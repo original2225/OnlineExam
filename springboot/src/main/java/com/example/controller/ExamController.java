@@ -123,7 +123,7 @@ public class ExamController {
     }
 
     /**
-     * 获取学生可参加的考试列表
+     * 获取玩家可参加的考试列表
      */
     @GetMapping("/getAvailableExams/{studentId}")
     public Result getAvailableExams(@PathVariable Integer studentId) {
@@ -132,8 +132,8 @@ public class ExamController {
     }
 
     /**
-     * 为指定学生开放补考
-     * 管理员/阅卷人可以给未参加考试的学生开放补考
+     * 为指定玩家开放补考
+     * 管理员/阅卷人可以给未参加考试的玩家开放补考
      * 使用原试卷，自定义时间窗口
      */
     @PostMapping("/makeup")

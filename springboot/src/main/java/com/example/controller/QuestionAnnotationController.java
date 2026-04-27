@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * 题目批注接口
- * 满分考生可以对题目写批注，其他考生可以在刷题时查看
+ * 满分玩家可以对题目写批注，其他玩家可以在审核模拟时查看
  */
 @RestController
 @RequestMapping("/questionAnnotation")

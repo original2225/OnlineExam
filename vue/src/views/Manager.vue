@@ -13,7 +13,7 @@
         </transition>
       </div>
 
-      <!-- 用户卡片 -->
+      <!-- 成员卡片 -->
       <div class="sb-profile" v-if="!data.fold">
         <img :src="data.user.avatar || defaultAvatar" class="sb-avatar" alt="">
         <div class="sb-profile-info">
@@ -29,7 +29,7 @@
       <div class="sb-exam-btn" @click="router.push('/exam/dashboard')">
         <div class="sb-exam-shine"></div>
         <el-icon :size="15"><Checked /></el-icon>
-        <span v-if="!data.fold">进入阅卷系统</span>
+        <span v-if="!data.fold">进入审核阅卷</span>
         <el-icon v-if="!data.fold" style="margin-left:auto;font-size:12px;opacity:.5"><ArrowRight /></el-icon>
       </div>
 
@@ -51,7 +51,7 @@
         </div>
 
         <div class="sb-group" v-if="isAdmin">
-          <div v-if="!data.fold" class="sb-group-title">用户</div>
+          <div v-if="!data.fold" class="sb-group-title">成员</div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/admin') }" @click="nav('/manager/admin')">
             <div class="sb-item-icon blue"><el-icon><UserFilled /></el-icon></div>
             <span v-if="!data.fold">管理员</span>
@@ -62,7 +62,7 @@
           </div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/student') }" @click="nav('/manager/student')">
             <div class="sb-item-icon green"><el-icon><User /></el-icon></div>
-            <span v-if="!data.fold">用户</span>
+            <span v-if="!data.fold">玩家</span>
           </div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/registrationApproval') }" @click="nav('/manager/registrationApproval')">
             <div class="sb-item-icon orange"><el-icon><Stamp /></el-icon></div>
@@ -84,37 +84,25 @@
             <div class="sb-item-icon"><el-icon><Collection /></el-icon></div>
             <span v-if="!data.fold">题目列表</span>
           </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/questionReview') }" @click="nav('/manager/questionReview')">
-            <div class="sb-item-icon"><el-icon><DocumentChecked /></el-icon></div>
+          <div class="sb-item" :class="{ active: isCurrent('/manager/questionReview') }" @click="nav('/manager/questionReview')" v-if="isAdmin">
+            <div class="sb-item-icon orange"><el-icon><Stamp /></el-icon></div>
             <span v-if="!data.fold">题目审核</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/tutorial') }" @click="nav('/manager/tutorial')">
-            <div class="sb-item-icon gold"><el-icon><Reading /></el-icon></div>
-            <span v-if="!data.fold">例题教程</span>
           </div>
         </div>
 
         <div class="sb-group">
-          <div v-if="!data.fold" class="sb-group-title">考试</div>
+          <div v-if="!data.fold" class="sb-group-title">审核</div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/examPaper') }" @click="nav('/manager/examPaper')">
             <div class="sb-item-icon"><el-icon><Document /></el-icon></div>
             <span v-if="!data.fold">试卷管理</span>
           </div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/exam') }" @click="nav('/manager/exam')">
             <div class="sb-item-icon"><el-icon><EditPen /></el-icon></div>
-            <span v-if="!data.fold">考试管理</span>
+            <span v-if="!data.fold">审核管理</span>
           </div>
           <div class="sb-item" :class="{ active: isCurrent('/manager/score') }" @click="nav('/manager/score')">
             <div class="sb-item-icon"><el-icon><DataAnalysis /></el-icon></div>
-            <span v-if="!data.fold">成绩管理</span>
-          </div>
-        </div>
-
-        <div class="sb-group">
-          <div v-if="!data.fold" class="sb-group-title">社区</div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/forumManage') }" @click="nav('/manager/forumManage')">
-            <div class="sb-item-icon"><el-icon><ChatLineSquare /></el-icon></div>
-            <span v-if="!data.fold">帖子管理</span>
+            <span v-if="!data.fold">结果管理</span>
           </div>
         </div>
       </nav>
@@ -147,7 +135,7 @@
             <div class="tb-setting"><el-icon><Setting /></el-icon></div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="router.push('/front/home')"><el-icon><Monitor /></el-icon> 用户前台</el-dropdown-item>
+                <el-dropdown-item @click="router.push('/front/home')"><el-icon><Monitor /></el-icon> 玩家前台</el-dropdown-item>
                 <el-dropdown-item @click="router.push('/manager/person')"><el-icon><User /></el-icon> 个人资料</el-dropdown-item>
                 <el-dropdown-item @click="router.push('/manager/password')"><el-icon><Lock /></el-icon> 修改密码</el-dropdown-item>
                 <el-dropdown-item divided @click="logout"><el-icon><SwitchButton /></el-icon> 退出登录</el-dropdown-item>
@@ -160,9 +148,12 @@
       <!-- 内容 -->
       <main class="content">
         <router-view v-slot="{ Component, route: currentRoute }">
-          <transition name="fade" mode="out-in">
+          <Suspense>
             <component :is="Component" :key="currentRoute.path" @updateUser="updateUser" />
-          </transition>
+            <template #fallback>
+              <div class="page-loading">页面加载中...</div>
+            </template>
+          </Suspense>
         </router-view>
       </main>
     </div>
@@ -170,7 +161,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref, watch } from "vue"
+import { reactive, computed, onMounted } from "vue"
 import router from "@/router/index.js"
 import { ElMessage } from "element-plus"
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue"
@@ -192,27 +183,34 @@ const greeting = computed(() => {
   return '晚上好'
 })
 
-const transitionName = ref('page')
-const routeOrder = [
-  '/manager/home', '/manager/notice',
-  '/manager/admin', '/manager/examiner', '/manager/student', '/manager/registrationApproval', '/manager/invitationCode',
-  '/manager/questionCategory', '/manager/question', '/manager/tutorial',
-  '/manager/examPaper', '/manager/exam', '/manager/score',
-  '/manager/forumManage',
-]
-watch(() => router.currentRoute.value.path, (to, from) => {
-  if (!from || from === to) { transitionName.value = 'page'; return }
-  const toIdx = routeOrder.indexOf(to)
-  const fromIdx = routeOrder.indexOf(from)
-  transitionName.value = (toIdx >= 0 && fromIdx >= 0 && toIdx < fromIdx) ? 'page-back' : 'page'
-})
+const preloadManagerPages = () => {
+  const pages = [
+    () => import('@/views/manager/Admin.vue'),
+    () => import('@/views/manager/Notice.vue'),
+    () => import('@/views/manager/Person.vue'),
+    () => import('@/views/manager/Password.vue'),
+    () => import('@/views/manager/Examiner.vue'),
+    () => import('@/views/manager/Student.vue'),
+    () => import('@/views/manager/RegistrationApproval.vue'),
+    () => import('@/views/manager/InvitationCodeManagement.vue'),
+    () => import('@/views/manager/QuestionCategory.vue'),
+    () => import('@/views/manager/Question.vue'),
+    () => import('@/views/manager/QuestionReview.vue'),
+    () => import('@/views/manager/ExamPaper.vue'),
+    () => import('@/views/manager/Exam.vue'),
+    () => import('@/views/manager/Score.vue'),
+  ]
+  pages.forEach(load => load())
+}
+
+onMounted(() => setTimeout(preloadManagerPages, 500))
 
 const isCurrent = (p) => router.currentRoute.value.path === p
 const nav = (p) => router.push(p)
 const isAdmin = computed(() => data.user.role === 'ADMIN' || data.user.role === 'OWNER')
 const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
 const roleColor = computed(() => roleColors[data.user.role] || '#4ade80')
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '用户' }[role] || '用户')
+const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
 
 const goHome = () => router.push('/')
 const logout = () => { localStorage.removeItem('xm-user'); router.push('/login') }
@@ -255,7 +253,7 @@ if (!data.user.id) { logout(); ElMessage.error('请登录！') }
 .sb-logo-text b { font-size: 16px; color: #fff; letter-spacing: 1px; }
 .sb-logo-text span { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
 
-/* 用户卡 */
+/* 成员卡 */
 .sb-profile {
   display: flex;
   align-items: center;
@@ -420,6 +418,12 @@ if (!data.user.id) { logout(); ElMessage.error('请登录！') }
 
 /* 内容 */
 .content { flex: 1; padding: 20px 24px; overflow-y: auto; }
+.page-loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
 
 @media (max-width: 768px) {
   .sidebar { width: 62px; }

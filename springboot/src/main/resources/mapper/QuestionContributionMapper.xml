@@ -34,6 +34,7 @@
             <if test="reviewerName != null">reviewer_name = #{reviewerName},</if>
             <if test="reviewComment != null">review_comment = #{reviewComment},</if>
             <if test="reviewedAt != null">reviewed_at = #{reviewedAt},</if>
+            <if test="approvedQuestionId != null">approved_question_id = #{approvedQuestionId},</if>
         </set>
         where id = #{id}
     </update>

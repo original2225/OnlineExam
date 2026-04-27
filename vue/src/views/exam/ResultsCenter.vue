@@ -10,8 +10,8 @@
           </svg>
         </div>
         <div>
-          <h1>成绩公示</h1>
-          <p>查看与管理考试成绩公示状态</p>
+          <h1>结果公示</h1>
+          <p>查看与管理入服审核结果公示状态</p>
         </div>
       </div>
     </div>
@@ -21,7 +21,7 @@
       <div class="toolbar-left">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-select v-model="data.selectedExamId" placeholder="选择考试" clearable @change="loadRecords" style="width: 240px" class="exam-sel">
+          <el-select v-model="data.selectedExamId" placeholder="选择审核" clearable @change="loadRecords" style="width: 240px" class="exam-sel">
             <template #prefix><el-icon><Document /></el-icon></template>
             <el-option v-for="e in data.examList" :key="e.id" :label="e.name" :value="e.id" />
           </el-select>
@@ -30,7 +30,7 @@
       <div class="toolbar-right" v-if="data.selectedExamId">
         <el-button :type="data.isPublished ? 'warning' : 'success'" size="small" @click="togglePublish">
           <el-icon><Promotion /></el-icon>
-          {{ data.isPublished ? '取消公示' : '公示成绩' }}
+          {{ data.isPublished ? '取消公示' : '公示结果' }}
         </el-button>
       </div>
     </div>
@@ -58,12 +58,12 @@
       </div>
     </div>
 
-    <!-- 成绩列表 -->
+    <!-- 结果列表 -->
     <div class="records-card" v-if="data.selectedExamId" v-loading="data.loading">
       <el-table :data="data.records" stripe
         :header-cell-style="{ background: 'var(--el-fill-color-light)', color: 'var(--el-text-color-primary)', fontWeight: '600' }">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column label="考生" width="140">
+        <el-table-column label="玩家" width="140">
           <template #default="scope">
             <div style="display: flex; align-items: center; gap: 8px;">
               <div class="student-avatar">{{ (scope.row.studentName || '?')[0] }}</div>
@@ -103,7 +103,7 @@
       <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
         <path d="M18 20V10M12 20V4M6 20v-6" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <p>请选择考试查看成绩公示情况</p>
+      <p>请选择审核查看结果公示情况</p>
     </div>
 
   </div>
@@ -226,7 +226,7 @@ onMounted(() => { loadExams() })
 .bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; min-width: 2px; }
 .bar-count { width: 48px; font-size: 13px; color: #9ca3af; }
 
-/* ===== 成绩列表 ===== */
+/* ===== 结果列表 ===== */
 .records-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--el-border-color-lighter); }
 .student-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #0891b2, #22d3ee); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
 .score-obj { font-weight: 600; color: #2563eb; }

@@ -14,6 +14,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -34,25 +35,33 @@ public class TokenUtils {
     @Resource
     private ExaminerService examinerService;
 
+    @Value("${app.jwt.secret:beiming-online-exam-dev-secret-change-me}")
+    private String jwtSecret;
+
     private static AdminService staticAdminService;
     private static StudentService staticStudentService;
     private static ExaminerService staticExaminerService;
+    private static String staticJwtSecret = "beiming-online-exam-dev-secret-change-me";
 
     @PostConstruct
     public void init() {
         staticAdminService = adminService;
         staticStudentService = studentService;
         staticExaminerService = examinerService;
+        staticJwtSecret = jwtSecret;
     }
 
     /**
      * 生成JWT token
      */
-    public static String createToken(String data, String sign) {
-        // audience是存储数据的一个媒介  存储用户ID和用户的角色  1-ADMIN
+    public static String createToken(String data) {
         return JWT.create().withAudience(data)
-                .withExpiresAt(DateUtil.offsetDay(new Date(), 1)) // 设置过期时间1天后
-                .sign(Algorithm.HMAC256(sign));
+                .withExpiresAt(DateUtil.offsetDay(new Date(), 1))
+                .sign(Algorithm.HMAC256(staticJwtSecret));
+    }
+
+    public static String getJwtSecret() {
+        return staticJwtSecret;
     }
 
     /**

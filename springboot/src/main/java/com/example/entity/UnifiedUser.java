@@ -17,7 +17,7 @@ public class UnifiedUser {
     private String className;
     private String branch;
     private String status;
-    private String source;   // ADMIN / EXAMINER / STUDENT
+    private String source;
     private Integer level;   // 仅管理员有
     private String themePreference;
     private String badgeList;

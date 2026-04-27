@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>注册审批</h1>
-          <p>审核用户注册申请，拒绝或通过新用户入驻</p>
+          <p>审核玩家注册申请，拒绝或通过新玩家入驻</p>
         </div>
       </div>
       <div class="hero-stats">
@@ -77,7 +77,7 @@
             class="approval-item"
             :class="'status-' + row.status.toLowerCase()"
           >
-            <!-- 左侧：用户信息 -->
+            <!-- 左侧：玩家信息 -->
             <div class="item-left">
               <div class="user-avatar">
                 <img v-if="row.avatar" :src="row.avatar" alt="avatar" />
@@ -224,7 +224,7 @@
           <el-descriptions-item label="编号">{{ data.currentRow.studentNo || '—' }}</el-descriptions-item>
           <el-descriptions-item label="邮箱">{{ data.currentRow.email || '—' }}</el-descriptions-item>
           <el-descriptions-item label="手机号">{{ data.currentRow.phone || '—' }}</el-descriptions-item>
-          <el-descriptions-item label="班级">{{ data.currentRow.className || '—' }}</el-descriptions-item>
+          <el-descriptions-item label="审核分组">{{ data.currentRow.className || '—' }}</el-descriptions-item>
           <el-descriptions-item label="申请时间">{{ formatTime(data.currentRow.requestTime) }}</el-descriptions-item>
           <el-descriptions-item label="审批时间" :span="2">{{ data.currentRow.approvalTime ? formatTime(data.currentRow.approvalTime) : '—' }}</el-descriptions-item>
           <el-descriptions-item v-if="data.currentRow.rejectionReason" label="拒绝原因" :span="2">
@@ -327,12 +327,12 @@ const reset = () => {
 
 const handleApprove = (row) => {
   ElMessageBox.confirm(
-    `确定批准用户「${row.name || row.username}」的注册申请吗？审批通过后将自动创建账号。`,
+    `确定批准玩家「${row.name || row.username}」的注册申请吗？审批通过后将自动创建账号。`,
     '批准确认',
     { confirmButtonText: '确认批准', cancelButtonText: '取消', type: 'success', icon: Check }
   ).then(() => {
     request.post('/registration/approve', null, { params: { id: row.id } }).then(res => {
-      if (res.code === '200') { ElMessage.success('已批准申请，用户账号已创建'); load() }
+      if (res.code === '200') { ElMessage.success('已批准申请，玩家账号已创建'); load() }
       else ElMessage.error(res.msg || '操作失败')
     })
   }).catch(() => {})
@@ -444,7 +444,7 @@ onMounted(() => { load() })
 .approval-item:hover { background: #f8f7ff; }
 .approval-item.status-rejected { opacity: 0.7; }
 
-/* 用户信息 */
+/* 玩家信息 */
 .item-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
 .user-avatar {
   width: 46px; height: 46px; border-radius: 50%; overflow: hidden;

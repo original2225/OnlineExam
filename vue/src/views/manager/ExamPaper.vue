@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>试卷管理</h1>
-          <p>创建与管理考试试卷，支持手动组卷与随机组卷两种模式</p>
+          <p>创建与管理审核试卷，支持手动组卷与随机组卷两种模式</p>
         </div>
       </div>
       <div class="hero-right">
@@ -148,7 +148,7 @@
         <el-form-item label="总分">
           <el-input-number v-model="data.form.totalScore" :min="0" :max="1000" :step="10" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="考试时长(分钟)">
+        <el-form-item label="审核时长(分钟)">
           <el-input-number v-model="data.form.totalTime" :min="1" :max="600" :step="10" style="width: 100%" />
         </el-form-item>
         <el-form-item label="及格分">
@@ -238,7 +238,7 @@ const handleSizeChange = (size) => { data.pageSize = size; load() }
 const handleCurrentChange = (page) => { data.pageNum = page; load() }
 
 const handleQuestions = (row) => { data.currentPaperId = row.id; data.questionDialogVisible = true; data.questionPageNum = 1; data.selectedQuestions = []; loadQuestions() }
-const loadQuestions = () => { request.get('/question/selectPage', { params: { pageNum: data.questionPageNum, pageSize: data.questionPageSize, content: data.questionSearch || undefined, type: data.questionType || undefined } }).then(res => { if (res.code === '200') { data.questionList = res.data?.list || []; data.questionTotal = res.data?.total } }) }
+const loadQuestions = () => { request.get('/question/selectPage', { params: { pageNum: data.questionPageNum, pageSize: data.questionPageSize, content: data.questionSearch || undefined, type: data.questionType || undefined, status: 'active' } }).then(res => { if (res.code === '200') { data.questionList = res.data?.list || []; data.questionTotal = res.data?.total } }) }
 const resetQuestionSearch = () => { data.questionSearch = null; data.questionType = null; loadQuestions() }
 const handleQuestionSelection = (rows) => { data.selectedQuestions = rows }
 const addSelectedQuestions = () => { if (!data.selectedQuestions.length) { ElMessage.warning('请选择题目'); return }; request.post('/examPaper/addQuestions?paperId=' + data.currentPaperId, data.selectedQuestions.map(q => q.id)).then(res => { if (res.code === '200') { ElMessage.success('添加成功'); data.selectedQuestions = []; load() } else ElMessage.error(res.msg) }) }

@@ -16,6 +16,7 @@ import com.example.mapper.ExamMapper;
 import com.example.mapper.ExamPermissionMapper;
 import com.example.mapper.RegistrationRequestMapper;
 import com.example.mapper.StudentMapper;
+import com.example.utils.PasswordUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -55,7 +56,7 @@ public class RegistrationRequestService {
     private ExamPermissionMapper examPermissionMapper;
 
     /**
-     * 学生提交注册申请（支持邀请码直接通过）
+     * 玩家提交注册申请（支持邀请码直接通过）
      */
     @Transactional
     public Object submitRequest(RegistrationRequest request) {
@@ -74,6 +75,9 @@ public class RegistrationRequestService {
         // 设置默认密码
         if (ObjectUtil.isEmpty(request.getPassword())) {
             request.setPassword(Constants.USER_DEFAULT_PASSWORD);
+        }
+        if (PasswordUtils.needsUpgrade(request.getPassword())) {
+            request.setPassword(PasswordUtils.encode(request.getPassword()));
         }
 
         // 设置默认姓名
@@ -114,7 +118,7 @@ public class RegistrationRequestService {
                     );
                     return examiner;
                 } else {
-                    // 默认创建学生账号
+                    // 默认创建玩家账号
                     Student student = new Student();
                     student.setUsername(request.getUsername());
                     student.setPassword(request.getPassword());
@@ -171,7 +175,7 @@ public class RegistrationRequestService {
             throw new CustomException(ResultCodeEnum.USER_EXIST_ERROR, "用户名已存在，无法创建账号");
         }
 
-        // 创建学生账号
+        // 创建玩家账号
         Student student = new Student();
         student.setUsername(request.getUsername());
         student.setPassword(request.getPassword());
@@ -185,7 +189,7 @@ public class RegistrationRequestService {
         student.setStatus("APPROVED"); // 审批通过，账号状态为审核通过
         studentMapper.insert(student);
 
-        // 根据学生的分支，自动开通对应分支的考试权限
+        // 根据玩家的分支，自动开通对应分支的考试权限
         grantExamPermissionsByBranch(student.getId(), student.getBranch());
 
         // 更新申请状态
@@ -260,7 +264,7 @@ public class RegistrationRequestService {
     }
 
     /**
-     * 根据学生的分支，自动开通对应分支的考试权限
+     * 根据玩家的分支，自动开通对应分支的考试权限
      */
     private void grantExamPermissionsByBranch(Integer studentId, String branch) {
         if (branch == null || branch.isEmpty()) {

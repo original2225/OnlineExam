@@ -29,6 +29,8 @@ public interface ExamRecordMapper {
 
     List<ExamRecord> selectPublicResults();
 
+    List<Map<String, Object>> selectEntryReviewLeaderboard();
+
     Map<String, Object> getGradingProgress(Integer examId);
 
     void unpublishByExamId(@Param("examId") Integer examId);

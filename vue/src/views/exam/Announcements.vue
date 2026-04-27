@@ -11,8 +11,8 @@
           </svg>
         </div>
         <div>
-          <h1>考试公告</h1>
-          <p>查看与发布考试相关通知公告</p>
+          <h1>审核公告</h1>
+          <p>查看与发布入服审核相关通知公告</p>
         </div>
       </div>
       <el-button v-if="canEdit" type="primary" size="default" @click="openCreate" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff;">
@@ -23,8 +23,8 @@
     <!-- 统计卡片 -->
     <div class="stats-grid" v-if="data.list.length">
       <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.list.length }}</div><div class="stat-label">全部公告</div></div></div>
-      <div class="stat-card stat-exam"><div class="stat-inner"><div class="stat-num">{{ examCount }}</div><div class="stat-label">考试通知</div></div></div>
-      <div class="stat-card stat-result"><div class="stat-inner"><div class="stat-num">{{ resultCount }}</div><div class="stat-label">成绩公告</div></div></div>
+      <div class="stat-card stat-exam"><div class="stat-inner"><div class="stat-num">{{ examCount }}</div><div class="stat-label">审核通知</div></div></div>
+      <div class="stat-card stat-result"><div class="stat-inner"><div class="stat-num">{{ resultCount }}</div><div class="stat-label">结果公告</div></div></div>
     </div>
 
     <!-- 筛选工具栏 -->
@@ -37,8 +37,8 @@
         <el-select v-model="data.query.type" placeholder="类型筛选" clearable style="width: 130px;" @change="loadList">
           <template #prefix><el-icon><Filter /></el-icon></template>
           <el-option label="通用" value="general" />
-          <el-option label="考试" value="exam" />
-          <el-option label="成绩" value="result" />
+          <el-option label="审核" value="exam" />
+          <el-option label="结果" value="result" />
           <el-option label="通知" value="notice" />
         </el-select>
       </div>
@@ -115,8 +115,8 @@
             <el-form-item label="类型">
               <el-select v-model="data.form.type" style="width: 100%;">
                 <el-option label="通用公告" value="general" />
-                <el-option label="考试通知" value="exam" />
-                <el-option label="成绩公告" value="result" />
+                <el-option label="审核通知" value="exam" />
+                <el-option label="结果公告" value="result" />
                 <el-option label="系统通知" value="notice" />
               </el-select>
             </el-form-item>
@@ -127,7 +127,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="关联考试">
+        <el-form-item label="关联审核">
           <el-select v-model="data.form.examId" placeholder="可选" clearable style="width: 100%;">
             <el-option v-for="e in data.examList" :key="e.id" :label="e.name" :value="e.id" />
           </el-select>
@@ -184,7 +184,7 @@ const canEdit = computed(() => ['OWNER', 'ADMIN', 'HELPER'].includes(data.user.r
 const examCount = computed(() => data.list.filter(i => i.type === 'exam').length)
 const resultCount = computed(() => data.list.filter(i => i.type === 'result').length)
 
-const typeLabel = (type) => ({ general: '公告', exam: '考试', result: '成绩', notice: '通知' }[type] || '公告')
+const typeLabel = (type) => ({ general: '公告', exam: '审核', result: '结果', notice: '通知' }[type] || '公告')
 
 const loadList = () => {
   data.loading = true

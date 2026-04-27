@@ -12,18 +12,18 @@
           </svg>
         </div>
         <div>
-          <h1>考试管理</h1>
-          <p>创建、发布与管控所有考试安排</p>
+          <h1>审核管理</h1>
+          <p>创建、发布与管控所有入服审核安排</p>
         </div>
       </div>
       <el-button type="primary" size="default" @click="openCreate" style="background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff;">
-        <el-icon><Plus /></el-icon> 创建考试
+        <el-icon><Plus /></el-icon> 创建审核
       </el-button>
     </div>
 
     <!-- 统计卡片 -->
     <div class="stats-grid" v-if="data.examList.length">
-      <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.total }}</div><div class="stat-label">总考试</div></div></div>
+      <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.total }}</div><div class="stat-label">总审核</div></div></div>
       <div class="stat-card stat-published"><div class="stat-inner"><div class="stat-num">{{ publishedCount }}</div><div class="stat-label">已发布</div></div></div>
       <div class="stat-card stat-ongoing"><div class="stat-inner"><div class="stat-num">{{ ongoingCount }}</div><div class="stat-label">进行中</div></div></div>
       <div class="stat-card stat-finished"><div class="stat-inner"><div class="stat-num">{{ finishedCount }}</div><div class="stat-label">已结束</div></div></div>
@@ -34,7 +34,7 @@
       <div class="toolbar-left">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-input v-model="data.query.name" placeholder="搜索考试名称" clearable style="width: 200px;" @keyup.enter="loadExams" />
+          <el-input v-model="data.query.name" placeholder="搜索审核名称" clearable style="width: 200px;" @keyup.enter="loadExams" />
         </div>
         <el-select v-model="data.query.status" placeholder="状态筛选" clearable style="width: 140px;" @change="loadExams">
           <template #prefix><el-icon><Filter /></el-icon></template>
@@ -44,9 +44,9 @@
           <el-option label="已结束" value="finished" />
           <el-option label="已取消" value="cancelled" />
         </el-select>
-        <el-select v-model="data.query.examType" placeholder="考试类型" clearable style="width: 140px;" @change="loadExams">
-          <el-option label="统一考试" value="scheduled" />
-          <el-option label="常驻考试" value="permanent" />
+        <el-select v-model="data.query.examType" placeholder="审核类型" clearable style="width: 140px;" @change="loadExams">
+          <el-option label="统一审核" value="scheduled" />
+          <el-option label="常驻审核" value="permanent" />
         </el-select>
       </div>
       <div class="toolbar-right">
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- 考试列表 -->
+    <!-- 审核列表 -->
     <div class="exam-list-card" v-loading="data.loading">
       <transition-group name="exam-anim">
         <div v-for="row in data.examList" :key="row.id" class="exam-card-item">
@@ -73,7 +73,7 @@
               <span class="exam-name">{{ row.name }}</span>
               <div class="exam-badges">
                 <span class="exam-status-badge" :class="row.status">{{ statusLabel(row.status) }}</span>
-                <span class="exam-type-badge" :class="row.examType">{{ row.examType === 'scheduled' ? '统一考试' : '常驻考试' }}</span>
+                <span class="exam-type-badge" :class="row.examType">{{ row.examType === 'scheduled' ? '统一审核' : '常驻审核' }}</span>
                 <el-tag v-if="row.enableRecording" type="warning" size="small" effect="plain">录屏</el-tag>
                 <el-tag v-if="row.autoPublish" type="success" size="small" effect="plain">自动公示</el-tag>
               </div>
@@ -120,9 +120,9 @@
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <rect x="9" y="3" width="6" height="4" rx="1" stroke="#93c5fd" stroke-width="1.5"/>
         </svg>
-        <p>暂无考试，创建一个开始吧</p>
+        <p>暂无审核，创建一个开始吧</p>
         <el-button type="primary" @click="openCreate" size="small">
-          <el-icon><Plus /></el-icon> 创建考试
+          <el-icon><Plus /></el-icon> 创建审核
         </el-button>
       </div>
 
@@ -139,30 +139,30 @@
     </div>
 
     <!-- 创建/编辑对话框 -->
-    <el-dialog v-model="data.dialogVisible" :title="data.isEdit ? '编辑考试' : '创建考试'" width="680px" destroy-on-close>
+    <el-dialog v-model="data.dialogVisible" :title="data.isEdit ? '编辑审核' : '创建审核'" width="680px" destroy-on-close>
       <el-form :model="data.form" label-width="100px" style="padding: 0 20px;">
-        <el-form-item label="考试名称" required>
-          <el-input v-model="data.form.name" placeholder="请输入考试名称" />
+        <el-form-item label="审核名称" required>
+          <el-input v-model="data.form.name" placeholder="请输入审核名称" />
         </el-form-item>
         <el-form-item label="关联试卷" required>
           <el-select v-model="data.form.paperId" placeholder="选择试卷" style="width: 100%;">
             <el-option v-for="p in data.paperList" :key="p.id" :label="p.name" :value="p.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="考试描述">
+        <el-form-item label="审核描述">
           <el-input v-model="data.form.description" type="textarea" :rows="2" placeholder="选填" />
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="考试类型">
+            <el-form-item label="审核类型">
               <el-select v-model="data.form.examType" style="width: 100%;">
-                <el-option label="统一考试" value="scheduled" />
-                <el-option label="常驻考试" value="permanent" />
+                <el-option label="统一审核" value="scheduled" />
+                <el-option label="常驻审核" value="permanent" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="考试时长">
+            <el-form-item label="审核时长">
               <el-input-number v-model="data.form.duration" :min="5" :max="600" style="width: 100%;" />
             </el-form-item>
           </el-col>
@@ -205,7 +205,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="考试分支">
+            <el-form-item label="审核分支">
               <el-select v-model="data.form.branch" placeholder="选择分支" clearable style="width: 100%;">
                 <el-option label="红石" value="红石" />
                 <el-option label="生电" value="生电" />
@@ -316,7 +316,7 @@ const saveExam = () => {
 }
 
 const publishExam = (row) => {
-  ElMessageBox.confirm('确定发布此考试？', '提示').then(() => {
+  ElMessageBox.confirm('确定发布此审核？', '提示').then(() => {
     request.put('/exam/publish/' + row.id).then(res => {
       if (res.code === '200') { ElMessage.success('发布成功'); loadExams() }
       else ElMessage.error(res.msg)
@@ -325,7 +325,7 @@ const publishExam = (row) => {
 }
 
 const cancelExam = (row) => {
-  ElMessageBox.confirm('确定取消此考试？', '提示').then(() => {
+  ElMessageBox.confirm('确定取消此审核？', '提示').then(() => {
     request.put('/exam/cancel/' + row.id).then(res => {
       if (res.code === '200') { ElMessage.success('已取消'); loadExams() }
       else ElMessage.error(res.msg)
@@ -334,7 +334,7 @@ const cancelExam = (row) => {
 }
 
 const deleteExam = (row) => {
-  ElMessageBox.confirm('确定删除此考试？此操作不可恢复', '警告').then(() => {
+  ElMessageBox.confirm('确定删除此审核？此操作不可恢复', '警告').then(() => {
     request.delete('/exam/delete/' + row.id).then(res => {
       if (res.code === '200') { ElMessage.success('已删除'); loadExams() }
       else ElMessage.error(res.msg)

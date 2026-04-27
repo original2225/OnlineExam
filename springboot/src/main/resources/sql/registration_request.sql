@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `registration_request` (
     `username` VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
     `password` VARCHAR(100) NOT NULL COMMENT '密码',
     `name` VARCHAR(50) COMMENT '姓名',
-    `student_no` VARCHAR(20) COMMENT '学号',
+    `student_no` VARCHAR(20) COMMENT '玩家编号',
     `email` VARCHAR(100) NOT NULL COMMENT '邮箱',
     `phone` VARCHAR(20) COMMENT '手机号',
     `class_name` VARCHAR(50) COMMENT '分组',

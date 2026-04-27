@@ -13,17 +13,21 @@ import com.example.exception.CustomException;
 import com.example.service.AdminService;
 import com.example.service.ExaminerService;
 import com.example.service.StudentService;
+import com.example.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/**
- * JWT拦截器
- */
+import java.util.Set;
+
 @Component
 public class JWTInterceptor implements HandlerInterceptor {
+
+    private static final Set<String> ADMIN_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name());
+    private static final Set<String> REVIEW_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name(), RoleEnum.HELPER.name());
+    private static final Set<String> ALL_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name(), RoleEnum.HELPER.name(), RoleEnum.USER.name());
 
     @Resource
     private AdminService adminService;
@@ -35,47 +39,90 @@ public class JWTInterceptor implements HandlerInterceptor {
     private StudentService studentService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 1. 从http请求标头里面拿到token
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader(Constants.TOKEN);
         if (ObjectUtil.isNull(token)) {
-            // 如果没拿到，那么再从请求参数里拿一次
             token = request.getParameter(Constants.TOKEN);
         }
-        // 2. 开始执行认证
         if (ObjectUtil.isNull(token)) {
             throw new CustomException(ResultCodeEnum.TOKEN_INVALID_ERROR);
         }
-        Account account = null;
+
+        Account account;
+        String role;
         try {
             String audience = JWT.decode(token).getAudience().get(0);
-            String userId = audience.split("-")[0];
-            String role = audience.split("-")[1];
-            // 根据用户角色判断用户属于哪个数据库表 然后查询用户数据
+            String[] parts = audience.split("-");
+            String userId = parts[0];
+            role = parts[1];
             if (RoleEnum.OWNER.name().equals(role) || RoleEnum.ADMIN.name().equals(role)) {
                 account = adminService.selectById(Integer.valueOf(userId));
             } else if (RoleEnum.HELPER.name().equals(role)) {
                 account = examinerService.selectById(Integer.valueOf(userId));
             } else if (RoleEnum.USER.name().equals(role)) {
                 account = studentService.selectById(Integer.valueOf(userId));
+            } else {
+                throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
             }
         } catch (Exception e) {
             throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
         }
-        // 根据token里面携带的用户ID去对应的角色表查询  没查到 所有报了这个"用户不存在"错误
+
         if (ObjectUtil.isNull(account)) {
-            // 用户不存在
             throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
         }
         try {
-            // 通过用户的密码作为密钥再次验证token的合法性
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
-            jwtVerifier.verify(token);  // 验证token
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(TokenUtils.getJwtSecret())).build();
+            jwtVerifier.verify(token);
         } catch (JWTVerificationException e) {
-            // 用户不存在
             throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
         }
+
+        checkPermission(request.getServletPath(), request.getMethod(), role);
         return true;
     }
 
+    private void checkPermission(String path, String method, String role) {
+        if (!ALL_ROLES.contains(role)) {
+            throw new CustomException(ResultCodeEnum.FORBIDDEN);
+        }
+        if (path.startsWith("/admin") || path.startsWith("/unifiedUser") || path.startsWith("/registration")
+                || path.startsWith("/invitationCode") || path.startsWith("/promotion")) {
+            require(role, ADMIN_ROLES);
+        }
+        if (path.startsWith("/student") || path.startsWith("/examiner")) {
+            if (!"GET".equalsIgnoreCase(method) || path.endsWith("selectAll") || path.contains("selectPage")) {
+                require(role, ADMIN_ROLES);
+            }
+        }
+        if (path.startsWith("/question") || path.startsWith("/examPaper") || path.startsWith("/notice")
+                || path.startsWith("/examAnnouncement")) {
+            if (!"GET".equalsIgnoreCase(method)) {
+                require(role, ADMIN_ROLES);
+            }
+        }
+        if (path.startsWith("/exam")) {
+            if (path.startsWith("/examRecord") || path.startsWith("/examRecording")) {
+                return;
+            }
+            if (!"GET".equalsIgnoreCase(method) || path.contains("setPermissions") || path.contains("makeup")) {
+                require(role, ADMIN_ROLES);
+            }
+        }
+        if (path.startsWith("/grading") || path.startsWith("/examApproval")) {
+            require(role, REVIEW_ROLES);
+        }
+        if (path.startsWith("/score") && (path.contains("selectPage") || path.contains("getStatistics"))) {
+            require(role, REVIEW_ROLES);
+        }
+        if (path.equals("/files/upload")) {
+            require(role, ALL_ROLES);
+        }
+    }
+
+    private void require(String role, Set<String> allowedRoles) {
+        if (!allowedRoles.contains(role)) {
+            throw new CustomException(ResultCodeEnum.FORBIDDEN);
+        }
+    }
 }

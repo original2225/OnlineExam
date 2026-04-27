@@ -1,86 +1,51 @@
--- =====================================================
--- 例题讲解模块 - 示例题目数据
--- 覆盖三个学科分类：我的世界进服审核题目、小学算术、看图写话
--- 题型：单选、多选、判断、填空、简答
--- =====================================================
+-- Minecraft Java 生电服务器进服审核示例题库
+-- 分类：建筑审核、后期审核、红石审核、普通(见习)审核
 
--- 先确保分类已初始化（如果还没执行过initFullDefaults）
--- 学科分类由 initFullDefaults 接口自动创建
+INSERT INTO `question_category` (`name`, `description`, `status`, `icon`)
+SELECT 'Minecraft Java 生电服务器进服审核', '面向生电服务器成员准入的四项审核题库', 'active', 'minecraft'
+WHERE NOT EXISTS (SELECT 1 FROM `question_category` WHERE `name` = 'Minecraft Java 生电服务器进服审核');
 
--- =====================================================
--- 一、我的世界进服审核题目（红石工程、建筑设计、后勤管理、基础知识）
--- =====================================================
+SET @audit_parent_id = (SELECT id FROM `question_category` WHERE `name` = 'Minecraft Java 生电服务器进服审核' LIMIT 1);
 
--- 【单选题】基础知识
-INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`) VALUES
-('single', '在Minecraft中，红石信号的最大传输距离是多少格？', '{"A": "10格", "B": "15格", "C": "20格", "D": "25格"}', 'B', '红石粉信号强度初始为15，每传输一格衰减1点，因此最远传输15格。要延长信号需要红石中继器。', 'medium', 3, NULL, 'active'),
-('single', '以下哪种工具可以快速清除大量方块？', '{"A": "铁镐", "B": "TNT", "C": "钻石斧", "D": "水桶"}', 'B', 'TNT是游戏中最有效的批量清除工具，可以一次性炸毁大量方块。但需要注意安全距离。', 'easy', 2, NULL, 'active'),
-('single', '在Minecraft中，下界合金碎片需要在哪里获取？', '{"A": "末地城", "B": "废弃传送门", "C": "下界堡垒遗迹", "D": "海底神殿"}', 'C', '下界合金碎片通过在下界堡垒遗迹中挖掘远古残骸获得，需要在熔炉中烧制后与金锭合成。', 'medium', 3, NULL, 'active');
+INSERT INTO `question_category` (`name`, `description`, `parent_id`, `status`)
+SELECT '建筑审核', '建筑审美、结构表达、风格统一与工程协作审核', @audit_parent_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question_category` WHERE `name` = '建筑审核' AND `parent_id` = @audit_parent_id);
+INSERT INTO `question_category` (`name`, `description`, `parent_id`, `status`)
+SELECT '后期审核', '物资统计、仓储整理、工程收尾与文档记录审核', @audit_parent_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question_category` WHERE `name` = '后期审核' AND `parent_id` = @audit_parent_id);
+INSERT INTO `question_category` (`name`, `description`, `parent_id`, `status`)
+SELECT '红石审核', '红石机器原理、性能影响、区块加载与维护能力审核', @audit_parent_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question_category` WHERE `name` = '红石审核' AND `parent_id` = @audit_parent_id);
+INSERT INTO `question_category` (`name`, `description`, `parent_id`, `status`)
+SELECT '普通(见习)审核', '服务器规则、基础生存、生电常识与协作意识审核', @audit_parent_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question_category` WHERE `name` = '普通(见习)审核' AND `parent_id` = @audit_parent_id);
 
--- 【单选题】红石工程
-('single', '红石中继器的主要作用是什么？', '{"A": "增强红石信号强度", "B": "改变红石信号方向", "C": "产生红石信号", "D": "储存红石信号"}', 'A', '红石中继器可以增强红石信号到15级，还可以增加1-4刻的延迟。它是红石电路中最常用的元件之一。', 'medium', 3, NULL, 'active'),
-('single', '以下哪个方块可以被红石信号激活？', '{"A": "石头", "B": "泥土", "C": "红石灯", "D": "玻璃"}', 'C', '红石灯是唯一能被红石信号激活发光的方块，常用于红石照明系统和装饰电路。', 'easy', 2, NULL, 'active');
+SET @building_id = (SELECT id FROM `question_category` WHERE `name` = '建筑审核' AND `parent_id` = @audit_parent_id LIMIT 1);
+SET @post_id = (SELECT id FROM `question_category` WHERE `name` = '后期审核' AND `parent_id` = @audit_parent_id LIMIT 1);
+SET @redstone_id = (SELECT id FROM `question_category` WHERE `name` = '红石审核' AND `parent_id` = @audit_parent_id LIMIT 1);
+SET @trainee_id = (SELECT id FROM `question_category` WHERE `name` = '普通(见习)审核' AND `parent_id` = @audit_parent_id LIMIT 1);
 
--- 【多选题】基础知识
-('multiple', '以下哪些是Minecraft中的可再生资源？', '{"A": "石头", "B": "钻石", "C": "木头", "D": "铁矿石"}', 'AC', '石头可以通过岩浆和水接触生成圆石来再生，木头可以通过种植树苗再生。钻石和铁矿石是不可再生资源。', 'hard', 5, NULL, 'active'),
-('multiple', '在Minecraft生存模式中，以下哪些方法可以获得经验值？', '{"A": "击杀怪物", "B": "冶炼矿物", "C": "繁殖动物", "D": "挖掘钻石矿"}', 'ABCD', '以上四种方式都可以获得经验值。经验值主要用于附魔和修复装备。', 'medium', 5, NULL, 'active');
-
--- 【判断题】基础知识
-('judge', '在Minecraft中，水可以无限生成。', '{}', 'true', '利用两个水源方块可以生成第三个水源方块的机制，水确实是无限可再生的资源。', 'easy', 2, NULL, 'active'),
-('judge', '末影龙只能被击败一次，之后不会再生成。', '{}', 'false', '在末地放置末影水晶可以重新召唤末影龙，所以末影龙可以被无限次击败。', 'medium', 2, NULL, 'active'),
-('judge', '在Minecraft中，使用鞘翅可以在主世界飞行。', '{}', 'true', '鞘翅是一种可以滑翔的装备，在空中使用可以获得滑翔效果。配合烟花火箭可以实现持续飞行。', 'easy', 2, NULL, 'active');
-
--- 【填空题】红石工程
-('fillin', '红石信号的初始强度等级为___，每经过一格红石粉衰减___点。', '{}', '15|||1', '红石信号强度从0到15，信号源产生的信号一般为15，每经过一格红石粉减少1点。', 'medium', 4, NULL, 'active'),
-('fillin', '红石中继器可以增加___到___刻的红石延迟。', '{}', '1|||4', '红石中继器通过右键可以调整延迟，从1刻到4刻（1刻=0.1秒）。', 'medium', 4, NULL, 'active');
-
--- 【简答题】建筑设计
-('essay', '请简述在Minecraft中建造一座美观的中世纪风格建筑需要考虑哪些要素？', '{}', '要点：1. 材质选择（石砖、橡木、云杉木等）；2. 屋顶设计（阶梯状、尖顶）；3. 窗户和门的比例；4. 装饰细节（栏杆、灯笼、花盆）；5. 环境搭配（花园、道路、水景）；6. 内部空间规划。', 'hard', 10, NULL, 'active');
-
--- =====================================================
--- 二、小学算术（加减运算、乘除运算、应用题）
--- =====================================================
-
--- 【单选题】加减运算
-INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`) VALUES
-('single', '123 + 456 = ?', '{"A": "569", "B": "579", "C": "589", "D": "579"}', 'B', '个位3+6=9，十位2+5=7，百位1+4=5，所以123+456=579。', 'easy', 2, NULL, 'active'),
-('single', '1000 - 367 = ?', '{"A": "633", "B": "643", "C": "633", "D": "673"}', 'A', '个位0-7不够减，向十位借1，10-7=3；十位9-6=3；百位9-3=6，所以1000-367=633。', 'easy', 2, NULL, 'active');
-
--- 【单选题】乘除运算
-('single', '25 × 4 = ?', '{"A": "50", "B": "75", "C": "100", "D": "125"}', 'C', '25×4可以看作25+25+25+25=100，也可以用25×2=50，50×2=100。', 'easy', 2, NULL, 'active'),
-('single', '144 ÷ 12 = ?', '{"A": "10", "B": "11", "C": "12", "D": "13"}', 'C', '12×12=144，所以144÷12=12。可以验证：12×10=120，144-120=24，24÷12=2，10+2=12。', 'medium', 3, NULL, 'active');
-
--- 【多选题】应用题
-('multiple', '以下哪些算式的结果大于100？', '{"A": "25 × 5", "B": "99 + 2", "C": "50 × 3", "D": "200 - 99"}', 'ABC', 'A: 25×5=125>100 ✓；B: 99+2=101>100 ✓；C: 50×3=150>100 ✓；D: 200-99=101>100 ✓。等等，D也是101>100。让我重新检查...ABCD都正确。', 'medium', 5, NULL, 'active');
-
--- 【判断题】加减运算
-('judge', '两个三位数相加，结果一定是三位数。', '{}', 'false', '例如 500+600=1100，结果是四位数。两个三位数相加，结果可能是三位数也可能是四位数。', 'easy', 2, NULL, 'active'),
-('judge', '0乘以任何数都等于0。', '{}', 'true', '0是乘法的零元素，0×任何数=0，这是乘法的基本性质。', 'easy', 2, NULL, 'active');
-
--- 【填空题】乘除运算
-('fillin', '长方形的面积公式是：面积 = ___ × ___。', '{}', '长|||宽', '长方形面积=长×宽。例如长5厘米宽3厘米的长方形面积=5×3=15平方厘米。', 'easy', 4, NULL, 'active'),
-('fillin', '正方形的周长=边长×___，正方形的面积=边长×___。', '{}', '4|||边长', '正方形周长=边长×4（四条等长的边），面积=边长×边长。', 'easy', 4, NULL, 'active');
-
--- 【简答题】应用题
-('essay', '小明有35个苹果，他平均分给7个小朋友，每人可以得到几个苹果？请写出计算过程。', '{}', '35 ÷ 7 = 5（个）。答：每人可以得到5个苹果。', 'easy', 10, NULL, 'active');
-
--- =====================================================
--- 三、看图写话（词语理解、短文写作）
--- =====================================================
-
--- 【单选题】词语理解
-INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`) VALUES
-('single', '"春暖花开"这个成语描写的是哪个季节的景色？', '{"A": "夏天", "B": "春天", "C": "秋天", "D": "冬天"}', 'B', '春暖花开形容春天天气暖和，百花盛开的景象。关键词"春"字就表明了季节。', 'easy', 2, NULL, 'active'),
-('single', '"亡羊补牢"这个成语告诉我们什么道理？', '{"A": "羊很重要", "B": "出了问题要及时补救", "C": "牢圈很结实", "D": "不要养羊"}', 'B', '亡羊补牢比喻出了问题以后想办法补救，免得以后继续受损失。寓意是知错就改，为时不晚。', 'medium', 3, NULL, 'active');
-
--- 【判断题】词语理解
-('judge', '"守株待兔"是一个褒义词。', '{}', 'false', '守株待兔比喻不主动努力，存在侥幸心理，希望得到意外收获。这是一个贬义词，批评不劳而获的想法。', 'easy', 2, NULL, 'active'),
-('judge', '"画龙点睛"比喻在关键处加上精辟的话语，使内容更加生动。', '{}', 'true', '画龙点睛原指画龙时最后点上眼睛，龙就会飞走。比喻说话或写文章时，在关键处用一两句话点明实质，使内容更加生动有力。', 'medium', 2, NULL, 'active');
-
--- 【填空题】词语理解
-('fillin', '补全成语：___高水长，___马行空。', '{}', '天|||天', '山高水长形容人的品行高洁；天马行空比喻思想奔放、不受拘束。', 'medium', 4, NULL, 'active'),
-('fillin', '"床前明月光，疑是地上___。"这首诗的作者是___。', '{}', '霜|||李白', '这是唐代诗人李白的《静夜思》中的名句。全诗为：床前明月光，疑是地上霜。举头望明月，低头思故乡。', 'easy', 4, NULL, 'active');
-
--- 【简答题】短文写作
-('essay', '请用"小心翼翼"和"兴高采烈"两个词语各造一个句子。', '{}', '示例：1. 小明小心翼翼地捧着小鸟，生怕惊动了它。2. 听到周末要去游乐园的消息，孩子们兴高采烈地欢呼起来。', 'medium', 10, NULL, 'active'),
-('essay', '请用至少三句话描写你最喜欢的一个季节。要求语句通顺，内容完整。', '{}', '示例：我最喜欢的季节是春天。春天来了，小草从地里钻出了嫩绿的芽，花园里的花朵争相开放。温暖的春风吹过脸庞，让人觉得格外舒服。小鸟在枝头欢快地唱歌，好像在说"春天真美啊！"', 'hard', 15, NULL, 'active');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'essay', '请说明你会如何让公共建筑同时满足美观、可维护和服务器风格统一。', NULL, '要点：明确风格参考、控制体量比例、选材统一、预留维护空间、避免遮挡公共线路。', '建筑审核重点看审美表达、功能性、可维护性和团队协作意识。', 'hard', 10, @building_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '请说明你会如何让公共建筑同时满足美观、可维护和服务器风格统一。');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'single', '公共建筑选址时，最应该优先避开什么？', '{"A":"主交通线、公共机器和预留工程区","B":"所有平原地形","C":"玩家个人审美","D":"低亮度装饰"}', 'A', '生电服务器公共区域需要优先保证线路、机器、交通和后续扩建空间。', 'medium', 3, @building_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '公共建筑选址时，最应该优先避开什么？');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'essay', '请说明你能承担哪些后期工作，以及如何记录工程进度和物资消耗。', NULL, '要点：物资统计、仓储整理、施工收尾、文档记录、截图归档、异常反馈。', '后期审核重点看稳定执行、记录习惯和收尾能力。', 'medium', 8, @post_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '请说明你能承担哪些后期工作，以及如何记录工程进度和物资消耗。');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'multiple', '大型工程收尾时，哪些事项必须检查？', '{"A":"临时方块是否清理","B":"剩余物资是否归仓","C":"说明牌和文档是否更新","D":"是否刷屏庆祝"}', 'ABC', '临时结构、物资和文档是工程交付关键项。', 'medium', 5, @post_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '大型工程收尾时，哪些事项必须检查？');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'multiple', '设计大型红石机器前，需要提前说明哪些内容？', '{"A":"用途与产能","B":"卡服风险","C":"区块加载方式","D":"机器外观颜色"}', 'ABC', '红石审核重点关注功能、性能、加载方式和维护成本。', 'medium', 5, @redstone_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '设计大型红石机器前，需要提前说明哪些内容？');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'single', '红石机器导致 MSPT 明显升高时，正确处理方式是什么？', '{"A":"立刻停机并反馈排查","B":"继续运行观察几天","C":"隐藏机器避免被发现","D":"增加更多漏斗"}', 'A', '性能异常要先停机，避免影响服务器整体稳定。', 'easy', 3, @redstone_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '红石机器导致 MSPT 明显升高时，正确处理方式是什么？');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'single', '普通(见习)审核中，进入生电服务器前最应该确认哪项？', '{"A":"服务器版本、规则和准入要求","B":"材质包颜色","C":"个人皮肤稀有度","D":"聊天昵称长度"}', 'A', '见习成员先确认版本、规则、权限边界和基础要求。', 'easy', 2, @trainee_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '普通(见习)审核中，进入生电服务器前最应该确认哪项？');
+INSERT INTO `question` (`type`, `content`, `options`, `answer`, `analysis`, `difficulty`, `score`, `category_id`, `status`)
+SELECT 'judge', '未经沟通，不应擅自改动公共机器、公共仓储或他人工程。', NULL, 'true', '公共设施变更需要沟通和记录，避免破坏服务器协作秩序。', 'easy', 2, @trainee_id, 'active'
+WHERE NOT EXISTS (SELECT 1 FROM `question` WHERE `content` = '未经沟通，不应擅自改动公共机器、公共仓储或他人工程。');

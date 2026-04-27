@@ -98,7 +98,7 @@ public class ExamService {
     }
 
     /**
-     * 设置考试权限（允许参加考试的学生）
+     * 设置考试权限（允许参加考试的玩家）
      */
     @Transactional
     public void setPermissions(Integer examId, List<Integer> studentIds) {
@@ -128,7 +128,7 @@ public class ExamService {
     }
 
     /**
-     * 检查学生是否有权限参加考试
+     * 检查玩家是否有权限参加考试
      */
     public boolean checkPermission(Integer examId, Integer studentId) {
         List<ExamPermission> permissions = examPermissionMapper.selectByExamId(examId);
@@ -136,7 +136,7 @@ public class ExamService {
     }
 
     /**
-     * 获取学生可参加的考试列表
+     * 获取玩家可参加的考试列表
      */
     public List<Exam> getAvailableExams(Integer studentId) {
         List<ExamPermission> permissions = examPermissionMapper.selectByStudentId(studentId);
@@ -151,7 +151,7 @@ public class ExamService {
     }
 
     /**
-     * 为指定学生创建补考
+     * 为指定玩家创建补考
      * 复用原试卷，创建新的补考考试实例
      */
     @Transactional
@@ -183,7 +183,7 @@ public class ExamService {
         makeup.setEnableRecording(false);
         examMapper.insert(makeup);
 
-        // 为指定学生设置权限
+        // 为指定玩家设置权限
         List<ExamPermission> permissions = new ArrayList<>();
         for (Integer studentId : studentIds) {
             ExamPermission p = new ExamPermission();

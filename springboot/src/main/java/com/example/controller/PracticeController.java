@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 刷题练习接口
+ * 审核模拟接口
  */
 @RestController
 @RequestMapping("/practice")
@@ -101,7 +101,7 @@ public class PracticeController {
         Exam exam = new Exam();
         exam.setName("[练习] " + (practiceName != null ? practiceName : "随机练习"));
         exam.setPaperId(paper.getId());
-        exam.setDescription("刷题练习 - 自动批阅");
+        exam.setDescription("审核模拟 - 自动批阅");
         exam.setExamType("permanent");
         exam.setStartTime(now);
         exam.setEndTime(now.plusYears(1));
@@ -224,7 +224,7 @@ public class PracticeController {
     }
 
     /**
-     * 学习趋势 — 按日期统计每日练习题数
+     * 审核模拟趋势 — 按日期统计每日练习题数
      */
     @GetMapping("/trend")
     public Result trend(@RequestParam Integer userId, @RequestParam String userRole) {
@@ -245,7 +245,7 @@ public class PracticeController {
     }
 
     @GetMapping("/stats")
-    public Result stats(@RequestParam Integer userId, @RequestParam(defaultValue = "STUDENT") String userRole) {
+    public Result stats(@RequestParam Integer userId, @RequestParam(defaultValue = "USER") String userRole) {
         List<ExamRecord> allRecords = examRecordMapper.selectAll(new ExamRecord());
         List<ExamRecord> myPractice = allRecords.stream()
                 .filter(r -> r.getExamName() != null && (r.getExamName().startsWith("[练习]") || r.getExamName().startsWith("[挑战]")) && "completed".equals(r.getStatus()))
@@ -378,7 +378,7 @@ public class PracticeController {
                 .filter(r -> r.getExamName() != null && r.getExamName().startsWith("[练习]") && "completed".equals(r.getStatus()))
                 .toList();
 
-        // 按学生分组统计
+        // 按玩家分组统计
         Map<Integer, List<ExamRecord>> grouped = new HashMap<>();
         for (ExamRecord r : practiceRecords) {
             grouped.computeIfAbsent(r.getStudentId(), k -> new ArrayList<>()).add(r);

@@ -21,7 +21,7 @@ public class RegistrationRequestController {
     private RegistrationRequestService registrationRequestService;
 
     /**
-     * 学生提交注册申请（公开接口，无需登录）
+     * 玩家提交注册申请（公开接口，无需登录）
      * 有邀请码：直接注册成功
      * 无邀请码：创建待审批申请
      */
@@ -45,7 +45,7 @@ public class RegistrationRequestController {
         // TODO: 从JWT中获取管理员ID，这里暂时使用固定值
         Integer adminId = 1;
         registrationRequestService.approveRequest(id, adminId);
-        return Result.success("申请已通过，学生账号已创建");
+        return Result.success("申请已通过，玩家账号已创建");
     }
 
     /**

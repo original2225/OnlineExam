@@ -1,18 +1,18 @@
-# 在线考试系统
+# 北冥审核系统
 
-北冥在线考试系统，基于 Spring Boot 3、MyBatis、MySQL、Vue 3、Vite、Element Plus。
+北冥审核系统用于 Minecraft Java 生电服务器入服审核，基于 Spring Boot 3、MyBatis、MySQL、Vue 3、Vite、Element Plus。
 
 ## 功能
 
-- 管理员、阅卷人、学生角色
-- 题库管理
-- 试卷管理
-- 考试发布与权限管理
-- 学生在线考试
-- 阅卷与成绩管理
-- 公告、论坛、文件上传
-- 邮件通知
-- 考试录屏上传到 Cloudreve
+- 所有者、管理员、阅卷人、玩家角色
+- 建筑审核、后期审核、红石审核、普通(见习)审核分支
+- 审核题库与题目提交流程
+- 试卷管理、入服审核发布与权限管理
+- 玩家在线审核、审核模拟、错题复盘
+- 阅卷、参考表决、主考官最终判定
+- 审核结果、公示、榜单与成就彩蛋
+- 公告、文件上传、邮件通知
+- 审核录屏上传到 Cloudreve
 
 ## 技术栈
 
@@ -35,7 +35,7 @@
 ## 目录结构
 
 ```text
-OnlineExam/
+Beiming-OnlineExam/
 ├── springboot/        # 后端服务
 ├── vue/               # 前端项目
 ├── system.sql         # 数据库初始化脚本
@@ -91,7 +91,7 @@ mvn spring-boot:run
 | `CLOUDREVE_BASE_URL` | 空 | Cloudreve 地址 |
 | `CLOUDREVE_USERNAME` | 空 | Cloudreve 用户名 |
 | `CLOUDREVE_PASSWORD` | 空 | Cloudreve 密码 |
-| `CLOUDREVE_UPLOAD_DIR` | `/考试录屏` | 录屏上传目录 |
+| `CLOUDREVE_UPLOAD_DIR` | `/审核录屏` | 录屏上传目录 |
 
 ### 3. 启动前端
 
@@ -113,7 +113,7 @@ npm run dev
 | --- | --- | --- |
 | 管理员 | `admin` | `admin` |
 | 阅卷人 | `examiner` | `examiner` |
-| 学生 | `student` | `student` |
+| 玩家 | `student` | `student` |
 
 生产环境请删除演示账号或修改密码。
 
@@ -138,9 +138,3 @@ git status --ignored
 - `vue/dist/`
 - `springboot/target/`
 - `.idea/`
-- `springboot/.settings/`
-- `files/`
-
-## License
-
-MIT

@@ -34,7 +34,7 @@ public class PromotionController {
     private AdminMapper adminMapper;
 
     /**
-     * 提拔学生为阅卷人 (→level 2)
+     * 提拔玩家为阅卷人 (→level 2)
      * 需要 Admin(level>=3) 及以上
      */
     @Transactional
@@ -47,7 +47,7 @@ public class PromotionController {
 
         Student student = studentMapper.selectById(studentId);
         if (ObjectUtil.isNull(student)) {
-            return Result.error("学生不存在");
+            return Result.error("玩家不存在");
         }
 
         Examiner existExaminer = examinerMapper.selectByUsername(student.getUsername());
@@ -72,7 +72,7 @@ public class PromotionController {
     }
 
     /**
-     * 提拔学生为管理员 (→level 3)
+     * 提拔玩家为管理员 (→level 3)
      * 需要 Owner(level=4)
      */
     @Transactional
@@ -85,7 +85,7 @@ public class PromotionController {
 
         Student student = studentMapper.selectById(studentId);
         if (ObjectUtil.isNull(student)) {
-            return Result.error("学生不存在");
+            return Result.error("玩家不存在");
         }
 
         Admin admin = new Admin();

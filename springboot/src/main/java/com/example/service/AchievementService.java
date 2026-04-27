@@ -12,32 +12,32 @@ public class AchievementService {
 
     private static final Map<String, AchievementDef> DEFINITIONS = new LinkedHashMap<>();
     static {
-        // 考试类
-        DEFINITIONS.put("first_exam", new AchievementDef("first_exam", "初出茅庐", "完成人生第一场考试", "🎯", "exam", 5));
-        DEFINITIONS.put("perfect_score", new AchievementDef("perfect_score", "满分答卷", "考试获得满分", "💯", "exam", 20));
-        DEFINITIONS.put("exam_master", new AchievementDef("exam_master", "考试大师", "累计完成10场考试", "🏆", "exam", 15));
-        DEFINITIONS.put("streak_pass", new AchievementDef("streak_pass", "连战连捷", "连续5场考试通过", "🔥", "exam", 25));
+        // 审核类
+        DEFINITIONS.put("first_exam", new AchievementDef("first_exam", "初入审核", "完成第一场入服审核", "🎯", "exam", 5));
+        DEFINITIONS.put("perfect_score", new AchievementDef("perfect_score", "满分答卷", "入服审核获得满分", "💯", "exam", 20));
+        DEFINITIONS.put("exam_master", new AchievementDef("exam_master", "审核老手", "累计完成10场入服审核", "🏆", "exam", 15));
+        DEFINITIONS.put("streak_pass", new AchievementDef("streak_pass", "连战连捷", "连续5场审核通过", "🔥", "exam", 25));
 
-        // 练习类
-        DEFINITIONS.put("first_practice", new AchievementDef("first_practice", "初试牛刀", "完成第一次练习", "✏️", "practice", 3));
-        DEFINITIONS.put("question_collector", new AchievementDef("question_collector", "刷题达人", "累计完成100道练习题", "📚", "practice", 20));
-        DEFINITIONS.put("speed_demon", new AchievementDef("speed_demon", "闪电侠", "单次练习正确率100%且用时最短", "⚡", "practice", 15));
-        DEFINITIONS.put("no_wrong", new AchievementDef("no_wrong", "一题不漏", "单次练习连续答对20题", "🎯", "practice", 10));
+        // 模拟类
+        DEFINITIONS.put("first_practice", new AchievementDef("first_practice", "初试牛刀", "完成第一次审核模拟", "✏️", "practice", 3));
+        DEFINITIONS.put("question_collector", new AchievementDef("question_collector", "题库磨炼者", "累计完成100道审核模拟题", "📚", "practice", 20));
+        DEFINITIONS.put("speed_demon", new AchievementDef("speed_demon", "闪电侠", "单次审核模拟正确率100%且用时最短", "⚡", "practice", 15));
+        DEFINITIONS.put("no_wrong", new AchievementDef("no_wrong", "一题不漏", "单次审核模拟连续答对20题", "🎯", "practice", 10));
 
         // 打卡类
-        DEFINITIONS.put("first_checkin", new AchievementDef("first_checkin", "每日打卡", "完成第一次学习打卡", "📅", "checkin", 3));
+        DEFINITIONS.put("first_checkin", new AchievementDef("first_checkin", "每日打卡", "完成第一次审核打卡", "📅", "checkin", 3));
         DEFINITIONS.put("week_warrior", new AchievementDef("week_warrior", "周冠军", "连续打卡7天", "🏅", "checkin", 15));
         DEFINITIONS.put("month_legend", new AchievementDef("month_legend", "月传说", "连续打卡30天", "👑", "checkin", 50));
-        DEFINITIONS.put("century_student", new AchievementDef("century_student", "百年学子", "连续打卡100天", "📜", "checkin", 100));
+        DEFINITIONS.put("century_student", new AchievementDef("century_student", "百日守门人", "连续打卡100天", "📜", "checkin", 100));
 
         // 社交类
         DEFINITIONS.put("contributor", new AchievementDef("contributor", "出题官", "成功提交1道题目被采纳", "📝", "social", 15));
         DEFINITIONS.put("mentor", new AchievementDef("mentor", "答疑达人", "在满分批注中获得10个赞", "💬", "social", 20));
-        DEFINITIONS.put("social_star", new AchievementDef("social_star", "社交之星", "在论坛发布5篇帖子", "🌟", "social", 10));
+        DEFINITIONS.put("social_star", new AchievementDef("social_star", "审核参与者", "完成5次审核相关操作", "🌟", "social", 10));
 
         // 探索类
         DEFINITIONS.put("egg_hunter", new AchievementDef("egg_hunter", "彩蛋猎人", "发现3个隐藏彩蛋", "🥚", "social", 15));
-        DEFINITIONS.put("all_achieved", new AchievementDef("all_achieved", "全能学霸", "解锁全部成就", "🌈", "exam", 100));
+        DEFINITIONS.put("all_achieved", new AchievementDef("all_achieved", "全能审核员", "解锁全部成就", "🌈", "exam", 100));
     }
 
     private final AchievementRecordMapper mapper;

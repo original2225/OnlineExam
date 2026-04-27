@@ -4,7 +4,7 @@
     <div class="welcome-banner">
       <div class="welcome-text-wrap">
         <div class="welcome-title">
-          {{ getGreeting() }}，{{ data.user.name || '同学' }} 👋
+          {{ getGreeting() }}，{{ data.user.name || '审核员' }} 👋
         </div>
         <div class="welcome-desc">{{ todayStr }}</div>
       </div>
@@ -25,7 +25,7 @@
             <span class="ws-lbl">通过率</span>
           </div>
         </div>
-        <div class="progress-wrap" @click="router.push('/front/dashboard')">
+        <div class="progress-wrap" @click="router.push('/front/myScores')">
           <svg class="spr-svg" viewBox="0 0 60 60">
             <circle class="spr-bg" cx="30" cy="30" r="24" />
             <circle class="spr-fill" cx="30" cy="30" r="24"
@@ -35,14 +35,14 @@
           </svg>
           <div class="spr-text">
             <span class="spr-value">{{ data.learningProgress }}%</span>
-            <span class="spr-label">学习</span>
+            <span class="spr-label">审核</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 每日任务 -->
-    <div class="mission-trend-row" v-if="data.user.id">
+    <div class="mission-trend-row" v-if="false">
       <div class="daily-mission-card">
         <div class="dm-header">
           <span class="dm-title">今日任务</span>
@@ -69,7 +69,7 @@
         </div>
       </div>
 
-      <!-- 学习趋势 -->
+      <!-- 审核趋势 -->
       <div class="trend-card">
         <div class="trend-header">
           <span class="trend-title">近7天练习趋势</span>
@@ -100,12 +100,12 @@
       <div class="stats-card blue hover-lift">
         <div class="stats-icon blue"><el-icon :size="22"><EditPen /></el-icon></div>
         <div class="stats-value">{{ data.stats.available }}</div>
-        <div class="stats-label">可参加考试</div>
+        <div class="stats-label">可参加审核</div>
       </div>
       <div class="stats-card green hover-lift">
         <div class="stats-icon green"><el-icon :size="22"><CircleCheck /></el-icon></div>
         <div class="stats-value">{{ data.stats.completed }}</div>
-        <div class="stats-label">已完成考试</div>
+        <div class="stats-label">已完成审核</div>
       </div>
       <div class="stats-card orange hover-lift">
         <div class="stats-icon orange"><el-icon :size="22"><TrendCharts /></el-icon></div>
@@ -119,8 +119,8 @@
       </div>
     </div>
 
-    <!-- 学习打卡 -->
-    <div class="checkin-card" v-if="data.user.id">
+    <!-- 审核打卡 -->
+    <div class="checkin-card" v-if="false">
       <div class="checkin-info">
         <div class="checkin-flame">🔥</div>
         <div class="checkin-text">
@@ -139,35 +139,27 @@
 
     <!-- 快捷功能 -->
     <div class="quick-actions">
-      <div class="qa-item" @click="router.push('/front/practiceMode')">
-        <div class="qa-icon" style="background: linear-gradient(135deg, #00b42a, #00a81e);">🎯</div>
+      <div class="qa-item" @click="router.push('/front/subjects')">
+        <div class="qa-icon" style="background: linear-gradient(135deg, #00b42a, #00a81e);">📚</div>
         <div class="qa-text">
-          <div class="qa-title">刷题练习</div>
-          <div class="qa-desc">随机组卷，即时批阅</div>
-        </div>
-        <el-icon class="qa-arrow"><ArrowRight /></el-icon>
-      </div>
-      <div class="qa-item" @click="router.push('/front/wrongQuestions')">
-        <div class="qa-icon" style="background: linear-gradient(135deg, #f53f3f, #ff4d4f);">📝</div>
-        <div class="qa-text">
-          <div class="qa-title">错题集</div>
-          <div class="qa-desc">{{ data.stats.wrongCount || 0 }} 道错题待复习</div>
+          <div class="qa-title">审核题库</div>
+          <div class="qa-desc">建筑、后期、红石、见习四项</div>
         </div>
         <el-icon class="qa-arrow"><ArrowRight /></el-icon>
       </div>
       <div class="qa-item" @click="router.push('/front/examList')">
         <div class="qa-icon" style="background: linear-gradient(135deg, #409eff, #53a8ff);">📋</div>
         <div class="qa-text">
-          <div class="qa-title">在线考试</div>
+          <div class="qa-title">进服审核</div>
           <div class="qa-desc">{{ data.stats.available }} 场可参加</div>
         </div>
         <el-icon class="qa-arrow"><ArrowRight /></el-icon>
       </div>
-      <div class="qa-item" @click="router.push('/front/leaderboard')">
+      <div class="qa-item" @click="router.push('/front/myScores')">
         <div class="qa-icon" style="background: linear-gradient(135deg, #ff7d00, #ff9500);">🏆</div>
         <div class="qa-text">
-          <div class="qa-title">排行榜</div>
-          <div class="qa-desc">查看学霸排名</div>
+          <div class="qa-title">审核结果</div>
+          <div class="qa-desc">查看结果与通过状态</div>
         </div>
         <el-icon class="qa-arrow"><ArrowRight /></el-icon>
       </div>
@@ -176,7 +168,7 @@
     <!-- 学科入口 -->
     <div class="card" style="margin-bottom: 24px">
       <div class="section-header">
-        <div class="section-title">题库中心</div>
+        <div class="section-title">审核题库</div>
         <span class="section-more" @click="router.push('/front/subjects')">查看全部 →</span>
       </div>
       <div class="subject-grid">
@@ -203,7 +195,7 @@
               class="subject-tag"
             >{{ child.name }}</span>
           </div>
-          <div class="subject-enter">进入题库 <el-icon><ArrowRight /></el-icon></div>
+          <div class="subject-enter">进入审核库 <el-icon><ArrowRight /></el-icon></div>
         </div>
         <div v-if="!data.subjects.length" class="empty-state" style="grid-column: 1 / -1;">
           <div class="empty-icon">📚</div>
@@ -212,11 +204,11 @@
       </div>
     </div>
 
-    <!-- 即将开始考试 -->
+    <!-- 即将开始审核 -->
     <div class="card" style="margin-bottom: 24px" v-if="data.upcomingExams.length">
       <div class="section-header">
-        <div class="section-title">即将开始的考试</div>
-        <span class="section-more" @click="router.push('/front/examList')">全部考试 →</span>
+        <div class="section-title">即将开始的进服审核</div>
+        <span class="section-more" @click="router.push('/front/examList')">全部审核 →</span>
       </div>
       <div class="upcoming-exams">
         <div
@@ -244,16 +236,16 @@
       </div>
     </div>
 
-    <!-- 最近成绩 + 公告 -->
+    <!-- 最近结果 + 公告 -->
     <div class="two-col-grid">
       <div class="card">
         <div class="section-header">
-          <div class="section-title">最近成绩</div>
-          <span class="section-more" @click="router.push('/front/myScores')">全部成绩 →</span>
+          <div class="section-title">最近结果</div>
+          <span class="section-more" @click="router.push('/front/myScores')">全部结果 →</span>
         </div>
         <div v-if="data.recentScores.length === 0" class="empty-state">
           <div class="empty-icon">📝</div>
-          <div class="empty-text">暂无考试成绩</div>
+          <div class="empty-text">暂无审核结果</div>
         </div>
         <div v-else class="score-card-list">
           <div v-for="score in data.recentScores" :key="score.id" class="score-card">
@@ -288,7 +280,7 @@
       </div>
     </div>
 
-    <!-- 彩蛋 + 考试通过公示 -->
+    <!-- 彩蛋 + 进服审核通过公示 -->
     <div class="two-col-grid" style="margin-top: 24px;" v-if="data.user.id">
       <div class="card">
         <div class="section-header">
@@ -316,11 +308,11 @@
 
       <div class="card">
         <div class="section-header">
-          <div class="section-title">考试通过公示</div>
+          <div class="section-title">进服审核通过公示</div>
         </div>
         <div v-if="data.publicResults.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
-          <div class="empty-text">暂无考试通过记录</div>
+          <div class="empty-text">暂无审核通过记录</div>
         </div>
         <div v-else class="public-result-list">
           <div v-for="record in data.publicResults.slice(0, 10)" :key="record.id" class="public-result-item">
@@ -342,7 +334,7 @@
       </div>
     </div>
 
-    <!-- 学习小贴士悬浮球 -->
+    <!-- 审核小贴士悬浮球 -->
     <div class="study-tip-float" @click="data.tipExpanded = !data.tipExpanded">
       <span class="tip-icon">{{ data.currentTip?.icon || '💡' }}</span>
       <div class="tip-bubble" v-if="data.tipExpanded">
@@ -375,7 +367,7 @@ const data = reactive({
   learningProgress: 0,
   missions: [
     { id: 1, name: '完成一次练习', desc: '进入练习模式完成至少1题', reward: '+5分', done: false, action: () => router.push('/front/practiceMode'), color: '#00b42a' },
-    { id: 2, name: '阅读一篇教程', desc: '学习新知识，巩固基础', reward: '+3分', done: false, action: () => router.push('/front/tutorials'), color: '#409eff' },
+    { id: 2, name: '查看审核题库', desc: '熟悉四项审核要求', reward: '+3分', done: false, action: () => router.push('/front/subjects'), color: '#409eff' },
     { id: 3, name: '复习错题', desc: '回顾错题，加深理解', reward: '+2分', done: false, action: () => router.push('/front/wrongQuestions'), color: '#ff7d00' },
   ],
   practiceTrend: [],
@@ -385,14 +377,14 @@ const data = reactive({
   tipExpanded: false,
   currentTip: null,
   tips: [
-    { icon: '🧠', text: '学习时多思考为什么，而不是死记硬背。' },
-    { icon: '📖', text: '每天坚持学习一点点，积少成多！' },
-    { icon: '💡', text: '做错的题才是最好的老师，一定要弄懂它。' },
-    { icon: '⏰', text: '番茄工作法：学习25分钟，休息5分钟，效率翻倍！' },
-    { icon: '🎯', text: '设定明确的学习目标，比漫无目的地刷题更有效。' },
-    { icon: '🔄', text: '定期复习旧知识，巩固记忆曲线。' },
-    { icon: '📝', text: '做笔记时用自己的话复述，比抄写更有效。' },
-    { icon: '🏃', text: '适度运动可以提高学习效率和专注力！' },
+    { icon: '🧠', text: '审核时多思考为什么，而不是死记硬背。' },
+    { icon: '📖', text: '先熟悉审核方向，再进入正式考核。' },
+    { icon: '💡', text: '错题代表薄弱规则，复盘后再模拟一次。' },
+    { icon: '⏰', text: '正式审核前检查网络、浏览器和可用时间。' },
+    { icon: '🎯', text: '选择与你申请方向一致的题库，避免盲刷。' },
+    { icon: '🔄', text: '建筑、后期、红石和见习要求不同，按方向复习。' },
+    { icon: '📝', text: '简答题写清思路、依据和服务器规则理解。' },
+    { icon: '🏃', text: '状态不好先休息，正式审核一次认真完成。' },
   ],
 })
 
@@ -402,7 +394,7 @@ const todayStr = new Date().toLocaleDateString('zh-CN', {
 
 const getGreeting = () => {
   const greetings = [
-    '欢迎回来', '元气满满', '继续加油', '学习愉快', '突破自我',
+    '欢迎回来', '元气满满', '继续加油', '审核愉快', '突破自我',
   ]
   return greetings[Math.floor(Math.random() * greetings.length)]
 }

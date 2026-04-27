@@ -94,7 +94,7 @@ public class ScoreController {
     }
 
     /**
-     * 获取学生成绩列表
+     * 获取玩家成绩列表
      */
     @GetMapping("/getByStudentId/{studentId}")
     public Result getByStudentId(@PathVariable Integer studentId) {

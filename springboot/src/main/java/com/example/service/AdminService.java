@@ -10,6 +10,7 @@ import com.example.entity.Examiner;
 import com.example.exception.CustomException;
 import com.example.mapper.AdminMapper;
 import com.example.mapper.ExaminerMapper;
+import com.example.utils.PasswordUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -39,6 +40,7 @@ public class AdminService {
         if (ObjectUtil.isEmpty(admin.getPassword())) {
             admin.setPassword(Constants.USER_DEFAULT_PASSWORD);
         }
+        admin.setPassword(PasswordUtils.encode(admin.getPassword()));
         if (ObjectUtil.isEmpty(admin.getName())) {
             admin.setName(admin.getUsername());
         }
@@ -109,11 +111,15 @@ public class AdminService {
         if (ObjectUtil.isNull(dbAdmin)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!dbAdmin.getPassword().equals(account.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbAdmin.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
         }
+        if (PasswordUtils.needsUpgrade(dbAdmin.getPassword())) {
+            dbAdmin.setPassword(PasswordUtils.encode(account.getPassword()));
+            adminMapper.updateById(dbAdmin);
+        }
         // 生成token
-        String token = TokenUtils.createToken(dbAdmin.getId() + "-" + dbAdmin.getRole(), dbAdmin.getPassword());
+        String token = TokenUtils.createToken(dbAdmin.getId() + "-" + dbAdmin.getRole());
         dbAdmin.setToken(token);
         return dbAdmin;
     }
@@ -126,10 +132,10 @@ public class AdminService {
         if (ObjectUtil.isNull(dbAdmin)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbAdmin.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbAdmin.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbAdmin.setPassword(account.getNewPassword());
+        dbAdmin.setPassword(PasswordUtils.encode(account.getNewPassword()));
         adminMapper.updateById(dbAdmin);
     }
 

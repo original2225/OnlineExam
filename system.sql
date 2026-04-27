@@ -57,8 +57,8 @@ CREATE TABLE `notice`  (
 -- ----------------------------
 -- Records of notice
 -- ----------------------------
-INSERT INTO `notice` VALUES (1, '系统维护通知', '系统将在2026年3月10日凌晨2点进行维护，请各位考生提前完成考试，避免影响正常考试。', '2025-03-09 18:00:00', NOW());
-INSERT INTO `notice` VALUES (2, '考试安排公告', '本次在线考试将于2025年3月15日开始，请各位考生在规定时间内完成考试。考试内容包括：计算机基础、编程能力、算法设计等。', '2026-03-10 10:00:00', NOW());
+INSERT INTO `notice` VALUES (1, '系统维护通知', '系统将在2026年3月10日凌晨2点进行维护，请各位玩家提前完成审核，避免影响正常入服流程。', '2025-03-09 18:00:00', NOW());
+INSERT INTO `notice` VALUES (2, '入服审核安排公告', '本次入服审核将于2026年3月15日开始，请各位玩家在规定时间内完成审核。审核内容包括：建筑审核、后期审核、红石审核、普通(见习)审核。', '2026-03-10 10:00:00', NOW());
 INSERT INTO `notice` VALUES (3, '作弊防范提示', '为了确保考试的公正性，本系统启用了实时监控功能，考试过程中请勿切换窗口或使用其他应用，违者将被警告并自动终止考试。', '2026-03-10 10:30:00', NOW());
 
 -- ----------------------------
@@ -96,15 +96,15 @@ CREATE TABLE `examiner`  (
 -- ----------------------------
 -- Records of examiner
 -- ----------------------------
-INSERT INTO `examiner` VALUES (1, 'examiner', 'examiner', '阅卷人', 'http://localhost:9090/files/download/1721114905635-柴犬.jpeg', 'EXAMINER', '13800000002', 'examiner@example.com', NOW(), NOW(), 'active');
+INSERT INTO `examiner` VALUES (1, 'examiner', 'examiner', '阅卷人', 'http://localhost:9090/files/download/1721114905635-柴犬.jpeg', 'HELPER', '13800000002', 'examiner@example.com', NOW(), NOW(), 'active');
 
 -- ----------------------------
--- Table structure for student (学生表)
+-- Table structure for student (玩家表，保留历史表名)
 -- ----------------------------
 DROP TABLE IF EXISTS `student`;
 CREATE TABLE `student`  (
   `id` int(10) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `student_no` varchar(50) NULL COMMENT '学号',
+  `student_no` varchar(50) NULL COMMENT '玩家编号',
   `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '账号',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '密码',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '姓名',
@@ -119,15 +119,15 @@ CREATE TABLE `student`  (
   `status` varchar(50) DEFAULT 'PENDING' COMMENT '账号状态: APPROVED-审核通过, PENDING-审核中, REJECTED-审核未通过',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_student_no` (`student_no`)
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '玩家表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of student
 -- ----------------------------
-INSERT INTO `student` VALUES (1, '2024001', 'student', 'student', '学生', 'http://localhost:9090/files/download/1721114905635-柴犬.jpeg', 'STUDENT', '13800000003', 'student@example.com', '计算机1班', NULL, NOW(), NOW(), 'active');
+INSERT INTO `student` VALUES (1, 'BM0001', 'student', 'student', '示例玩家', 'http://localhost:9090/files/download/1721114905635-柴犬.jpeg', 'USER', '13800000003', 'player@example.com', '普通(见习)审核', '普通(见习)审核', NOW(), NOW(), 'active');
 
 -- ===========================================
--- 在线考试系统核心表
+-- 北冥审核系统核心表
 -- ===========================================
 
 -- ----------------------------
@@ -150,11 +150,12 @@ CREATE TABLE `question_category`  (
 -- ----------------------------
 -- Records of question_category
 -- ----------------------------
-INSERT INTO `question_category` VALUES (1, '计算机基础', '计算机基础知识相关题目', NOW(), NOW(), 'active');
-INSERT INTO `question_category` VALUES (2, '编程语言', '各类编程语言相关题目', NOW(), NOW(), 'active');
-INSERT INTO `question_category` VALUES (3, '算法设计', '算法与数据结构相关题目', NOW(), NOW(), 'active');
-INSERT INTO `question_category` VALUES (4, '数据库', '数据库相关题目', NOW(), NOW(), 'active');
-INSERT INTO `question_category` VALUES (5, '网络技术', '计算机网络相关题目', NOW(), NOW(), 'active');
+INSERT INTO `question_category` (`id`, `name`, `description`, `created_at`, `updated_at`, `status`, `parent_id`, `icon`) VALUES
+(1, 'Minecraft Java 生电服务器进服审核', '面向生电服务器成员准入的四项审核题库', NOW(), NOW(), 'active', NULL, 'minecraft'),
+(2, '建筑审核', '建筑审美、结构表达、风格统一与工程协作审核', NOW(), NOW(), 'active', 1, NULL),
+(3, '后期审核', '物资统计、仓储整理、工程收尾与文档记录审核', NOW(), NOW(), 'active', 1, NULL),
+(4, '红石审核', '红石机器原理、性能影响、区块加载与维护能力审核', NOW(), NOW(), 'active', 1, NULL),
+(5, '普通(见习)审核', '服务器规则、基础生存、生电常识与协作意识审核', NOW(), NOW(), 'active', 1, NULL);
 
 -- ----------------------------
 -- Table structure for question (题目表)
@@ -183,12 +184,15 @@ CREATE TABLE `question`  (
 -- ----------------------------
 -- Records of question (示例数据)
 -- ----------------------------
-INSERT INTO `question` VALUES (1, 1, 'single', '计算机中存储信息的最小单位是？', '{"A": "位", "B": "字节", "C": "字", "D": "KB"}', 'A', '位(bit)是计算机中存储信息的最小单位', 'easy', 2.0, 1, NOW(), NOW(), 'active');
-INSERT INTO `question` VALUES (2, 1, 'single', '下列哪个不是操作系统的功能？', '{"A": "进程管理", "B": "内存管理", "C": "文档编辑", "D": "文件管理"}', 'C', '文档编辑是应用软件的功能，不是操作系统的功能', 'medium', 3.0, 1, NOW(), NOW(), 'active');
-INSERT INTO `question` VALUES (3, 2, 'multiple', '下列哪些是面向对象的编程语言？', '{"A": "Java", "B": "Python", "C": "C语言", "D": "C++"}', 'ABD', 'Java、Python和C++都是面向对象的编程语言，C语言是面向过程的', 'medium', 5.0, 1, NOW(), NOW(), 'active');
-INSERT INTO `question` VALUES (4, 3, 'judge', '栈是一种先进先出的数据结构。', NULL, 'false', '栈是先进后出(FILO)的数据结构，队列才是先进先出(FIFO)', 'easy', 2.0, 1, NOW(), NOW(), 'active');
-INSERT INTO `question` VALUES (5, 3, 'judge', '快速排序的平均时间复杂度是O(nlogn)。', NULL, 'true', '快速排序的平均时间复杂度确实是O(nlogn)', 'medium', 2.0, 1, NOW(), NOW(), 'active');
-INSERT INTO `question` VALUES (6, 2, 'essay', '请简述面向对象编程的三大特性。', NULL, '封装、继承、多态', '面向对象编程的三大特性是封装、继承和多态', 'medium', 10.0, 1, NOW(), NOW(), 'active');
+INSERT INTO `question` (`id`, `category_id`, `type`, `content`, `options`, `answer`, `analysis`, `images`, `difficulty`, `score`, `created_by`, `created_at`, `updated_at`, `status`) VALUES
+(1, 2, 'essay', '请说明你会如何让公共建筑同时满足美观、可维护和服务器风格统一。', NULL, '要点：明确风格参考、控制体量比例、选材统一、预留维护空间、避免遮挡公共线路。', '建筑审核重点看审美表达、功能性、可维护性和团队协作意识。', NULL, 'hard', 10.0, 1, NOW(), NOW(), 'active'),
+(2, 2, 'single', '公共建筑选址时，最应该优先避开什么？', '{"A": "主交通线、公共机器和预留工程区", "B": "所有平原地形", "C": "玩家个人审美", "D": "低亮度装饰"}', 'A', '生电服务器公共区域需要优先保证线路、机器、交通和后续扩建空间。', NULL, 'medium', 3.0, 1, NOW(), NOW(), 'active'),
+(3, 3, 'essay', '请说明你能承担哪些后期工作，以及如何记录工程进度和物资消耗。', NULL, '要点：物资统计、仓储整理、施工收尾、文档记录、截图归档、异常反馈。', '后期审核重点看稳定执行、记录习惯和收尾能力。', NULL, 'medium', 8.0, 1, NOW(), NOW(), 'active'),
+(4, 3, 'multiple', '大型工程收尾时，哪些事项必须检查？', '{"A": "临时方块是否清理", "B": "剩余物资是否归仓", "C": "说明牌和文档是否更新", "D": "是否刷屏庆祝"}', 'ABC', '临时结构、物资和文档是工程交付关键项。', NULL, 'medium', 5.0, 1, NOW(), NOW(), 'active'),
+(5, 4, 'multiple', '设计大型红石机器前，需要提前说明哪些内容？', '{"A": "用途与产能", "B": "卡服风险", "C": "区块加载方式", "D": "机器外观颜色"}', 'ABC', '红石审核重点关注功能、性能、加载方式和维护成本。', NULL, 'medium', 5.0, 1, NOW(), NOW(), 'active'),
+(6, 4, 'single', '红石机器导致 MSPT 明显升高时，正确处理方式是什么？', '{"A": "立刻停机并反馈排查", "B": "继续运行观察几天", "C": "隐藏机器避免被发现", "D": "增加更多漏斗"}', 'A', '性能异常要先停机，避免影响服务器整体稳定。', NULL, 'easy', 3.0, 1, NOW(), NOW(), 'active'),
+(7, 5, 'single', '普通(见习)审核中，进入生电服务器前最应该确认哪项？', '{"A": "服务器版本、规则和准入要求", "B": "材质包颜色", "C": "个人皮肤稀有度", "D": "聊天昵称长度"}', 'A', '见习成员先确认版本、规则、权限边界和基础要求。', NULL, 'easy', 2.0, 1, NOW(), NOW(), 'active'),
+(8, 5, 'judge', '未经沟通，不应擅自改动公共机器、公共仓储或他人工程。', NULL, 'true', '公共设施变更需要沟通和记录，避免破坏服务器协作秩序。', NULL, 'easy', 2.0, 1, NOW(), NOW(), 'active');
 
 -- ----------------------------
 -- Table structure for exam_paper (试卷表)
@@ -284,6 +288,16 @@ CREATE TABLE `exam_record`  (
   `total_score` decimal(5,2) DEFAULT 0.00,
   `is_pass` tinyint(1) NULL,
   `exam_status` varchar(50) DEFAULT 'PENDING' COMMENT '考核状态: PENDING-待审阅, UNDER_REVIEW-审阅中, PASSED-考核通过, FAILED-未通过考核',
+  `approved_by` int(10) NULL COMMENT '审批人ID',
+  `approved_at` datetime NULL COMMENT '审批时间',
+  `is_published` tinyint(1) DEFAULT 0 COMMENT '是否公示',
+  `published_at` datetime NULL COMMENT '公示时间',
+  `switch_count` int(10) DEFAULT 0 COMMENT '切屏次数',
+  `chief_examiner_id` int(10) NULL COMMENT '主考官ID',
+  `chief_examiner_role` varchar(20) NULL COMMENT '主考官角色',
+  `chief_examiner_name` varchar(50) NULL COMMENT '主考官姓名',
+  `final_decision_reason` varchar(500) NULL COMMENT '最终判定理由',
+  `final_evaluated_at` datetime NULL COMMENT '最终判定时间',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

@@ -1,4 +1,4 @@
--- 题目批注表（满分考生可写批注）
+-- 题目批注表（满分玩家可写批注）
 CREATE TABLE IF NOT EXISTS `question_annotation` (
   `id` int NOT NULL AUTO_INCREMENT,
   `question_id` int NOT NULL COMMENT '题目ID',

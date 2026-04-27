@@ -110,7 +110,7 @@
         </el-form-item>
 
         <el-form-item label="封面图">
-          <el-upload :action="uploadUrl" :on-success="handleCoverSuccess" :show-file-list="false" accept="image/*">
+          <el-upload :action="uploadUrl" :headers="uploadHeaders" :on-success="handleCoverSuccess" :show-file-list="false" accept="image/*">
             <img v-if="data.form.coverUrl" :src="data.form.coverUrl" class="cover-preview" />
             <el-button v-else type="primary" plain><el-icon><Upload /></el-icon> 上传封面</el-button>
           </el-upload>
@@ -119,7 +119,7 @@
         <!-- 视频上传 -->
         <template v-if="data.form.contentType === 'video'">
           <el-form-item label="视频文件">
-            <el-upload :action="uploadUrl" :on-success="handleVideoSuccess" :show-file-list="false" accept="video/*">
+            <el-upload :action="uploadUrl" :headers="uploadHeaders" :on-success="handleVideoSuccess" :show-file-list="false" accept="video/*">
               <video v-if="data.form.videoUrl" :src="data.form.videoUrl" class="video-preview" controls></video>
               <el-button v-else type="success" plain><el-icon><Upload /></el-icon> 上传视频</el-button>
             </el-upload>
@@ -132,7 +132,7 @@
             <el-input v-model="data.form.content" type="textarea" :rows="10" placeholder="支持 HTML 格式的图文内容" />
           </el-form-item>
           <el-form-item label="上传图片">
-             <el-upload :action="uploadUrl" :on-success="handleImageInsert" :show-file-list="false" accept="image/*" multiple>
+             <el-upload :action="uploadUrl" :headers="uploadHeaders" :on-success="handleImageInsert" :show-file-list="false" accept="image/*" multiple>
               <el-button plain><el-icon><Picture /></el-icon> 插入图片</el-button>
             </el-upload>
           </el-form-item>
@@ -141,7 +141,7 @@
         <!-- 文档上传 -->
         <template v-if="data.form.contentType === 'document'">
           <el-form-item label="上传文档">
-            <el-upload :action="uploadUrl" :on-success="handleDocSuccess" :show-file-list="false" accept=".pdf,.doc,.docx,.ppt,.pptx">
+            <el-upload :action="uploadUrl" :headers="uploadHeaders" :on-success="handleDocSuccess" :show-file-list="false" accept=".pdf,.doc,.docx,.ppt,.pptx">
               <div v-if="data.form.documentUrl" class="doc-uploaded">
                 <el-icon :size="24"><Document /></el-icon>
                 <span>文档已上传</span>
@@ -164,7 +164,7 @@
             </div>
           </el-form-item>
           <el-form-item label="上传MD">
-            <el-upload :action="uploadUrl" :on-success="handleMdFileSuccess" :show-file-list="false" accept=".md,.markdown,.txt">
+            <el-upload :action="uploadUrl" :headers="uploadHeaders" :on-success="handleMdFileSuccess" :show-file-list="false" accept=".md,.markdown,.txt">
               <el-button plain><el-icon><Upload /></el-icon> 导入 .md 文件</el-button>
             </el-upload>
           </el-form-item>
@@ -189,8 +189,10 @@
 import { reactive, computed, onMounted } from "vue"
 import request from "@/utils/request.js"
 import { ElMessage, ElMessageBox } from "element-plus"
+import { getUploadHeaders } from '@/utils/upload.js'
 
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
+const uploadHeaders = getUploadHeaders()
 
 const typeOptions = [
   { value: 'video', label: '视频教程', desc: '上传视频文件', emoji: '🎬' },

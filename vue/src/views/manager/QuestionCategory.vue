@@ -104,7 +104,7 @@
         </el-form-item>
         <el-form-item label="分类图标">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <el-upload action="/api/files/upload" :show-file-list="false" :on-success="handleIconUpload" accept="image/*">
+            <el-upload :action="baseUrl + '/files/upload'" :headers="uploadHeaders" :show-file-list="false" :on-success="handleIconUpload" accept="image/*">
               <div v-if="data.form.icon" style="position: relative; width: 64px; height: 64px;">
                 <img :src="data.form.icon" style="width: 64px; height: 64px; border-radius: 12px; object-fit: cover; border: 2px solid #e4e7ed;" />
                 <div class="icon-replace-hint">更换</div>
@@ -138,6 +138,10 @@ import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Edit, Plus, Search, Folder, Upload } from "@element-plus/icons-vue";
 import { loadCascaderCategories } from "@/utils/categoryUtils.js";
+import { getUploadHeaders } from '@/utils/upload.js'
+
+const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 
 const data = reactive({
   formVisible: false, form: {}, tableData: [], name: null, ids: [], loading: false

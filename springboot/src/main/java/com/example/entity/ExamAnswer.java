@@ -13,7 +13,7 @@ public class ExamAnswer {
     private Integer questionId;
     /** 题目信息（关联查询用，非数据库字段） */
     private Question question;
-    /** 学生答案 */
+    /** 玩家答案 */
     private String studentAnswer;
     /** 是否正确 */
     private Boolean isCorrect;

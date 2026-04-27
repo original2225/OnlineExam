@@ -2,13 +2,13 @@
   <div class="main-content">
     <div class="page-hero">
       <div class="page-hero-icon">🏆</div>
-      <div class="page-hero-title">排行榜</div>
-      <div class="page-hero-subtitle">看看你的学习排名，和同学一起进步</div>
+      <div class="page-hero-title">审核榜单</div>
+      <div class="page-hero-subtitle">仅统计入服审核相关表现：模拟、复盘、正式审核结果</div>
       <div class="page-hero-actions">
         <el-radio-group v-model="data.activeTab" @change="loadTab" size="large" class="lb-mode-switch">
-          <el-radio-button label="practice">练习榜</el-radio-button>
-          <el-radio-button label="checkin">打卡榜</el-radio-button>
-          <el-radio-button label="exam">考试榜</el-radio-button>
+          <el-radio-button label="practice">模拟榜</el-radio-button>
+          <el-radio-button label="checkin">活跃榜</el-radio-button>
+          <el-radio-button label="exam">审核榜</el-radio-button>
         </el-radio-group>
       </div>
     </div>
@@ -49,7 +49,7 @@
     <div class="lb-card">
       <div class="lb-list-header">
         <span>排名</span>
-        <span>用户</span>
+        <span>玩家</span>
         <span class="text-right">{{ tabMetric }}</span>
       </div>
       <div v-if="currentList.length === 0" class="lb-empty">
@@ -70,7 +70,7 @@
           <div class="li-user">
             <div class="li-avatar">{{ item.name?.charAt(0) || '?' }}</div>
             <div class="li-info">
-              <span class="li-name">{{ item.name || item.studentName || '匿名用户' }}</span>
+              <span class="li-name">{{ item.name || item.studentName || '匿名玩家' }}</span>
               <span class="li-badge" v-if="item.id === data.currentUserId">我</span>
             </div>
           </div>
@@ -87,7 +87,7 @@
     </div>
     <div class="egg-detail" v-if="data.showEggDetail">
       <div class="egg-icon">🏆</div>
-      <div class="egg-text">点击任意领奖台上的选手卡片即可发起挑战！</div>
+      <div class="egg-text">点击榜单上的成员，可以发起一次同方向审核模拟挑战。</div>
     </div>
   </div>
 </template>
@@ -118,8 +118,8 @@ const getTop3 = computed(() => currentList.value.slice(0, 3))
 const restList = computed(() => currentList.value.slice(3))
 
 const tabMetric = computed(() => {
-  if (data.activeTab === 'practice') return '练习次数'
-  if (data.activeTab === 'checkin') return '连续天数'
+  if (data.activeTab === 'practice') return '模拟次数'
+  if (data.activeTab === 'checkin') return '活跃天数'
   return '平均分'
 })
 
@@ -148,24 +148,20 @@ const loadCheckin = () => {
 }
 
 const loadExam = () => {
-  request.get('/examRecord/selectAll').then(res => {
-    const records = (res.data || []).filter(r => r.status === 'completed' && r.totalScore !== null)
-    const map = {}
-    records.forEach(r => {
-      if (!map[r.studentId]) map[r.studentId] = { studentName: r.studentName, scores: [], passCount: 0, id: r.studentId }
-      map[r.studentId].scores.push(Number(r.totalScore) || 0)
-      if (r.examStatus === 'PASSED') map[r.studentId].passCount++
-    })
-    data.examList = Object.values(map).map(s => ({
-      ...s, avgScore: s.scores.length > 0 ? Math.round(s.scores.reduce((a, b) => a + b, 0) / s.scores.length) : 0
-    })).sort((a, b) => b.passCount - a.passCount || b.avgScore - a.avgScore).slice(0, 20)
+  request.get('/leaderboard/entryReview').then(res => {
+    data.examList = (res.data || []).map(item => ({
+      ...item,
+      studentName: item.name,
+      avgScore: Math.round(Number(item.avgScore) || 0),
+      passCount: Number(item.passCount) || 0
+    })).slice(0, 20)
   }).catch(() => {})
 }
 
 const challengePlayer = (player) => {
   if (!player) return
   if (player.id === data.currentUserId) {
-    ElMessage.info('不能挑战自己哦！')
+    ElMessage.info('这是你自己的审核记录，去做一次模拟刷新结果吧')
     return
   }
   if (!data.easterEggFound) {

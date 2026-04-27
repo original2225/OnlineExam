@@ -8,6 +8,7 @@ import com.example.entity.Account;
 import com.example.entity.Student;
 import com.example.exception.CustomException;
 import com.example.mapper.StudentMapper;
+import com.example.utils.PasswordUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +34,7 @@ public class StudentService {
         if (ObjectUtil.isEmpty(student.getPassword())) {
             student.setPassword(Constants.USER_DEFAULT_PASSWORD);
         }
+        student.setPassword(PasswordUtils.encode(student.getPassword()));
         if (ObjectUtil.isEmpty(student.getName())) {
             student.setName(student.getUsername());
         }
@@ -76,15 +78,19 @@ public class StudentService {
         if (ObjectUtil.isNull(dbStudent)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!dbStudent.getPassword().equals(account.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbStudent.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
+        }
+        if (PasswordUtils.needsUpgrade(dbStudent.getPassword())) {
+            dbStudent.setPassword(PasswordUtils.encode(account.getPassword()));
+            studentMapper.updateById(dbStudent);
         }
         // 检查账号状态
         if ("PENDING".equals(dbStudent.getStatus()) || "REJECTED".equals(dbStudent.getStatus())) {
             throw new CustomException(ResultCodeEnum.PARAM_ERROR, "您的注册信息正在审核中，请联系管理员及时审核");
         }
         // 生成token
-        String token = TokenUtils.createToken(dbStudent.getId() + "-" + dbStudent.getRole(), dbStudent.getPassword());
+        String token = TokenUtils.createToken(dbStudent.getId() + "-" + dbStudent.getRole());
         dbStudent.setToken(token);
         return dbStudent;
     }
@@ -97,10 +103,10 @@ public class StudentService {
         if (ObjectUtil.isNull(dbStudent)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbStudent.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbStudent.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbStudent.setPassword(account.getNewPassword());
+        dbStudent.setPassword(PasswordUtils.encode(account.getNewPassword()));
         studentMapper.updateById(dbStudent);
     }
 

@@ -110,7 +110,7 @@
         </el-form-item>
         <el-form-item label="头像">
           <div class="avatar-upload-row">
-            <el-upload :action="baseUrl + '/files/upload'" :on-success="handleFileUpload" :show-file-list="false" accept="image/*">
+            <el-upload :action="baseUrl + '/files/upload'" :headers="uploadHeaders" :on-success="handleFileUpload" :show-file-list="false" accept="image/*">
               <img v-if="data.form.avatar" :src="data.form.avatar" class="form-avatar-preview" />
               <el-button v-else type="primary" plain>
                 <el-icon><Upload /></el-icon> 上传头像
@@ -140,8 +140,10 @@ import { reactive, computed, onMounted } from "vue";
 import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Edit, Plus, Search, Upload } from "@element-plus/icons-vue";
+import { getUploadHeaders } from '@/utils/upload.js'
 
 const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 const currentUser = JSON.parse(localStorage.getItem('xm-user') || '{}')
 const currentUserLevel = currentUser.level || 1
 

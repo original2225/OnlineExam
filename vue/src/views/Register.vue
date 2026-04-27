@@ -113,7 +113,7 @@ const successCanvas = ref(null)
 const particleCanvas = ref(null)
 const formRef = ref()
 
-const TITLE_ORIGINAL = '北冥·群组服 注册'
+const TITLE_ORIGINAL = '北冥审核系统 注册'
 
 const data = reactive({
   loading: false,

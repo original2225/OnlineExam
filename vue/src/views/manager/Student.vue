@@ -1,5 +1,5 @@
 <template>
-  <div class="user-page">
+  <div class="player-page">
 
     <!-- 页面标题 -->
     <div class="page-hero">
@@ -13,13 +13,13 @@
           </svg>
         </div>
         <div class="hero-text">
-          <h1>用户管理</h1>
-          <p>统一管理所有用户信息，支持跨身份转移与批量操作</p>
+          <h1>玩家管理</h1>
+          <p>统一管理所有玩家信息，支持身份调整与批量操作</p>
         </div>
       </div>
       <div class="hero-right">
         <el-button type="primary" size="large" round @click="handleAdd">
-          <el-icon><Plus /></el-icon> 新增用户
+          <el-icon><Plus /></el-icon> 新增玩家
         </el-button>
       </div>
     </div>
@@ -29,7 +29,7 @@
       <div class="stat-card stat-all">
         <div class="stat-inner">
           <div class="stat-num">{{ data.allUsers.length }}</div>
-          <div class="stat-label">用户总数</div>
+          <div class="stat-label">成员总数</div>
           <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><User /></el-icon></div>
         </div>
       </div>
@@ -57,7 +57,7 @@
       <div class="stat-card stat-user">
         <div class="stat-inner">
           <div class="stat-num">{{ countByRole('USER') }}</div>
-          <div class="stat-label">普通用户</div>
+          <div class="stat-label">玩家</div>
           <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><Avatar /></el-icon></div>
         </div>
       </div>
@@ -83,7 +83,7 @@
           <el-option label="站长" value="OWNER" />
           <el-option label="管理员" value="ADMIN" />
           <el-option label="阅卷人" value="HELPER" />
-          <el-option label="普通用户" value="USER" />
+          <el-option label="玩家" value="USER" />
         </el-select>
         <el-button plain @click="reset" class="reset-btn">重置</el-button>
       </div>
@@ -166,7 +166,7 @@
               <el-icon><Edit /></el-icon> 编辑
             </el-button>
             <el-popconfirm
-              title="确定删除该用户？"
+              title="确定删除该玩家？"
               confirm-button-text="删除"
               cancel-button-text="取消"
               @confirm="del(scope.row)"
@@ -196,10 +196,10 @@
       </div>
     </div>
 
-    <!-- 用户信息弹窗 -->
+    <!-- 玩家信息弹窗 -->
     <el-dialog
       v-model="data.formVisible"
-      :title="data.form.id ? '编辑用户' : '新增用户'"
+      :title="data.form.id ? '编辑玩家' : '新增玩家'"
       width="540px"
       class="user-dialog"
       destroy-on-close
@@ -226,6 +226,7 @@
               </div>
               <el-upload
                 :action="baseUrl + '/files/upload'"
+                :headers="uploadHeaders"
                 :on-success="handleFileUpload"
                 :show-file-list="false"
                 accept="image/*"
@@ -245,7 +246,7 @@
                 <el-option v-if="currentUserLevel >= 4" label="站长 (Owner)" value="OWNER" />
                 <el-option v-if="currentUserLevel >= 4" label="管理员 (Admin)" value="ADMIN" />
                 <el-option v-if="currentUserLevel >= 3" label="阅卷人 (Helper)" value="HELPER" />
-                <el-option label="普通用户 (User)" value="USER" />
+                <el-option label="玩家 (User)" value="USER" />
               </el-select>
             </div>
           </div>
@@ -301,8 +302,10 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Edit, Search, Filter, Plus, Star, Tools, Reading, Avatar, User } from '@element-plus/icons-vue'
 import request from '@/utils/request.js'
+import { getUploadHeaders } from '@/utils/upload.js'
 
 const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 const currentUser = JSON.parse(localStorage.getItem('xm-user') || '{}')
 const currentUserLevel = currentUser.level || 1
 
@@ -342,7 +345,7 @@ const roleLabel = (src) => {
   if (src === 'OWNER') return '站长'
   if (src === 'ADMIN') return '管理员'
   if (src === 'HELPER') return '阅卷人'
-  return '用户'
+  return '玩家'
 }
 
 const statusLabel = (s) => {
@@ -432,7 +435,7 @@ const del = (row) => {
 
 const delBatch = () => {
   if (!data.ids.length) return
-  ElMessageBox.confirm(`确定删除选中的 ${data.ids.length} 个用户吗？`, '批量删除确认', {
+  ElMessageBox.confirm(`确定删除选中的 ${data.ids.length} 个成员吗？`, '批量删除确认', {
     confirmButtonText: '确认删除', cancelButtonText: '取消', type: 'warning'
   }).then(() => {
     const grouped = {}
@@ -464,7 +467,7 @@ onMounted(() => { load() })
 </script>
 
 <style scoped>
-.user-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.player-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
 
 /* ===== 页面标题 ===== */
 .page-hero {

@@ -6,15 +6,11 @@
           <div class="nav-logo-wrap">
             <img src="@/assets/imgs/logo.png" alt="Logo" class="nav-logo" />
           </div>
-          <span class="nav-title">北冥</span>
+          <span class="nav-title">北冥审核系统</span>
         </div>
         <div class="nav-center">
           <a href="#hero" class="nav-link" @click.prevent="scrollTo('hero')">首页</a>
-          <a href="#features" class="nav-link" @click.prevent="scrollTo('features')">平台特色</a>
-          <a href="#stats" class="nav-link" @click.prevent="scrollTo('stats')">数据概览</a>
-          <a href="#roles" class="nav-link" @click.prevent="scrollTo('roles')">角色权限</a>
-          <a href="#about" class="nav-link" @click.prevent="scrollTo('about')">关于平台</a>
-          <a href="https://docs.beiming.games" target="_blank" class="nav-link">文档库</a>
+          <a href="#about" class="nav-link" @click.prevent="scrollTo('about')">服务器介绍</a>
         </div>
         <div class="nav-right">
           <template v-if="data.user.id">
@@ -27,8 +23,8 @@
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item v-if="data.user.role === 'OWNER' || data.user.role === 'ADMIN' || data.user.role === 'HELPER'" command="manager">进入管理后台</el-dropdown-item>
-                  <el-dropdown-item v-if="data.user.role === 'USER'" command="front">进入用户中心</el-dropdown-item>
-                  <el-dropdown-item command="exam">进入考试中心</el-dropdown-item>
+                  <el-dropdown-item v-if="data.user.role === 'USER'" command="front">进入玩家中心</el-dropdown-item>
+                  <el-dropdown-item command="exam">进入审核中心</el-dropdown-item>
                   <el-dropdown-item command="person">个人资料</el-dropdown-item>
                   <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
                 </el-dropdown-menu>
@@ -59,6 +55,14 @@
         ></div>
       </div>
       <div class="hero-overlay"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-orbit orbit-a"></div>
+      <div class="hero-orbit orbit-b"></div>
+      <div class="hero-terminal animate-on-scroll">
+        <div class="terminal-line"><span>STATUS</span><b>ONLINE</b></div>
+        <div class="terminal-line"><span>VERSION</span><b>Java 1.21.1</b></div>
+        <div class="terminal-line"><span>CHECK</span><b>4 ROUTES</b></div>
+      </div>
       <div class="hero-particles" ref="heroParticlesRef"></div>
       <div class="hero-content">
         <div class="hero-logo-wrapper">
@@ -71,116 +75,78 @@
             @dblclick="logoDoubleClick"
             ref="logoRef"
           >
-            <img src="@/assets/imgs/logo.png" alt="北冥" />
+            <img src="@/assets/imgs/logo.png" alt="北冥审核系统" />
           </div>
           <div class="particles" ref="particlesRef"></div>
           <div v-if="data.clickCount > 0" class="click-hint">
             {{ data.clickCount >= 10 ? '🎉 解锁隐藏彩蛋！' : '' }}
           </div>
         </div>
-        <h1 class="hero-title">
-          <span class="title-char" v-for="(char, i) in '北冥'" :key="i" :style="{ animationDelay: (i * 0.15) + 's' }">{{ char }}</span>
-        </h1>
+        <h1 class="hero-title">北冥审核系统</h1>
         <p class="hero-subtitle">{{ data.typedText }}<span class="typing-cursor" v-if="data.isTyping">|</span></p>
         <div class="hero-actions">
-          <el-button type="primary" size="large" class="hero-btn hero-btn-primary" @click="scrollTo('features')">
-            <el-icon style="margin-right: 6px;"><ArrowDown /></el-icon>了解更多
+          <el-button type="primary" size="large" class="hero-btn hero-btn-primary" @click="scrollTo('about')">
+            <el-icon style="margin-right: 6px;"><ArrowDown /></el-icon>服务器介绍
           </el-button>
-          <el-button v-if="!data.user.id" size="large" class="hero-btn ghost" @click="showLogin">立即登录</el-button>
-          <el-button v-else size="large" class="hero-btn ghost" @click="enterSystem">进入系统</el-button>
+          <el-button size="large" class="hero-btn ghost" @click="data.user.id ? enterSystem() : showLogin()">进入系统</el-button>
         </div>
 
-      </div>
-    </section>
-
-    <section id="features" class="features-section">
-      <div class="section-inner">
-        <h2 class="section-title animate-on-scroll"><span class="title-accent"></span>平台特色</h2>
-        <p class="section-desc animate-on-scroll">为不同角色提供量身定制的功能体验</p>
-        <div class="features-grid">
-          <div class="feature-card animate-on-scroll" v-for="(feature, idx) in features" :key="idx" :style="{ animationDelay: (idx * 0.1) + 's' }">
-            <div class="feature-icon" :style="{ background: feature.gradient }">
-              <el-icon :size="36"><component :is="feature.icon" /></el-icon>
-            </div>
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.desc }}</p>
-            <div class="feature-tags">
-              <span class="feature-tag" v-for="tag in feature.tags" :key="tag">{{ tag }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="stats" class="stats-section">
-      <div class="section-inner">
-        <h2 class="section-title animate-on-scroll"><span class="title-accent"></span>数据概览</h2>
-        <p class="section-desc animate-on-scroll">平台运营核心数据</p>
-        <div class="stats-showcase">
-          <div class="stat-item animate-on-scroll" v-for="(stat, idx) in platformStats" :key="idx" :style="{ animationDelay: (idx * 0.1) + 's' }">
-            <div class="stat-number">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
-            <div class="stat-bar"><div class="stat-bar-fill" :style="{ background: stat.color }" :class="{ fill: data.statVisible }"></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="roles" class="roles-section">
-      <div class="section-inner">
-        <h2 class="section-title animate-on-scroll"><span class="title-accent"></span>多角色协作</h2>
-        <p class="section-desc animate-on-scroll">清晰的权限分级，各司其职</p>
-        <div class="roles-grid">
-          <div class="role-card animate-on-scroll" v-for="(role, idx) in roles" :key="idx" :style="{ animationDelay: (idx * 0.08) + 's' }">
-            <div class="role-icon-wrap" :style="{ background: role.gradient }"><span class="role-emoji">{{ role.emoji }}</span></div>
-            <div class="role-badge-text" :style="{ color: role.textColor }">{{ role.tag }}</div>
-            <h3>{{ role.title }}</h3>
-            <p>{{ role.desc }}</p>
-            <ul class="role-permissions">
-              <li v-for="perm in role.permissions" :key="perm">
-                <el-icon size="14" color="#67c23a"><CircleCheck /></el-icon><span>{{ perm }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
     </section>
 
     <section id="about" class="about-section">
       <div class="section-inner">
         <div class="about-content">
-          <h2 class="section-title animate-on-scroll"><span class="title-accent-light"></span>关于北冥平台</h2>
+          <h2 class="section-title animate-on-scroll"><span class="title-accent-light"></span>服务器介绍</h2>
           <p class="about-text animate-on-scroll">
-            北冥是一个专业的在线考试与成绩管理系统。平台致力于为组织提供公平、公正、高效的考核解决方案，
-            支持多种题型的灵活组卷、智能防作弊机制、多角色协同工作，以及全面的成绩统计分析。
+            北冥审核系统用于北冥群组服进服审核。玩家可在这里提交申请、参加建筑审核、后期审核、红石审核或普通(见习)审核，并查看审核结果。
           </p>
-          <div class="about-highlights animate-on-scroll">
-            <div class="highlight-item">
-              <el-icon :size="28" color="#667eea"><Lock /></el-icon>
-              <div>
-                <div class="highlight-title">安全可靠</div>
-                <div class="highlight-desc">严格的权限控制与数据加密</div>
-              </div>
-            </div>
-            <div class="highlight-item">
-              <el-icon :size="28" color="#43e97b"><Timer /></el-icon>
-              <div>
-                <div class="highlight-title">高效便捷</div>
-                <div class="highlight-desc">智能组卷与自动批阅系统</div>
-              </div>
-            </div>
-            <div class="highlight-item">
-              <el-icon :size="28" color="#fa709a"><DataAnalysis /></el-icon>
-              <div>
-                <div class="highlight-title">数据洞察</div>
-                <div class="highlight-desc">多维度成绩统计与可视化分析</div>
-              </div>
+          <div class="server-info animate-on-scroll">
+            <button class="info-card tech-card" type="button" @click="copyText('9950X / 48G / 三线直连')">
+              <div class="info-label">服务器配置</div>
+              <div class="info-text">9950X 物理机，48G 内存；电信、移动、联通三线直连。当前单线路全天候限速 1.5m/s，每天 20G 流量。</div>
+              <span class="card-action">点击复制配置</span>
+            </button>
+            <button class="info-card tech-card" type="button" @click="openLink(links.docs)">
+              <div class="info-label">开放内容</div>
+              <div class="info-text">原版 1.21.1 生电群组服已开放，包含镜像、虚空创造和小游戏服；整合包服按轮换机制开放。</div>
+              <span class="card-action">查看玩家指南</span>
+            </button>
+            <button class="info-card tech-card" type="button" @click="openLink(links.joinGuide)">
+              <div class="info-label">如何加入生电服</div>
+              <div class="info-text">跳转到生电群组服文档库第一篇文章，查看客户端、服务器地址和进服流程。</div>
+              <span class="card-action">打开加入教程</span>
+            </button>
+            <button class="info-card tech-card" type="button" @click="copyText('274350103')">
+              <div class="info-label">Oopz 语音频道</div>
+              <div class="info-text">北冥服在 Oopz 语音软件有频道，域 ID：274350103。</div>
+              <span class="card-action">点击复制域 ID</span>
+            </button>
+            <button class="info-card tech-card" type="button" @click="openLink(links.qqGroup)">
+              <div class="info-label">北冥大群</div>
+              <div class="info-text">北冥-群组服大群：1041762935。点击后跳转 QQ 入群页面。</div>
+              <span class="card-action">加入群聊</span>
+            </button>
+            <button class="info-card tech-card" type="button" @click="copyText('pd96073114')">
+              <div class="info-label">腾讯频道</div>
+              <div class="info-text">腾讯频道：pd96073114。复制频道号后在腾讯频道内搜索加入。</div>
+              <span class="card-action">点击复制频道号</span>
+            </button>
+            <div class="info-card wide rule-card">
+              <div class="info-label">游玩规则</div>
+              <div class="info-text">群内禁止发布不良内容。请友好交流，禁止破坏公平性的行为；发现问题请联系群主、管理员或对应服务器负责人。</div>
             </div>
           </div>
           <div class="about-links animate-on-scroll">
-            <a href="https://docs.beiming.games" target="_blank" class="about-link">
-              <el-icon><Link /></el-icon><span>访问文档库</span>
-            </a>
+            <button class="about-link" type="button" @click="openLink(links.joinGuide)">
+              <el-icon><Link /></el-icon><span>如何加入生电服</span>
+            </button>
+            <button class="about-link primary-link" type="button" @click="openLink(links.qqGroup)">
+              <span>加入北冥大群</span>
+            </button>
+            <button class="about-link" type="button" @click="copyText('274350103')">
+              <span>复制 Oopz 域 ID</span>
+            </button>
           </div>
         </div>
       </div>
@@ -192,19 +158,18 @@
           <div class="footer-brand-section">
             <img src="@/assets/imgs/logo.png" alt="Logo" class="footer-logo" />
             <div>
-              <div class="footer-brand">北冥</div>
-              <div class="footer-slogan">专业、公正、高效的在线考试平台</div>
+              <div class="footer-brand">北冥审核系统</div>
+              <div class="footer-slogan">服务器进服审核管理系统</div>
             </div>
           </div>
           <div class="footer-links">
             <a href="#hero" @click.prevent="scrollTo('hero')">首页</a>
-            <a href="#features" @click.prevent="scrollTo('features')">平台特色</a>
-            <a href="https://docs.beiming.games" target="_blank">文档库</a>
+            <a href="#about" @click.prevent="scrollTo('about')">服务器介绍</a>
           </div>
         </div>
         <div class="footer-divider"></div>
         <div class="footer-bottom">
-          <p class="footer-copy">&copy; {{ new Date().getFullYear() }} 北冥 All Rights Reserved</p>
+          <p class="footer-copy">&copy; {{ new Date().getFullYear() }} 北冥审核系统 All Rights Reserved</p>
         </div>
       </div>
     </footer>
@@ -220,7 +185,7 @@
 
 <script setup>
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
-import { EditPen, Document, DataAnalysis, Link, ArrowDown, CircleCheck, Lock, Timer } from '@element-plus/icons-vue'
+import { Link, ArrowDown } from '@element-plus/icons-vue'
 import LoginDialog from './Login.vue'
 import router from '@/router/index.js'
 import { ElMessage } from 'element-plus'
@@ -232,25 +197,11 @@ let spinAngle = 0
 let spinVelocity = 0
 let spinRaf = null
 
-const features = [
-  { title: '在线考试', desc: '支持单选、多选、判断、简答多种题型，灵活组卷，智能防作弊机制，为用户提供便捷的在线答题体验。', icon: EditPen, gradient: 'linear-gradient(135deg, #00b42a, #00d034)', tags: ['多题型支持', '自动保存', '实时计时'] },
-  { title: '智能阅卷', desc: '阅卷人可高效批阅试卷，系统自动统计分数，客观题自动评分，减少人工操作，提升阅卷效率。', icon: Document, gradient: 'linear-gradient(135deg, #409eff, #53a8ff)', tags: ['自动评分', '批量批阅', '成绩统计'] },
-  { title: '成绩管理', desc: '多维度成绩统计分析，直观的数据图表展示，通过率、平均分等核心指标一目了然，帮助管理者全面掌握考核情况。', icon: DataAnalysis, gradient: 'linear-gradient(135deg, #fa709a, #fee140)', tags: ['可视化分析', '通过率追踪', '成绩导出'] },
-]
-
-const platformStats = [
-  { value: '4', label: '角色权限', percent: 80, color: 'linear-gradient(90deg, #667eea, #764ba2)' },
-  { value: '4+', label: '题型支持', percent: 70, color: 'linear-gradient(90deg, #43e97b, #38f9d7)' },
-  { value: '6', label: '主题皮肤', percent: 90, color: 'linear-gradient(90deg, #fa709a, #fee140)' },
-  { value: '24h', label: '全天候服务', percent: 100, color: 'linear-gradient(90deg, #a18cd1, #fbc2eb)' },
-]
-
-const roles = [
-  { tag: 'Owner', title: '最高管理者', desc: '拥有平台所有权限，系统全局配置与管理', emoji: '👑', gradient: 'linear-gradient(135deg, #f5576c, #ff6b6b)', textColor: '#f5576c', permissions: ['全局系统配置', '用户角色管理', '数据备份恢复'] },
-  { tag: 'Helper', title: '管理员', desc: '管理用户、题目、考试等核心数据', emoji: '🛡️', gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)', textColor: '#4facfe', permissions: ['题库管理维护', '考试安排发布', '成绩统计分析'] },
-  { tag: '阅卷人', title: '阅卷批改', desc: '专注于试卷批阅与评分工作', emoji: '✏️', gradient: 'linear-gradient(135deg, #43e97b, #38f9d7)', textColor: '#059669', permissions: ['试卷批阅评分', '主观题评阅', '分数审核确认'] },
-  { tag: '用户', title: '参加考试', desc: '在线答题、查看成绩与考试结果', emoji: '📚', gradient: 'linear-gradient(135deg, #a18cd1, #fbc2eb)', textColor: '#9b59b6', permissions: ['在线答题考试', '刷题练习', '成绩查询'] },
-]
+const links = {
+  docs: 'https://docs.beiming.games',
+  joinGuide: 'https://docs.beiming.games/2-%E7%94%9F%E7%94%B5%E7%BE%A4%E7%BB%84%E6%9C%8D/2.1-%E5%A6%82%E4%BD%95%E5%8A%A0%E5%85%A5%E7%94%9F%E7%94%B5%E6%9C%8D.html',
+  qqGroup: 'https://qm.qq.com/q/QFk4wtZUoG',
+}
 
 const data = reactive({
   scrolled: false,
@@ -268,12 +219,10 @@ const data = reactive({
   isTyping: true,
   typeIndex: 0,
   typeTexts: [
-    '专业、公正、高效的在线考试与成绩管理系统',
-    '多角色协作，智能阅卷，全面数据统计',
-    '灵活组卷，多种题型，智能防作弊',
+    '服务器进服审核管理系统',
+    '提交申请，参加审核，查看结果',
   ],
   currentTextIdx: 0,
-  statVisible: false,
 })
 
 const startTypeEffect = () => {
@@ -386,6 +335,17 @@ const enterSystem = () => {
 
 const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }) }
 
+const openLink = (url) => window.open(url, '_blank', 'noopener,noreferrer')
+
+const copyText = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage.success('已复制：' + text)
+  } catch {
+    ElMessage.info(text)
+  }
+}
+
 const handleUserCommand = (cmd) => {
   if (cmd === 'manager') router.push('/manager/home')
   else if (cmd === 'front') router.push('/front/home')
@@ -401,8 +361,6 @@ const handleScroll = () => {
   document.querySelectorAll('.animate-on-scroll').forEach(el => {
     if (el.getBoundingClientRect().top < window.innerHeight * 0.85) el.classList.add('visible')
   })
-  const statsEl = document.getElementById('stats')
-  if (statsEl && statsEl.getBoundingClientRect().top < window.innerHeight * 0.8) data.statVisible = true
 }
 
 const loadBackgrounds = () => {
@@ -460,20 +418,30 @@ onUnmounted(() => {
 .hero-bg { position: absolute; inset: 0; z-index: 0; }
 .hero-bg-item { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 2s ease-in-out; }
 .hero-bg-item.active { opacity: 1; }
-.hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(135deg, rgba(29, 33, 41, 0.8) 0%, rgba(43, 47, 56, 0.7) 50%, rgba(0, 180, 42, 0.15) 100%); }
+.hero-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(135deg, rgba(29, 33, 41, 0.82) 0%, rgba(10, 20, 18, 0.72) 50%, rgba(0, 180, 42, 0.18) 100%); }
+.hero-grid { position: absolute; inset: 0; z-index: 2; pointer-events: none; background-image: linear-gradient(rgba(74,222,128,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.12) 1px, transparent 1px); background-size: 64px 64px; mask-image: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 80%); animation: gridDrift 18s linear infinite; }
+.hero-grid::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(74,222,128,0.16) 50%, transparent 100%); transform: translateY(-100%); animation: scanLine 5s ease-in-out infinite; }
+.hero-orbit { position: absolute; z-index: 2; border: 1px solid rgba(74,222,128,0.28); border-radius: 50%; pointer-events: none; filter: drop-shadow(0 0 14px rgba(74,222,128,0.18)); }
+.orbit-a { width: 440px; height: 440px; left: 8%; top: 20%; animation: orbitPulse 8s ease-in-out infinite; }
+.orbit-b { width: 260px; height: 260px; right: 12%; bottom: 14%; animation: orbitPulse 7s ease-in-out infinite reverse; }
+.hero-terminal { position: absolute; left: 7%; bottom: 12%; z-index: 3; width: 230px; padding: 14px 16px; border-radius: 16px; background: rgba(8, 18, 16, 0.58); border: 1px solid rgba(74,222,128,0.28); box-shadow: 0 18px 50px rgba(0,0,0,0.25), inset 0 0 30px rgba(74,222,128,0.05); backdrop-filter: blur(14px); }
+.terminal-line { display: flex; justify-content: space-between; gap: 16px; color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 1px; line-height: 1.9; }
+.terminal-line b { color: #4ade80; font-weight: 700; }
+@keyframes gridDrift { from { background-position: 0 0, 0 0; } to { background-position: 64px 64px, 64px 64px; } }
+@keyframes scanLine { 0%, 25% { transform: translateY(-100%); opacity: 0; } 45%, 55% { opacity: 1; } 80%, 100% { transform: translateY(100%); opacity: 0; } }
+@keyframes orbitPulse { 0%, 100% { transform: scale(1); opacity: 0.35; } 50% { transform: scale(1.08); opacity: 0.65; } }
 
 .hero-particles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .hero-particle { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.25); animation: heroFloat linear infinite; }
 @keyframes heroFloat { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.5; } 100% { transform: translateY(-100vh) scale(0.4); opacity: 0; } }
 
-.hero-content { position: relative; z-index: 3; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; }
-.hero-logo { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin-bottom: 30px; box-shadow: 0 0 40px rgba(0, 180, 42, 0.4), 0 0 80px rgba(0, 180, 42, 0.15); border: 3px solid rgba(255, 255, 255, 0.3); cursor: pointer; will-change: transform; transition: box-shadow 0.3s ease; }
-.hero-logo:hover { box-shadow: 0 0 60px rgba(0, 180, 42, 0.5), 0 0 100px rgba(0, 180, 42, 0.2); }
+.hero-content { position: relative; z-index: 4; text-align: center; color: #fff; display: flex; flex-direction: column; align-items: center; padding: 42px 54px; border-radius: 32px; background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 24px 80px rgba(0,0,0,0.28); backdrop-filter: blur(8px); }
+.hero-content::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: linear-gradient(135deg, rgba(74,222,128,0.6), rgba(96,165,250,0.2), transparent); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; pointer-events: none; }
+.hero-logo { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin-bottom: 30px; box-shadow: 0 0 40px rgba(0, 180, 42, 0.4), 0 0 80px rgba(0, 180, 42, 0.15); border: 3px solid rgba(255, 255, 255, 0.3); cursor: pointer; will-change: transform; transition: box-shadow 0.3s ease, filter 0.3s ease; }
+.hero-logo:hover { box-shadow: 0 0 60px rgba(0, 180, 42, 0.5), 0 0 100px rgba(0, 180, 42, 0.2); filter: saturate(1.15); }
 .hero-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; pointer-events: none; }
 
-.hero-title { font-size: 72px; font-weight: 800; letter-spacing: 12px; margin-bottom: 24px; display: flex; gap: 4px; }
-.title-char { display: inline-block; background: linear-gradient(135deg, #ffecd2, #fcb69f, #ff9a9e, #fecfef, #a18cd1, #fbc2eb, #ffecd2); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientMove 6s ease infinite, charBounce 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
-@keyframes charBounce { from { opacity: 0; transform: translateY(40px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.hero-title { font-size: 60px; font-weight: 700; letter-spacing: 6px; margin-bottom: 22px; color: #fff; text-shadow: 0 8px 28px rgba(0, 0, 0, 0.35); }
 
 .hero-subtitle { font-size: 18px; color: rgba(255, 255, 255, 0.85); margin-bottom: 40px; letter-spacing: 2px; min-height: 30px; }
 .typing-cursor { animation: blink 0.8s step-end infinite; color: rgba(255,255,255,0.7); }
@@ -493,60 +461,33 @@ onUnmounted(() => {
 .scroll-dot { width: 4px; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.8); animation: scrollDot 2s ease-in-out infinite; }
 @keyframes scrollDot { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(10px); opacity: 0.3; } }
 @keyframes scrollHintBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
-@keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-.features-section { padding: 120px 30px; background: #f7f8fa; }
 .section-inner { max-width: 1100px; margin: 0 auto; }
 .section-title { text-align: center; font-size: 36px; font-weight: 800; color: #1a1a2e; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-.title-accent { width: 40px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #00b42a, #00d034); }
 .title-accent-light { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.5); }
-.section-desc { text-align: center; color: #888; font-size: 16px; margin-bottom: 60px; }
 
-.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-.feature-card { background: #fff; border-radius: 16px; padding: 40px 30px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-.feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1); }
-.feature-icon { width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; transition: transform 0.3s ease; }
-.feature-card:hover .feature-icon { transform: scale(1.08) rotate(3deg); }
-.feature-card h3 { font-size: 20px; color: #1a1a2e; margin-bottom: 12px; font-weight: 700; }
-.feature-card p { color: #777; line-height: 1.8; font-size: 14px; margin-bottom: 16px; }
-.feature-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-.feature-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; background: #e6f7eb; color: #00b42a; font-weight: 500; }
-
-.stats-section { padding: 100px 30px; background: #fff; }
-.stats-showcase { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.stat-item { text-align: center; padding: 32px 20px; border-radius: 16px; background: var(--bg-page); transition: all 0.3s ease; }
-.stat-item:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
-.stat-number { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #00b42a, #00d034); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
-.stat-label { font-size: 15px; color: #666; margin-bottom: 16px; font-weight: 500; }
-.stat-bar { height: 4px; background: #e8e8e8; border-radius: 2px; overflow: hidden; margin: 0 auto; max-width: 80px; }
-.stat-bar-fill { height: 100%; border-radius: 2px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1); width: 0; }
-.stat-bar-fill.fill { width: 80%; }
-
-.roles-section { padding: 120px 30px; background: #f7f8fa; }
-.roles-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.role-card { background: #fff; border-radius: 16px; padding: 32px 24px; text-align: center; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(0,0,0,0.04); position: relative; overflow: hidden; }
-.role-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08); }
-.role-icon-wrap { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; transition: transform 0.3s; }
-.role-card:hover .role-icon-wrap { transform: scale(1.1); }
-.role-emoji { font-size: 28px; }
-.role-badge-text { font-size: 12px; font-weight: 700; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
-.role-card h3 { font-size: 17px; color: #1a1a2e; margin-bottom: 8px; font-weight: 700; }
-.role-card p { font-size: 13px; color: #999; line-height: 1.6; margin-bottom: 16px; }
-.role-permissions { list-style: none; padding: 0; margin: 0; text-align: left; display: flex; flex-direction: column; gap: 6px; }
-.role-permissions li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
-
-.about-section { padding: 120px 30px; background: linear-gradient(135deg, #1d2129 0%, #2b2f38 50%, #1d2129 100%); }
+.about-section { position: relative; padding: 120px 30px; overflow: hidden; background: radial-gradient(circle at 15% 20%, rgba(74,222,128,0.16), transparent 28%), radial-gradient(circle at 85% 12%, rgba(96,165,250,0.14), transparent 26%), linear-gradient(135deg, #10151f 0%, #1d2129 48%, #101820 100%); }
+.about-section::before { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.06) 45%, transparent 60%); transform: translateX(-100%); animation: sectionSweep 10s ease-in-out infinite; pointer-events: none; }
 .about-section .section-title { color: #fff; }
-.about-content { max-width: 700px; margin: 0 auto; text-align: center; }
-.about-text { color: rgba(255, 255, 255, 0.8); font-size: 16px; line-height: 2; margin-bottom: 40px; }
-.about-highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
-.highlight-item { display: flex; align-items: flex-start; gap: 12px; text-align: left; padding: 20px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
-.highlight-item:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
-.highlight-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-.highlight-desc { font-size: 12px; color: rgba(255,255,255,0.6); }
-.about-links { display: flex; justify-content: center; gap: 20px; }
-.about-link { display: flex; align-items: center; gap: 8px; color: #fff; padding: 12px 28px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 25px; transition: all 0.3s; font-weight: 500; }
-.about-link:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.5); transform: translateY(-2px); }
+@keyframes sectionSweep { 0%, 35% { transform: translateX(-100%); } 65%, 100% { transform: translateX(100%); } }
+.about-content { max-width: 860px; margin: 0 auto; text-align: center; }
+.about-text { color: rgba(255, 255, 255, 0.82); font-size: 16px; line-height: 2; margin-bottom: 34px; }
+.server-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 34px; }
+.info-card { position: relative; overflow: hidden; text-align: left; padding: 20px 22px; border-radius: 18px; background: rgba(255,255,255,0.065); border: 1px solid rgba(255,255,255,0.1); color: inherit; font: inherit; }
+.tech-card { cursor: pointer; transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, background 0.28s ease; }
+.tech-card::before { content: ''; position: absolute; inset: -1px; background: linear-gradient(120deg, transparent, rgba(74,222,128,0.28), transparent); transform: translateX(-120%); transition: transform 0.55s ease; }
+.tech-card:hover { transform: translateY(-6px) scale(1.01); border-color: rgba(74,222,128,0.38); background: rgba(255,255,255,0.09); box-shadow: 0 18px 46px rgba(0,0,0,0.25), 0 0 26px rgba(74,222,128,0.08); }
+.tech-card:hover::before { transform: translateX(120%); }
+.info-card.wide { grid-column: 1 / -1; }
+.info-label { position: relative; color: #fff; font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.info-label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.8); }
+.info-text { position: relative; color: rgba(255,255,255,0.68); font-size: 13px; line-height: 1.8; }
+.card-action { position: relative; display: inline-flex; margin-top: 14px; color: #86efac; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+.rule-card { background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(74,222,128,0.05)); }
+.about-links { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.about-link { display: flex; align-items: center; gap: 8px; color: #fff; padding: 12px 24px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 999px; transition: all 0.3s; font-weight: 500; background: rgba(255,255,255,0.04); cursor: pointer; }
+.about-link:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.5); transform: translateY(-3px); box-shadow: 0 12px 34px rgba(0,0,0,0.22); }
+.primary-link { border-color: rgba(74,222,128,0.48); background: linear-gradient(135deg, rgba(0,180,42,0.35), rgba(74,222,128,0.16)); }
 
 .footer { background: #0a0a1a; padding: 48px 30px 24px; }
 .footer-content { max-width: 1100px; margin: 0 auto; }
@@ -555,9 +496,9 @@ onUnmounted(() => {
 .footer-logo { width: 36px; height: 36px; border-radius: 50%; }
 .footer-brand { color: #fff; font-weight: bold; font-size: 18px; }
 .footer-slogan { color: #555; font-size: 13px; margin-top: 2px; }
-.footer-links { display: flex; gap: 24px; }
-.footer-links a { color: #777; font-size: 14px; transition: color 0.3s; }
-.footer-links a:hover { color: #fff; }
+.footer-links { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.footer-links a, .footer-links button { color: #777; font-size: 14px; transition: color 0.3s; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; }
+.footer-links a:hover, .footer-links button:hover { color: #fff; }
 .footer-divider { height: 1px; background: #1a1a2e; margin-bottom: 20px; }
 .footer-bottom { text-align: center; }
 .footer-copy { color: #444; font-size: 13px; }
@@ -568,16 +509,16 @@ onUnmounted(() => {
 .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 900px) {
-  .features-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
-  .roles-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-showcase { grid-template-columns: repeat(2, 1fr); }
-  .about-highlights { grid-template-columns: 1fr; }
-  .hero-title { font-size: 48px; letter-spacing: 6px; }
+  .server-info { grid-template-columns: 1fr; }
+  .hero-title { font-size: 48px; letter-spacing: 4px; }
+  .hero-terminal, .hero-orbit { display: none; }
+  .hero-content { padding: 34px 28px; }
 }
 @media (max-width: 600px) {
-  .roles-grid { grid-template-columns: 1fr; }
-  .stats-showcase { grid-template-columns: 1fr; }
   .nav-center { display: none; }
-  .hero-title { font-size: 40px; }
+  .hero-title { font-size: 38px; letter-spacing: 2px; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-btn { width: 100%; }
+  .footer-top { flex-direction: column; gap: 18px; align-items: flex-start; }
 }
 </style>

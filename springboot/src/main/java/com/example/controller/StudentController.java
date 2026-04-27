@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 学生前端请求接口
+ * 玩家前端请求接口
  */
 @RestController
 @RequestMapping("/student")

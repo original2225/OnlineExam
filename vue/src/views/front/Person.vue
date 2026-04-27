@@ -5,6 +5,7 @@
       <div class="person-sidebar">
         <el-upload
           :action="baseUrl + '/files/upload'"
+          :headers="uploadHeaders"
           :on-success="handleFileUpload"
           :on-error="handleFileError"
           :show-file-list="false"
@@ -23,7 +24,7 @@
         <div class="person-stats">
           <div class="person-stat-item">
             <div class="stat-val">{{ data.stats.completed }}</div>
-            <div class="stat-lbl">已参加考试</div>
+            <div class="stat-lbl">已参加审核</div>
           </div>
           <div class="person-stat-item">
             <div class="stat-val">{{ data.stats.avg }}</div>
@@ -140,8 +141,10 @@
 import { reactive, ref, onMounted } from "vue";
 import request from "@/utils/request.js";
 import { ElMessage } from "element-plus";
+import { getUploadHeaders } from '@/utils/upload.js';
 
 const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
@@ -206,8 +209,8 @@ const rules = {
 }
 
 const getRoleLabel = (role) => {
-  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '用户' }
-  return map[role] || '用户'
+  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }
+  return map[role] || '玩家'
 }
 
 const handleFileUpload = (res) => {
@@ -234,7 +237,9 @@ const update = () => {
 
     const api = data.user.role === 'USER'
       ? '/student/update'
-      : '/admin/update'
+      : data.user.role === 'HELPER'
+        ? '/examiner/update'
+        : '/admin/update'
 
     request.put(api, payload).then(res => {
       if (res.code === '200') {

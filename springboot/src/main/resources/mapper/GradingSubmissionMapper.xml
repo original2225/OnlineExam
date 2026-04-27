@@ -24,6 +24,10 @@
             <if test="graderRole != null">grader_role,</if>
             <if test="manualScore != null">manual_score,</if>
             <if test="totalScore != null">total_score,</if>
+            <if test="performanceScore != null">performance_score,</if>
+            <if test="advisoryVote != null">advisory_vote,</if>
+            <if test="rejectionReasons != null">rejection_reasons,</if>
+            <if test="customReason != null">custom_reason,</if>
             <if test="comment != null">comment,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -34,6 +38,10 @@
             <if test="graderRole != null">#{graderRole},</if>
             <if test="manualScore != null">#{manualScore},</if>
             <if test="totalScore != null">#{totalScore},</if>
+            <if test="performanceScore != null">#{performanceScore},</if>
+            <if test="advisoryVote != null">#{advisoryVote},</if>
+            <if test="rejectionReasons != null">#{rejectionReasons},</if>
+            <if test="customReason != null">#{customReason},</if>
             <if test="comment != null">#{comment},</if>
         </trim>
     </insert>

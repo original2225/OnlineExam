@@ -16,7 +16,7 @@
     <div class="ach-filter">
       <el-radio-group v-model="data.activeCategory" size="large">
         <el-radio-button label="all">全部</el-radio-button>
-        <el-radio-button label="exam">考试</el-radio-button>
+        <el-radio-button label="exam">审核</el-radio-button>
         <el-radio-button label="practice">练习</el-radio-button>
         <el-radio-button label="checkin">打卡</el-radio-button>
         <el-radio-button label="social">社交</el-radio-button>
@@ -149,7 +149,7 @@ const showAchDetail = (ach) => {
 }
 
 const categoryLabel = (cat) => {
-  const map = { exam: '考试', practice: '练习', checkin: '打卡', social: '社交' }
+  const map = { exam: '审核', practice: '模拟', checkin: '打卡', social: '互动' }
   return map[cat] || cat
 }
 

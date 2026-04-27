@@ -1,15 +1,15 @@
 <template>
   <div class="main-content">
-    <!-- 未选择学科：展示学科卡片网格 -->
+    <!-- 未选择审核库：展示审核库卡片网格 -->
     <template v-if="!currentSubject">
       <div class="page-hero">
         <div class="page-hero-icon">📚</div>
-        <div class="page-hero-title">题库中心</div>
-        <div class="page-hero-subtitle">按学科分类浏览题目，开启你的学习之旅</div>
+        <div class="page-hero-title">审核题库</div>
+        <div class="page-hero-subtitle">按建筑、后期、红石、普通(见习)四项浏览进服审核内容</div>
         <div class="page-hero-stats">
           <div class="page-hero-stat">
             <div class="page-hero-stat-val">{{ data.subjects.length }}</div>
-            <div class="page-hero-stat-lbl">学科</div>
+            <div class="page-hero-stat-lbl">审核库</div>
           </div>
           <div class="page-hero-stat-div"></div>
           <div class="page-hero-stat">
@@ -27,7 +27,7 @@
       <!-- 搜索和排序 -->
       <div class="card" style="margin-bottom: 20px">
         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <el-input v-model="data.searchText" prefix-icon="Search" placeholder="搜索学科..." style="width: 260px" clearable />
+          <el-input v-model="data.searchText" prefix-icon="Search" placeholder="搜索审核方向..." style="width: 260px" clearable />
           <el-radio-group v-model="data.sortMode" size="small">
             <el-radio-button value="default">默认</el-radio-button>
             <el-radio-button value="questions">题目数</el-radio-button>
@@ -53,7 +53,7 @@
       <div v-else-if="filteredSubjects.length === 0" class="card">
         <div class="empty-state">
           <div class="empty-icon">🔍</div>
-          <div class="empty-text">{{ data.searchText ? '未找到匹配的学科' : '暂无学科分类' }}</div>
+          <div class="empty-text">{{ data.searchText ? '未找到匹配的审核方向' : '暂无审核分类' }}</div>
         </div>
       </div>
 
@@ -121,9 +121,9 @@
       </div>
     </template>
 
-    <!-- 选择了学科：展示子分类和考试 -->
+    <!-- 选择了审核库：展示子分类和审核 -->
     <template v-else>
-      <!-- 学科头部信息 -->
+      <!-- 审核库头部信息 -->
       <div class="page-hero" style="text-align: left; padding: 40px 48px;">
         <div style="display: flex; align-items: center; gap: 16px; position: relative; z-index: 1;">
           <div class="sli-icon" :style="{ background: getSubjectColor(currentSubject.icon), width: '56px', height: '56px' }">
@@ -133,12 +133,12 @@
           </div>
           <div>
             <div class="page-hero-title" style="text-align: left; margin-bottom: 4px;">{{ currentSubject.name }}</div>
-            <div class="page-hero-subtitle" style="margin: 0;">{{ currentSubject.description || '欢迎来到这个学科' }}</div>
+            <div class="page-hero-subtitle" style="margin: 0;">{{ currentSubject.description || '欢迎来到进服审核题库' }}</div>
           </div>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px; position: relative; z-index: 1;">
           <el-button type="primary" round @click="startPracticeForSubject">
-            <el-icon><EditPen /></el-icon> 开始刷题
+            <el-icon><EditPen /></el-icon> 查看审核题
           </el-button>
           <el-button round @click="goBack" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); color: #fff;">
             <el-icon><ArrowLeft /></el-icon> 返回
@@ -167,20 +167,20 @@
             </div>
             <div class="sub-info">
               <div class="sub-name">{{ child.name }}</div>
-              <div class="sub-count">{{ child.description || '点击查看相关考试' }}</div>
+              <div class="sub-count">{{ child.description || '点击查看相关审核' }}</div>
             </div>
             <el-icon v-if="data.selectedCategoryId === child.id" color="#409eff" :size="16" style="margin-left: auto;"><Check /></el-icon>
           </div>
         </div>
       </div>
 
-      <!-- 考试列表 -->
+      <!-- 审核列表 -->
       <div class="card">
         <div class="section-header">
           <div class="section-title">
-            {{ data.selectedCategoryName || '全部考试' }}
+            {{ data.selectedCategoryName || '全部审核' }}
             <span style="font-size: 13px; font-weight: normal; color: var(--text-secondary); margin-left: 8px;">
-              ({{ filteredExams.length }} 场考试)
+              ({{ filteredExams.length }} 场审核)
             </span>
           </div>
           <el-button size="small" circle @click="loadExams" :loading="data.loadingExams">
@@ -222,13 +222,13 @@
 
         <div v-if="data.loadingExams" class="empty-state">
           <el-icon class="spin" :size="28"><Loading /></el-icon>
-          <div style="margin-top: 8px;">加载考试列表...</div>
+          <div style="margin-top: 8px;">加载审核列表...</div>
         </div>
         <div v-else-if="filteredExams.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
-          <div class="empty-text">该分类下暂无考试</div>
+          <div class="empty-text">该分类下暂无审核</div>
           <el-button type="primary" size="small" round style="margin-top: 12px;" @click="startPracticeForSubject">
-            <el-icon><EditPen /></el-icon> 先去刷题吧
+            <el-icon><EditPen /></el-icon> 查看审核题
           </el-button>
         </div>
         <div v-else class="exam-card-list">
@@ -269,7 +269,7 @@
                 round
                 @click="startExam(exam)"
               >
-                <el-icon><VideoPlay /></el-icon> 进入考试
+                <el-icon><VideoPlay /></el-icon> 进入审核
               </el-button>
               <el-button
                 v-else-if="getExamStatus(exam) === 'notStarted'"
@@ -370,7 +370,7 @@ const currentSubject = computed(() => {
 
 const filteredExams = computed(() => {
   let list = data.exams
-  // 按学科筛选
+  // 按审核库筛选
   if (data.currentSubjectId) {
     const subject = currentSubject.value
     const catIds = subject?.children?.map(c => c.id) || []
@@ -378,7 +378,7 @@ const filteredExams = computed(() => {
       if (!e.categoryId) return false
       // categoryId 直接匹配子分类
       if (catIds.includes(e.categoryId)) return true
-      // 或者 categoryId 就是学科本身
+      // 或者 categoryId 就是审核库本身
       return e.categoryId === data.currentSubjectId
     })
   }
@@ -481,10 +481,7 @@ const startExam = (exam) => {
 }
 
 const startPracticeForSubject = () => {
-  const query = {}
-  if (data.selectedCategoryId) query.categoryId = data.selectedCategoryId
-  else if (data.currentSubjectId) query.categoryId = data.currentSubjectId
-  router.push({ path: '/front/practiceMode', query })
+  router.push('/front/examList')
 }
 
 const loadSubjects = () => {
@@ -700,7 +697,7 @@ export default { name: 'SubjectBrowse' }
   color: var(--primary-color);
 }
 
-/* 筛选和考试卡片样式 */
+/* 筛选和审核卡片样式 */
 .filter-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .filter-tag {
   padding: 6px 16px; border-radius: 20px; font-size: 13px;

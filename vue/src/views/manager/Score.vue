@@ -3,7 +3,7 @@
     <!-- 顶部筛选栏 -->
     <div class="score-filter-bar">
       <div class="filter-left">
-        <el-select v-model="data.examId" placeholder="选择考试筛选" style="width: 240px" clearable @change="onExamChange">
+        <el-select v-model="data.examId" placeholder="选择审核筛选" style="width: 240px" clearable @change="onExamChange">
           <el-option v-for="exam in data.exams" :key="exam.id" :label="exam.name" :value="exam.id" />
         </el-select>
         <el-button type="primary" @click="load" :icon="Search">查询</el-button>
@@ -69,13 +69,13 @@
       </div>
     </div>
 
-    <!-- 成绩列表 -->
+    <!-- 结果列表 -->
     <div class="score-table-card">
       <div class="table-header">
-        <span class="table-title">成绩列表</span>
+        <span class="table-title">结果列表</span>
       </div>
       <el-table stripe :data="data.tableData" style="width: 100%">
-        <el-table-column prop="studentName" label="考生" width="120">
+        <el-table-column prop="studentName" label="玩家" width="120">
           <template v-slot="scope">
             <div style="display: flex; align-items: center; gap: 8px;">
               <div class="student-avatar">{{ (scope.row.studentName || '?')[0] }}</div>
@@ -84,7 +84,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="studentNo" label="编号" width="100" />
-        <el-table-column prop="examName" label="考试名称" show-overflow-tooltip />
+        <el-table-column prop="examName" label="审核名称" show-overflow-tooltip />
         <el-table-column label="总分" width="100" sortable sort-by="totalScore">
           <template v-slot="scope">
             <div class="score-badge" :class="getScoreClass(scope.row.totalScore)">
@@ -118,11 +118,11 @@
     <el-dialog v-model="data.detailDialogVisible" width="65%" destroy-on-close>
       <template #header>
         <div class="dialog-header">
-          <span class="dialog-title">考试成绩详情</span>
+          <span class="dialog-title">审核结果详情</span>
         </div>
       </template>
       <div v-if="data.currentRecord">
-        <!-- 考生信息卡片 -->
+        <!-- 玩家信息卡片 -->
         <div class="detail-info-card">
           <div class="detail-avatar">{{ (data.currentRecord.studentName || '?')[0] }}</div>
           <div class="detail-meta">
@@ -163,7 +163,7 @@
             </div>
             <div class="answer-content">{{ answer.question?.content }}</div>
             <div class="answer-row">
-              <span class="answer-label">考生答案：</span>
+              <span class="answer-label">玩家答案：</span>
               <span class="answer-value">{{ answer.studentAnswer || '未作答' }}</span>
             </div>
             <div class="answer-row" v-if="answer.question?.answer">
@@ -239,7 +239,7 @@ const loadStatistics = () => {
 
 const load = () => {
   if (!data.examId) {
-    ElMessage.warning('请先选择考试');
+    ElMessage.warning('请先选择审核');
     return;
   }
   request.get('/score/selectPage', {
@@ -397,7 +397,7 @@ loadExams();
   color: #999;
 }
 
-/* 成绩表格 */
+/* 结果表格 */
 .score-table-card {
   background: #fff;
   border-radius: 12px;

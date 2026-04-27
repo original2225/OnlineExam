@@ -12,20 +12,20 @@
           </svg>
         </div>
         <div class="hero-text">
-          <h1>考试管理</h1>
-          <p>创建与管理系统考试，支持统一考试与常驻考试两种模式</p>
+          <h1>审核管理</h1>
+          <p>创建与管理入服审核，支持统一审核与常驻审核两种模式</p>
         </div>
       </div>
       <div class="hero-right">
         <el-button type="primary" size="large" round @click="handleAdd">
-          <el-icon><Plus /></el-icon> 新建考试
+          <el-icon><Plus /></el-icon> 新建审核
         </el-button>
       </div>
     </div>
 
     <!-- 统计卡片 -->
     <div class="stats-grid">
-      <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.total }}</div><div class="stat-label">考试总数</div></div></div>
+      <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.total }}</div><div class="stat-label">审核总数</div></div></div>
       <div class="stat-card stat-published"><div class="stat-inner"><div class="stat-num">{{ publishedCount }}</div><div class="stat-label">已发布</div></div></div>
       <div class="stat-card stat-ongoing"><div class="stat-inner"><div class="stat-num">{{ ongoingCount }}</div><div class="stat-label">进行中</div></div></div>
       <div class="stat-card stat-finished"><div class="stat-inner"><div class="stat-num">{{ finishedCount }}</div><div class="stat-label">已结束</div></div></div>
@@ -36,7 +36,7 @@
       <div class="toolbar-left">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-input v-model="data.name" placeholder="搜索考试名称..." clearable @keyup.enter="load" @clear="load" class="search-input" />
+          <el-input v-model="data.name" placeholder="搜索审核名称..." clearable @keyup.enter="load" @clear="load" class="search-input" />
         </div>
         <el-select v-model="data.status" placeholder="状态" @change="load" class="filter-sel" clearable>
           <template #prefix><el-icon><Filter /></el-icon></template>
@@ -46,10 +46,10 @@
           <el-option label="已结束" value="finished" />
           <el-option label="已取消" value="cancelled" />
         </el-select>
-        <el-select v-model="data.examType" placeholder="考试类型" @change="load" class="filter-sel" clearable>
+        <el-select v-model="data.examType" placeholder="审核类型" @change="load" class="filter-sel" clearable>
           <template #prefix><el-icon><Document /></el-icon></template>
-          <el-option label="统一考试" value="scheduled" />
-          <el-option label="常驻考试" value="permanent" />
+          <el-option label="统一审核" value="scheduled" />
+          <el-option label="常驻审核" value="permanent" />
         </el-select>
         <el-button plain @click="reset" class="reset-btn">重置</el-button>
       </div>
@@ -57,18 +57,18 @@
         <el-button type="danger" plain size="small" :disabled="!data.ids.length" @click="delBatch" class="batch-del">
           <el-icon><Delete /></el-icon> 批量删除 {{ data.ids.length ? `(${data.ids.length})` : '' }}
         </el-button>
-        <span class="total-tip">共 <strong>{{ data.total }}</strong> 场考试</span>
+        <span class="total-tip">共 <strong>{{ data.total }}</strong> 场审核</span>
       </div>
     </div>
 
-    <!-- 考试列表卡片 -->
+    <!-- 审核列表卡片 -->
     <div class="table-card">
       <el-table :data="data.tableData" stripe v-loading="data.loading" row-key="id"
         :header-cell-style="{ background: 'var(--el-fill-color-light)', color: 'var(--el-text-color-primary)', fontWeight: '600' }"
         @selection-change="handleSelectionChange" class="exam-table">
         <el-table-column type="selection" width="45" />
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="name" label="考试名称" min-width="180" show-overflow-tooltip>
+        <el-table-column prop="name" label="审核名称" min-width="180" show-overflow-tooltip>
           <template #default="scope">
             <span class="exam-name" @click="handleEdit(scope.row)">{{ scope.row.name }}</span>
           </template>
@@ -122,21 +122,21 @@
       </div>
     </div>
 
-    <!-- 考试表单对话框 -->
-    <el-dialog :title="data.form.id ? '编辑考试' : '新建考试'" v-model="data.formVisible" width="55%" class="exam-dialog" destroy-on-close>
+    <!-- 审核表单对话框 -->
+    <el-dialog :title="data.form.id ? '编辑审核' : '新建审核'" v-model="data.formVisible" width="55%" class="exam-dialog" destroy-on-close>
       <el-form :model="data.form" label-width="110px" style="padding: 8px 0">
-        <el-form-item label="考试名称">
-          <el-input v-model="data.form.name" placeholder="请输入考试名称" maxlength="80" show-word-limit />
+        <el-form-item label="审核名称">
+          <el-input v-model="data.form.name" placeholder="请输入审核名称" maxlength="80" show-word-limit />
         </el-form-item>
-        <el-form-item label="考试类型">
+        <el-form-item label="审核类型">
           <el-radio-group v-model="data.form.examType">
             <el-radio value="scheduled">
-              <span class="radio-label">统一考试</span>
+              <span class="radio-label">统一审核</span>
               <span class="radio-desc">规定开始结束时间</span>
             </el-radio>
             <el-radio value="permanent">
-              <span class="radio-label">常驻考试</span>
-              <span class="radio-desc">用户随时可参加</span>
+              <span class="radio-label">常驻审核</span>
+              <span class="radio-desc">玩家随时可参加</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -152,8 +152,8 @@
             <el-option label="建筑" value="建筑" />
           </el-select>
         </el-form-item>
-        <el-form-item label="考试描述">
-          <el-input v-model="data.form.description" type="textarea" :rows="2" placeholder="请输入考试描述" />
+        <el-form-item label="审核描述">
+          <el-input v-model="data.form.description" type="textarea" :rows="2" placeholder="请输入审核描述" />
         </el-form-item>
         <template v-if="data.form.examType === 'scheduled'">
           <el-form-item label="开始时间">
@@ -163,7 +163,7 @@
             <el-date-picker v-model="data.form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm:ss" />
           </el-form-item>
         </template>
-        <el-form-item label="考试时长(分钟)">
+        <el-form-item label="审核时长(分钟)">
           <el-input-number v-model="data.form.duration" :min="1" :max="600" :step="10" style="width: 100%" />
         </el-form-item>
         <template v-if="data.form.examType === 'scheduled'">
@@ -182,22 +182,22 @@
     </el-dialog>
 
     <!-- 权限设置对话框 -->
-    <el-dialog title="设置考试权限" v-model="data.permissionDialogVisible" width="65%" destroy-on-close>
+    <el-dialog title="设置审核权限" v-model="data.permissionDialogVisible" width="65%" destroy-on-close>
       <div class="perm-toolbar">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-input v-model="data.studentSearch" placeholder="搜索用户姓名或编号..." clearable @keyup.enter="loadStudents" class="search-input" />
+          <el-input v-model="data.studentSearch" placeholder="搜索玩家姓名或编号..." clearable @keyup.enter="loadStudents" class="search-input" />
         </div>
         <el-button type="info" plain @click="loadStudents">查询</el-button>
         <el-button type="warning" plain @click="resetStudentSearch">重置</el-button>
       </div>
       <div class="perm-info">
         <el-icon><InfoFilled /></el-icon>
-        当前有 <strong>{{ data.currentPermissions.length }}</strong> 名用户有权限参考
+        当前有 <strong>{{ data.currentPermissions.length }}</strong> 名玩家有权限参加审核
       </div>
       <div class="perm-add">
         <el-button type="success" plain :disabled="!data.selectedStudents.length" @click="addSelectedStudents">
-          <el-icon><Plus /></el-icon> 添加选中用户
+          <el-icon><Plus /></el-icon> 添加选中玩家
         </el-button>
       </div>
       <el-table stripe :data="data.studentList" @selection-change="handleStudentSelection" max-height="380">
@@ -220,7 +220,7 @@
         <el-icon><WarningFilled /></el-icon>
         <div>
           <div class="tip-title">补考说明</div>
-          <div class="tip-desc">将基于「{{ data.makeupExam?.name }}」的试卷创建补考，选择的用户可以参加</div>
+          <div class="tip-desc">将基于「{{ data.makeupExam?.name }}」的试卷创建补审，选择的玩家可以参加</div>
         </div>
       </div>
       <el-form label-width="90px" style="margin-top: 16px;">
@@ -229,12 +229,12 @@
           <span style="margin: 0 10px; color: #999;">至</span>
           <el-date-picker v-model="data.makeupEndTime" type="datetime" placeholder="结束时间" style="width: 38%" format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm:ss" />
         </el-form-item>
-        <el-form-item label="考试时长">
+        <el-form-item label="审核时长">
           <el-input-number v-model="data.makeupDuration" :min="5" :max="600" :step="10" style="width: 38%" />
           <span style="margin-left: 8px; color: #999;">分钟</span>
         </el-form-item>
       </el-form>
-      <el-divider content-position="left"><el-icon><User /></el-icon> 选择补考学生</el-divider>
+      <el-divider content-position="left"><el-icon><User /></el-icon> 选择补审玩家</el-divider>
       <div style="margin-bottom: 10px;">
         <div class="search-wrap" style="width: 220px;">
           <el-icon class="s-icon"><Search /></el-icon>
@@ -307,25 +307,25 @@ const handleAdd = () => { data.form = { duration: 120, allowLate: false, examTyp
 const handleEdit = (row) => { data.form = JSON.parse(JSON.stringify(row)); if (!data.form.examType) data.form.examType = 'scheduled'; data.formVisible = true }
 const save = () => { (data.form.id ? request.put('/exam/update', data.form) : request.post('/exam/add', data.form)).then(res => { if (res.code === '200') { ElMessage.success('操作成功'); data.formVisible = false; load() } else ElMessage.error(res.msg) }) }
 const del = (id) => { ElMessageBox.confirm('删除后数据无法恢复，确定删除吗？', '删除确认', { type: 'warning' }).then(() => { request.delete('/exam/delete/' + id).then(res => { if (res.code === '200') { ElMessage.success('删除成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
-const delBatch = () => { if (!data.ids.length) return; ElMessageBox.confirm('删除后数据无法恢复，确定删除选中的考试吗？', '批量删除', { type: 'warning' }).then(() => { request.delete('/exam/delete/batch', { data: data.ids }).then(res => { if (res.code === '200') { ElMessage.success('批量删除成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
+const delBatch = () => { if (!data.ids.length) return; ElMessageBox.confirm('删除后数据无法恢复，确定删除选中的审核吗？', '批量删除', { type: 'warning' }).then(() => { request.delete('/exam/delete/batch', { data: data.ids }).then(res => { if (res.code === '200') { ElMessage.success('批量删除成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
 const handleSelectionChange = (rows) => { data.ids = rows.map(v => v.id) }
 const reset = () => { data.name = null; data.status = null; data.examType = null; data.pageNum = 1; load() }
 const handleSizeChange = (size) => { data.pageSize = size; load() }
 const handleCurrentChange = (page) => { data.pageNum = page; load() }
-const publishExam = (id) => { ElMessageBox.confirm('发布后用户将可以看到并参加考试，确定发布吗？', '发布确认', { type: 'warning' }).then(() => { request.put('/exam/publish/' + id).then(res => { if (res.code === '200') { ElMessage.success('发布成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
-const cancelExam = (id) => { ElMessageBox.confirm('取消后用户将无法参加考试，确定取消吗？', '取消确认', { type: 'warning' }).then(() => { request.put('/exam/cancel/' + id).then(res => { if (res.code === '200') { ElMessage.success('取消成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
+const publishExam = (id) => { ElMessageBox.confirm('发布后玩家将可以看到并参加审核，确定发布吗？', '发布确认', { type: 'warning' }).then(() => { request.put('/exam/publish/' + id).then(res => { if (res.code === '200') { ElMessage.success('发布成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
+const cancelExam = (id) => { ElMessageBox.confirm('取消后玩家将无法参加审核，确定取消吗？', '取消确认', { type: 'warning' }).then(() => { request.put('/exam/cancel/' + id).then(res => { if (res.code === '200') { ElMessage.success('取消成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
 
 const handlePermissions = (row) => { data.currentExamId = row.id; data.permissionDialogVisible = true; data.studentPageNum = 1; data.selectedStudents = []; loadStudents(); loadCurrentPermissions() }
 const loadStudents = () => { request.get('/student/selectPage', { params: { pageNum: data.studentPageNum, pageSize: data.studentPageSize, name: data.studentSearch } }).then(res => { if (res.code === '200') { data.studentList = res.data?.list || []; data.studentTotal = res.data?.total } }) }
 const resetStudentSearch = () => { data.studentSearch = null; loadStudents() }
 const handleStudentSelection = (rows) => { data.selectedStudents = rows }
 const loadCurrentPermissions = () => { request.get('/exam/getPermissions/' + data.currentExamId).then(res => { if (res.code === '200') data.currentPermissions = res.data || [] }) }
-const addSelectedStudents = () => { if (!data.selectedStudents.length) { ElMessage.warning('请选择要添加的用户'); return }; const studentIds = data.selectedStudents.map(s => s.id); request.post('/exam/setPermissions?examId=' + data.currentExamId, studentIds).then(res => { if (res.code === '200') { ElMessage.success('添加成功'); data.selectedStudents = []; loadCurrentPermissions() } else ElMessage.error(res.msg) }) }
+const addSelectedStudents = () => { if (!data.selectedStudents.length) { ElMessage.warning('请选择要添加的玩家'); return }; const studentIds = data.selectedStudents.map(s => s.id); request.post('/exam/setPermissions?examId=' + data.currentExamId, studentIds).then(res => { if (res.code === '200') { ElMessage.success('添加成功'); data.selectedStudents = []; loadCurrentPermissions() } else ElMessage.error(res.msg) }) }
 
 const handleMakeup = (row) => { data.makeupExam = row; data.makeupDialogVisible = true; data.makeupStartTime = null; data.makeupEndTime = null; data.makeupDuration = row.duration || 30; data.makeupSelectedStudents = []; data.makeupStudentSearch = null; data.makeupStudentPageNum = 1; loadMakeupStudents() }
 const loadMakeupStudents = () => { request.get('/student/selectPage', { params: { pageNum: data.makeupStudentPageNum, pageSize: data.makeupStudentPageSize, name: data.makeupStudentSearch } }).then(res => { if (res.code === '200') { data.makeupStudentList = res.data?.list || []; data.makeupStudentTotal = res.data?.total } }) }
 const handleMakeupStudentSelection = (rows) => { data.makeupSelectedStudents = rows }
-const submitMakeup = () => { if (!data.makeupSelectedStudents.length) { ElMessage.warning('请选择补考学生'); return }; if (!data.makeupStartTime || !data.makeupEndTime) { ElMessage.warning('请设置补考时间'); return }; const studentIds = data.makeupSelectedStudents.map(s => s.id); request.post('/exam/makeup', { originalExamId: data.makeupExam.id, studentIds, startTime: data.makeupStartTime, endTime: data.makeupEndTime, duration: data.makeupDuration }).then(res => { if (res.code === '200') { ElMessage.success(`补考已开放，共 ${res.data?.studentCount || studentIds.length} 名学生`); data.makeupDialogVisible = false; load() } else ElMessage.error(res.msg || '操作失败') }) }
+const submitMakeup = () => { if (!data.makeupSelectedStudents.length) { ElMessage.warning('请选择补审玩家'); return }; if (!data.makeupStartTime || !data.makeupEndTime) { ElMessage.warning('请设置补审时间'); return }; const studentIds = data.makeupSelectedStudents.map(s => s.id); request.post('/exam/makeup', { originalExamId: data.makeupExam.id, studentIds, startTime: data.makeupStartTime, endTime: data.makeupEndTime, duration: data.makeupDuration }).then(res => { if (res.code === '200') { ElMessage.success(`补审已开放，共 ${res.data?.studentCount || studentIds.length} 名玩家`); data.makeupDialogVisible = false; load() } else ElMessage.error(res.msg || '操作失败') }) }
 
 onMounted(() => { loadPapers(); load() })
 </script>

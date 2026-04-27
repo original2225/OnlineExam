@@ -63,7 +63,7 @@
           <div class="stat-icon"><el-icon><User /></el-icon></div>
           <div class="stat-body">
             <div class="stat-num">{{ data.stats.users }}</div>
-            <div class="stat-label">用户</div>
+            <div class="stat-label">玩家</div>
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@
           <div class="stat-icon"><el-icon><Calendar /></el-icon></div>
           <div class="stat-body">
             <div class="stat-num">{{ data.stats.exams }}</div>
-            <div class="stat-label">考试数量</div>
+            <div class="stat-label">审核数量</div>
           </div>
         </div>
       </div>
@@ -119,12 +119,12 @@
           </div>
         </div>
 
-        <!-- 近期考试 -->
+        <!-- 近期审核 -->
         <div class="panel-card exam-panel">
           <div class="panel-header">
             <div class="panel-title">
               <el-icon color="#f59e0b"><Calendar /></el-icon>
-              近期考试
+              近期审核
             </div>
             <el-button link type="primary" size="small" @click="$router.push('/manager/exam')">查看全部 →</el-button>
           </div>
@@ -141,7 +141,7 @@
             </div>
           </div>
           <div v-else class="empty-hint">
-            <el-icon><Calendar /></el-icon> 暂无考试安排
+            <el-icon><Calendar /></el-icon> 暂无审核安排
           </div>
         </div>
 
@@ -277,11 +277,11 @@ const startTime = Date.now()
 const totalUsers = computed(() => data.stats.users + data.stats.admins + data.stats.examiners)
 
 const shortcuts = [
-  { label: '考试管理', path: '/manager/exam', icon: 'Document', bg: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: '#3b82f6' },
-  { label: '成绩管理', path: '/manager/score', icon: 'DataLine', bg: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#16a34a' },
+  { label: '审核管理', path: '/manager/exam', icon: 'Document', bg: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', color: '#3b82f6' },
+  { label: '结果管理', path: '/manager/score', icon: 'DataLine', bg: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#16a34a' },
   { label: '阅卷中心', path: '/exam/gradingCenter', icon: 'Finished', bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', color: '#d97706' },
   { label: '题目管理', path: '/manager/question', icon: 'EditPen', bg: 'linear-gradient(135deg, #fce7f3, #fbcfe8)', color: '#db2777' },
-  { label: '用户管理', path: '/manager/student', icon: 'User', bg: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
+  { label: '玩家管理', path: '/manager/student', icon: 'User', bg: 'linear-gradient(135deg, #ede9fe, #ddd6fe)', color: '#7c3aed' },
   { label: '公告管理', path: '/manager/notice', icon: 'Bell', bg: 'linear-gradient(135deg, #fee2e2, #fecaca)', color: '#dc2626' },
 ]
 
@@ -299,8 +299,8 @@ const isAdmin = computed(() => {
 })
 
 const roleLabel = computed(() => {
-  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '用户' }
-  return map[data.user.role] || '用户'
+  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }
+  return map[data.user.role] || '玩家'
 })
 
 const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
@@ -335,7 +335,7 @@ const uptimeStr = computed(() => {
   return `${Math.floor(diff / 3600)}小时${Math.floor((diff % 3600) / 60)}分`
 })
 
-// 考试
+// 审核
 const getExamDotClass = (exam) => {
   if (exam.examType === 'permanent') return 'green'
   const now = new Date()
@@ -368,66 +368,47 @@ const formatTime = (dt) => {
 
 // 一言
 const quotes = [
-  '学而不思则罔，思而不学则殆。', '知识就是力量。 —— 弗朗西斯·培根',
-  '温故而知新，可以为师矣。', '业精于勤，荒于嬉；行成于思，毁于随。',
-  '千里之行，始于足下。', '天才是百分之一的灵感加上百分之九十九的汗水。',
-  '三人行，必有我师焉。', '学如逆水行舟，不进则退。',
-  '路漫漫其修远兮，吾将上下而求索。', '书山有路勤为径，学海无涯苦作舟。',
-  '读万卷书，行万里路。', '吾生也有涯，而知也无涯。',
-  '不积跬步，无以至千里。', '黑发不知勤学早，白首方悔读书迟。',
-  '纸上得来终觉浅，绝知此事要躬行。',
+  '稳一点，比快一点更适合大型工程。', '红石机器上线前，先想清楚停机方案。',
+  '公共仓储最怕临时随手放，记录比记忆可靠。', '建筑先定比例和风格，再堆细节。',
+  'MSPT 异常先停机，再排查。', '不会问不是问题，不沟通才是问题。',
+  '公共设施改动前，先说明影响范围。', '截图、坐标、材料表，都是工程交接的一部分。',
+  '见习阶段先守规则，再谈效率。', '一次好审核，看答案，也看协作意识。',
+  '机器能跑不等于适合上服，维护成本同样重要。', '服务器长期稳定，靠每个人少一点侥幸。',
+  '先读文档再动手，能少踩很多坑。',
 ]
 const dailyQuote = ref(quotes[Math.floor(Math.random() * quotes.length)])
 const refreshQuote = () => { dailyQuote.value = quotes[Math.floor(Math.random() * quotes.length)] }
 
 // 数据
+const silent = { silentError: true }
+
 const loadNotice = () => {
-  request.get('/notice/selectAll').then(res => {
+  request.get('/notice/selectAll', silent).then(res => {
     if (res.code === '200') { data.noticeData = res.data || []; data.stats.notices = data.noticeData.length }
   }).catch(() => {})
 }
 const loadStats = () => {
-  request.get('/student/selectPage', { params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.users = res.data?.total || 0 }).catch(() => {})
-  request.get('/admin/selectPage', { params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.admins = res.data?.total || 0 }).catch(() => {})
-  request.get('/examiner/selectPage', { params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.examiners = res.data?.total || 0 }).catch(() => {})
-  request.get('/exam/selectPage', { params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.exams = res.data?.total || 0 }).catch(() => {})
-  request.get('/question/selectPage', { params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.questions = res.data?.total || 0 }).catch(() => {})
+  request.get('/student/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.users = res.data?.total || 0 }).catch(() => {})
+  request.get('/admin/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.admins = res.data?.total || 0 }).catch(() => {})
+  request.get('/examiner/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.examiners = res.data?.total || 0 }).catch(() => {})
+  request.get('/exam/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.exams = res.data?.total || 0 }).catch(() => {})
+  request.get('/question/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === '200') data.stats.questions = res.data?.total || 0 }).catch(() => {})
 }
 const loadRecentExams = () => {
-  request.get('/exam/selectAll').then(res => {
+  request.get('/exam/selectAll', silent).then(res => {
     if (res.code === '200') {
       data.recentExams = (res.data || []).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 6)
     }
   }).catch(() => {})
 }
 const loadTodoItems = () => {
-  // 注册审批待处理数量
-  request.get('/registration/selectPage', { params: { pageNum: 1, pageSize: 1, status: 'PENDING' } }).then(res => {
+  request.get('/registration/selectPage', { ...silent, params: { pageNum: 1, pageSize: 1, status: 'PENDING' } }).then(res => {
     if (res.code === '200') { const c = res.data?.total || 0; todoItems[0].meta = c > 0 ? `${c} 条待审批` : ''; todoItems[0].urgent = c > 5 }
   }).catch(() => {})
-  // 获取已发布考试中未批阅数量
-  request.get('/exam/selectPage', { params: { pageNum: 1, pageSize: 100, status: 'published' } }).then(res => {
-    if (res.code === '200') {
-      const exams = res.data?.list || []
-      let totalPending = 0
-      let checked = 0
-      if (exams.length === 0) { todoItems[1].meta = ''; return }
-      exams.forEach(exam => {
-        request.get('/examRecord/getByExamId/' + exam.id).then(sub => {
-          if (sub.code === '200') {
-            const pending = (sub.data || []).filter(r => r.manualScore == null).length
-            totalPending += pending
-            checked++
-            if (checked === exams.length) {
-              todoItems[1].meta = totalPending > 0 ? `${totalPending} 份待批阅` : ''
-              todoItems[1].urgent = totalPending > 10
-            }
-          }
-        }).catch(() => { checked++ })
-      })
-    }
+  request.get('/grading/countPending', silent).then(res => {
+    if (res.code === '200') { const c = res.data || 0; todoItems[1].meta = c > 0 ? `${c} 份待批阅` : ''; todoItems[1].urgent = c > 10 }
   }).catch(() => {})
-  request.get('/questionContribution/pendingCount', { params: {} }).then(res => {
+  request.get('/questionContribution/pendingCount', silent).then(res => {
     if (res.code === '200') { const c = res.data || 0; todoItems[2].meta = c > 0 ? `${c} 题待审核` : ''; todoItems[2].urgent = c > 20 }
   }).catch(() => {})
 }
@@ -465,13 +446,12 @@ const loadWeather = async () => {
   localStorage.setItem('xm-weather-city', weatherCity.value)
 }
 
-let uptimeTimer = null
 onMounted(() => {
   updateClock(); clockTimer = setInterval(updateClock, 1000)
-  uptimeTimer = setInterval(() => {}, 60000)
-  loadNotice(); loadStats(); loadRecentExams(); loadWeather(); loadTodoItems()
+  loadNotice(); loadStats(); loadRecentExams(); loadTodoItems()
+  setTimeout(loadWeather, 300)
 })
-onUnmounted(() => { if (clockTimer) clearInterval(clockTimer); if (uptimeTimer) clearInterval(uptimeTimer) })
+onUnmounted(() => { if (clockTimer) clearInterval(clockTimer) })
 </script>
 
 <style scoped>
@@ -568,7 +548,7 @@ onUnmounted(() => { if (clockTimer) clearInterval(clockTimer); if (uptimeTimer) 
 .notice-body { font-size: 13px; color: var(--text-regular); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .notice-time { font-size: 11px; color: var(--text-secondary); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
 
-/* ===== 考试 ===== */
+/* ===== 审核 ===== */
 .exam-timeline { display: flex; flex-direction: column; gap: 2px; }
 .exam-item { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
 .exam-item:hover { background: var(--bg-page); }

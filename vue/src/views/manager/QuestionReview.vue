@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>题目审核</h1>
-          <p>审核用户贡献的题目，支持通过、拒绝与详情查看</p>
+          <p>审核阅卷人、管理员或所有者提交的题目，支持通过、拒绝与详情查看</p>
         </div>
       </div>
     </div>
@@ -46,7 +46,7 @@
           <div class="review-body">
             <div class="review-header-row">
               <span class="review-user">{{ row.userName }}</span>
-              <span class="type-badge" :class="'type-' + row.type">{{ row.type }}</span>
+              <span class="type-badge" :class="'type-' + row.type">{{ typeLabel(row.type) }}</span>
               <span class="diff-badge" :class="'diff-' + row.difficulty">{{ diffLabel(row.difficulty) }}</span>
               <span class="status-badge" :class="'status-' + row.status">{{ statusLabel(row.status) }}</span>
             </div>
@@ -94,7 +94,7 @@
         <div class="detail-header">
           <el-tag type="info">{{ data.current.userName }}</el-tag>
           <el-tag :type="diffTagType(data.current.difficulty)" size="small">{{ diffLabel(data.current.difficulty) }}</el-tag>
-          <el-tag type="info" size="small">{{ data.current.type }}</el-tag>
+          <el-tag type="info" size="small">{{ typeLabel(data.current.type) }}</el-tag>
         </div>
         <div class="detail-section">
           <div class="detail-label"><el-icon><EditPen /></el-icon> 题目内容</div>
@@ -171,6 +171,7 @@ const rejectedCount = computed(() => data.list.filter(r => r.status === 'REJECTE
 
 const diffLabel = (d) => ({ easy: '简单', medium: '中等', hard: '困难' })[d] || d
 const diffTagType = (d) => ({ easy: 'success', medium: 'warning', hard: 'danger' })[d] || 'info'
+const typeLabel = (t) => ({ single: '单选题', multiple: '多选题', judge: '判断题', fillin: '填空题', essay: '简答题', '选择题': '单选题', '判断题': '判断题', '填空题': '填空题' })[t] || t
 const statusLabel = (s) => ({ PENDING: '待审核', APPROVED: '已通过', REJECTED: '已拒绝' })[s] || s
 
 const parseOptions = (opts) => {
@@ -192,10 +193,8 @@ const loadList = () => {
 const openDetail = (row) => { data.current = row; data.detailVisible = true }
 
 const approve = (row) => {
-  request.put('/questionContribution/review/' + row.id, null, {
-    params: { status: 'APPROVED', reviewerId: user.id, reviewerName: user.name }
-  }).then(res => {
-    if (res.code === '200') { ElMessage.success('已通过，题目已自动入库'); loadList() }
+  request.put('/questionContribution/review/' + row.id, { action: 'approve' }).then(res => {
+    if (res.code === '200') { ElMessage.success('已通过，题目已自动入库'); data.detailVisible = false; loadList() }
     else ElMessage.error(res.msg || '操作失败')
   })
 }
@@ -204,8 +203,9 @@ const openReject = (row) => { data.current = row; data.rejectComment = ''; data.
 
 const reject = () => {
   if (!data.rejectComment) { ElMessage.warning('请填写拒绝原因'); return }
-  request.put('/questionContribution/review/' + data.current.id, null, {
-    params: { status: 'REJECTED', reviewerId: user.id, reviewerName: user.name, reviewComment: data.rejectComment }
+  request.put('/questionContribution/review/' + data.current.id, {
+    action: 'reject',
+    comment: data.rejectComment
   }).then(res => {
     if (res.code === '200') { ElMessage.success('已拒绝'); data.rejectVisible = false; data.detailVisible = false; loadList() }
     else ElMessage.error(res.msg || '操作失败')

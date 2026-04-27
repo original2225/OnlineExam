@@ -60,6 +60,10 @@ public class WebController {
     public Result updatePassword(@RequestBody Account account) {
         if (RoleEnum.OWNER.name().equals(account.getRole()) || RoleEnum.ADMIN.name().equals(account.getRole())) {
             adminService.updatePassword(account);
+        } else if (RoleEnum.HELPER.name().equals(account.getRole())) {
+            examinerService.updatePassword(account);
+        } else if (RoleEnum.USER.name().equals(account.getRole())) {
+            studentService.updatePassword(account);
         }
         return Result.success();
     }

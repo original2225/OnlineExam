@@ -4,6 +4,7 @@
       <el-form-item prop="avatar" label="头像">
         <el-upload
             :action="baseUrl + '/files/upload'"
+            :headers="uploadHeaders"
             :on-success="handleFileUpload"
             :show-file-list="false"
             class="avatar-uploader"
@@ -35,8 +36,10 @@
 import { reactive } from "vue";
 import request from "@/utils/request.js";
 import {ElMessage} from "element-plus";
+import { getUploadHeaders } from '@/utils/upload.js';
 
 const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}')
@@ -47,18 +50,22 @@ const handleFileUpload = (res) => {
 }
 
 const emit = defineEmits(['updateUser'])
+const getUpdateApi = (role) => {
+  if (role === 'HELPER') return '/examiner/update'
+  if (role === 'USER') return '/student/update'
+  return '/admin/update'
+}
+
 const update = () => {
-  if (data.user.role === 'OWNER' || data.user.role === 'ADMIN') {
-    request.put('/admin/update', data.user).then(res => {
-      if (res.code === '200') {
-        ElMessage.success('保存成功')
-        localStorage.setItem('xm-user', JSON.stringify(data.user))
-        emit('updateUser')
-      } else {
-        ElMessage.error(res.msg)
-      }
-    })
-  }
+  request.put(getUpdateApi(data.user.role), data.user).then(res => {
+    if (res.code === '200') {
+      ElMessage.success('保存成功')
+      localStorage.setItem('xm-user', JSON.stringify(data.user))
+      emit('updateUser')
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
 }
 </script>
 

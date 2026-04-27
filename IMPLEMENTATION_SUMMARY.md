@@ -1,231 +1,69 @@
-# 在线考试系统实现完成总结
+# 北冥审核系统实现总结
 
-## 📋 项目概述
+## 项目定位
 
-本次实现为在线考试系统添加了完整的考试功能模块，包括：
-- 题库管理
-- 试卷管理
-- 考试管理
-- 在线考试（学生端）
-- 阅卷管理
-- 成绩管理
+北冥审核系统仅用于 Minecraft Java 生电服务器入服审核。系统围绕玩家入服考核、审核模拟、题库维护、阅卷表决和主考官最终判定展开，不包含无关交流或通用平台功能。
 
----
+## 核心功能
 
-## 🗂️ 文件结构
+- 建筑审核、后期审核、红石审核、普通(见习)审核分支
+- 审核题库与题目分类管理
+- 阅卷人、管理员、所有者提交题目
+- 管理端审核题目，审核通过后进入题库并可加入试卷
+- 入服审核发布、权限管理、补审安排
+- 玩家在线答题、自动保存、自动判分
+- 主观题阅卷、玩家表现打分、参考表决
+- 主考官最终判定通过或不通过
+- 审核结果、公示、错题复盘、审核模拟
+- 审核榜单、成就和彩蛋
+- 录屏上传、通知、文件上传
 
-### 后端文件
+## 角色
 
-#### 实体类 (Entity)
-- `springboot/src/main/java/com/example/entity/QuestionCategory.java` - 题目分类实体
-- `springboot/src/main/java/com/example/entity/Question.java` - 题目实体
-- `springboot/src/main/java/com/example/entity/ExamPaper.java` - 试卷实体
-- `springboot/src/main/java/com/example/entity/ExamPaperQuestion.java` - 试卷题目关联实体
-- `springboot/src/main/java/com/example/entity/Exam.java` - 考试实体
-- `springboot/src/main/java/com/example/entity/ExamPermission.java` - 考试权限实体
-- `springboot/src/main/java/com/example/entity/ExamRecord.java` - 考试记录实体
-- `springboot/src/main/java/com/example/entity/ExamAnswer.java` - 答题记录实体
+- `OWNER`：最高权限，可管理管理员、阅卷人、玩家和所有审核流程
+- `ADMIN`：管理题库、试卷、审核、阅卷、题目审核和主考官任命
+- `HELPER`：参与阅卷、提交题目、给出参考表决
+- `USER`：玩家，参加入服审核和审核模拟
 
-#### Mapper接口
-- `springboot/src/main/java/com/example/mapper/QuestionCategoryMapper.java`
-- `springboot/src/main/java/com/example/mapper/QuestionMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamPaperMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamPaperQuestionMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamPermissionMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamRecordMapper.java`
-- `springboot/src/main/java/com/example/mapper/ExamAnswerMapper.java`
+## 主要页面
 
-#### Mapper XML
-- `springboot/src/main/resources/mapper/QuestionCategoryMapper.xml`
-- `springboot/src/main/resources/mapper/QuestionMapper.xml`
-- `springboot/src/main/resources/mapper/ExamPaperMapper.xml`
-- `springboot/src/main/resources/mapper/ExamPaperQuestionMapper.xml`
-- `springboot/src/main/resources/mapper/ExamMapper.xml`
-- `springboot/src/main/resources/mapper/ExamPermissionMapper.xml`
-- `springboot/src/main/resources/mapper/ExamRecordMapper.xml`
-- `springboot/src/main/resources/mapper/ExamAnswerMapper.xml`
+### 玩家端
 
-#### 服务层 (Service)
-- `springboot/src/main/java/com/example/service/QuestionCategoryService.java`
-- `springboot/src/main/java/com/example/service/QuestionService.java`
-- `springboot/src/main/java/com/example/service/ExamPaperService.java`
-- `springboot/src/main/java/com/example/service/ExamService.java`
-- `springboot/src/main/java/com/example/service/ExamRecordService.java`
+- 首页：服务器介绍、入服入口、文档与群组链接
+- 审核题库：按审核分支浏览题目
+- 进服审核：查看可参加审核并进入答题
+- 审核模拟：练习审核题目
+- 错题复盘：复盘错误题目
+- 提交题目：阅卷人/管理员/所有者提交题目
+- 审核结果：查看个人审核记录
+- 审核榜单：查看模拟榜、活跃榜、审核榜
 
-#### 控制器 (Controller)
-- `springboot/src/main/java/com/example/controller/QuestionCategoryController.java`
-- `springboot/src/main/java/com/example/controller/QuestionController.java`
-- `springboot/src/main/java/com/example/controller/ExamPaperController.java`
-- `springboot/src/main/java/com/example/controller/ExamController.java`
-- `springboot/src/main/java/com/example/controller/ExamRecordController.java`
-- `springboot/src/main/java/com/example/controller/GradingController.java`
-- `springboot/src/main/java/com/example/controller/ScoreController.java`
+### 管理端
 
-#### 工具类
-- `springboot/src/main/java/com/example/common/handler/JsonTypeHandler.java` - JSON类型处理器
+- 题库管理：管理审核题目
+- 题目分类：管理审核分支和分类
+- 试卷管理：从已审核通过题目组卷
+- 考试管理：发布入服审核并设置权限
+- 题目审核：审核提交题目
+- 阅卷管理：批阅主观题并提交参考表决
+- 成绩管理：查看审核成绩和统计
+- 用户管理：管理玩家、阅卷人、管理员
 
-### 前端文件
+### 审核端
 
-#### 管理端页面
-- `vue/src/views/manager/QuestionCategory.vue` - 题目分类管理
-- `vue/src/views/manager/Question.vue` - 题目管理
-- `vue/src/views/manager/ExamPaper.vue` - 试卷管理
-- `vue/src/views/manager/Exam.vue` - 考试管理
-- `vue/src/views/manager/Grading.vue` - 阅卷管理
-- `vue/src/views/manager/Score.vue` - 成绩管理
-- `vue/src/views/manager/Student.vue` - 学生管理（已更新，添加学号和班级字段）
+- 阅卷中心：集中阅卷和提交表决
+- 审批中心：查看表决结果，由主考官最终判定
+- 结果中心：查看、公示审核结果
 
-#### 学生端页面
-- `vue/src/views/front/ExamList.vue` - 可参加考试列表
-- `vue/src/views/front/ExamTaking.vue` - 答题页面
-- `vue/src/views/front/ExamResult.vue` - 考试结果页
-- `vue/src/views/front/MyScores.vue` - 我的成绩
+## 数据库说明
 
-#### 组件
-- `vue/src/components/question/QuestionFormItem.vue` - 题目表单组件
+保留 `student` 表名作为历史兼容结构，业务展示统一称为“玩家”。旧无关模块迁移已保留为空迁移，避免部署脚本断档。
 
-#### 配置文件
-- `vue/src/router/index.js` - 路由配置（已更新）
-- `vue/src/views/Manager.vue` - 管理端菜单（已更新）
-- `vue/src/views/Front.vue` - 学生端菜单（已更新）
+## 验收要点
 
-### 数据库文件
-- `system.sql` - 完整数据库表结构（已更新）
-
----
-
-## 🚀 使用指南
-
-### 1. 数据库初始化
-
-执行 `system.sql` 中的SQL语句创建所有表：
-
-```sql
--- 执行以下内容
-- examiner 表（阅卷人）
-- student 表（学生，包含student_no和class_name字段）
-- question_category 表（题目分类）
-- question 表（题目）
-- exam_paper 表（试卷）
-- exam_paper_question 表（试卷题目关联）
-- exam 表（考试）
-- exam_permission 表（考试权限）
-- exam_record 表（考试记录）
-- exam_answer 表（答题记录）
-```
-
-### 2. 系统使用流程
-
-#### 管理员操作流程
-
-1. **创建题目分类**
-   - 登录管理后台 → 题库管理 → 题目分类 → 新增
-
-2. **添加题目**
-   - 题库管理 → 题目管理 → 新增
-   - 支持单选/多选/判断/简答四种题型
-
-3. **创建试卷**
-   - 考试管理 → 试卷管理 → 新增
-   - 点击"设置题目"从题库中选择题目并设置分值
-
-4. **创建考试**
-   - 考试管理 → 考试管理 → 新增
-   - 设置考试时间、时长等信息
-   - 点击"权限设置"选择允许参加考试的学生
-   - 点击"发布"使考试对学生可见
-
-5. **批阅试卷**
-   - 成绩管理 → 阅卷管理 → 选择考试 → 批阅
-   - 对简答题进行打分和写评语
-
-6. **查看成绩统计**
-   - 成绩管理 → 成绩管理 → 选择考试
-   - 查看及格率、平均分等统计数据
-
-#### 学生操作流程
-
-1. **参加考试**
-   - 登录学生账号 → 点击"在线考试"
-   - 选择可参加的考试 → 点击"开始考试"
-
-2. **答题**
-   - 在答题页面完成题目
-   - 答案每30秒自动保存
-   - 可查看答题卡了解答题进度
-   - 时间到或手动提交试卷
-
-3. **查看成绩**
-   - 点击"我的成绩"查看所有考试记录
-   - 点击"查看详情"查看具体答题情况
-
----
-
-## 📊 数据库表关系
-
-```
-exam (考试)
-  ├── exam_paper (试卷)
-  │     └── question (题目)
-  │           └── question_category (分类)
-  ├── exam_permission (考试权限)
-  │     └── student (学生)
-  └── exam_record (考试记录)
-        └── exam_answer (答题记录)
-```
-
----
-
-## ✅ 功能验收清单
-
-### 第一阶段：题库管理 ✓
-- [x] 能够创建题目分类
-- [x] 能够添加单选/多选/判断/简答题
-- [x] 题目支持按分类/题型/难度查询
-
-### 第二阶段：试卷管理 ✓
-- [x] 能够创建试卷
-- [x] 能够从题库选择题目添加到试卷
-- [x] 能够设置题目分值和顺序
-
-### 第三阶段：考试管理 ✓
-- [x] 能够创建考试
-- [x] 能够设置考试时间和权限
-- [x] 能够发布考试
-
-### 第四阶段：在线考试（学生端） ✓
-- [x] 学生能看到可参加的考试
-- [x] 能够进入答题页面
-- [x] 答案能自动保存
-- [x] 提交后客观题自动判分
-
-### 第五阶段：阅卷与成绩 ✓
-- [x] 阅卷人能批改主观题
-- [x] 能查询成绩统计
-- [x] 学生能查看自己的成绩
-
-### 第六阶段：学生模块完善 ✓
-- [x] 学生实体添加学号和班级字段
-- [x] 学生管理页面显示学号和班级
-
----
-
-## 🔧 技术特点
-
-1. **自动判分**：单选、多选、判断题提交后自动判分
-2. **答案自动保存**：每30秒自动保存答题进度
-3. **倒计时**：考试结束自动提交
-4. **答题卡**：实时显示答题状态
-5. **成绩统计**：及格率、平均分、最高/最低分
-6. **权限控制**：学生只能参加有权限的考试
-
----
-
-## 📝 注意事项
-
-1. 确保MySQL数据库已安装并运行
-2. 确保后端服务正常启动（端口9090）
-3. 确保前端服务正常启动（端口5173）
-4. 首次使用需先创建题目分类和题目
-5. 发布考试前必须先设置权限（选择学生）
+- 玩家只能看到自己有权限参加的入服审核
+- 题目必须审核通过后才能进入正式题库
+- 阅卷分数和参考表决不等于最终入服结果
+- 主考官按 `id + role` 校验，避免管理员和阅卷人 ID 冲突
+- 没有指定主考官时，第一位阅卷人自动成为主考官
+- 管理员可在审核过程中更换主考官

@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/examRecording")
 public class ExamRecordingController {
+
+    private static final long MAX_RECORDING_SIZE = 300L * 1024 * 1024;
 
     @Resource
     private ExamRecordingService examRecordingService;
@@ -41,7 +44,7 @@ public class ExamRecordingController {
         return Result.success(list);
     }
 
-    /** 查询某学生在某考试的录屏 */
+    /** 查询某玩家在某考试的录屏 */
     @GetMapping("/selectByExamAndStudent")
     public Result selectByExamAndStudent(@RequestParam Integer examId, @RequestParam Integer studentId) {
         ExamRecording recording = examRecordingService.selectByExamAndStudent(examId, studentId);
@@ -61,7 +64,18 @@ public class ExamRecordingController {
                          @RequestParam("recordingId") Integer recordingId,
                          @RequestParam("examId") Integer examId,
                          @RequestParam("studentId") Integer studentId) {
-        String fileName = "录屏_考试" + examId + "_学生" + studentId + "_" + System.currentTimeMillis() + ".webm";
+        if (file == null || file.isEmpty()) {
+            return Result.error("录屏文件不能为空");
+        }
+        if (file.getSize() > MAX_RECORDING_SIZE) {
+            return Result.error("录屏文件不能超过300MB");
+        }
+        String contentType = file.getContentType();
+        if (!Objects.equals(contentType, "video/webm") && !Objects.equals(contentType, "application/octet-stream")) {
+            return Result.error("仅支持webm录屏文件");
+        }
+
+        String fileName = "recording_exam_" + examId + "_student_" + studentId + "_" + System.currentTimeMillis() + ".webm";
         String shareUrl = cloudreveService.uploadAndShare(file, fileName);
 
         ExamRecording recording = new ExamRecording();

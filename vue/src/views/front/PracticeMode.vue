@@ -3,7 +3,7 @@
     <div class="breadcrumb-nav">
       <a @click="router.push('/front/home')">首页</a>
       <span>/</span>
-      <span class="current">刷题练习</span>
+      <span class="current">审核模拟</span>
     </div>
 
     <!-- 选择练习参数 -->
@@ -11,13 +11,13 @@
       <div class="practice-setup-card">
         <div class="setup-header">
           <div class="setup-icon">🎯</div>
-          <h2>刷题练习</h2>
-          <p>选择分类和难度，系统将随机生成一套练习题</p>
+          <h2>审核模拟</h2>
+          <p>按入服审核方向随机生成模拟题，提前熟悉建筑、后期、红石、见习审核要求</p>
         </div>
 
         <div class="setup-form">
           <div class="form-group">
-            <label>题目分类</label>
+            <label>审核方向</label>
             <el-tree-select
               v-model="data.categoryId"
               :data="categoryTree"
@@ -49,14 +49,14 @@
           </div>
 
           <div class="form-group">
-            <label>练习名称（可选）</label>
-            <el-input v-model="data.practiceName" placeholder="给你的练习起个名字" clearable />
+            <label>模拟名称（可选）</label>
+            <el-input v-model="data.practiceName" placeholder="例如：红石审核模拟 / 建筑审核自测" clearable />
           </div>
 
           <el-button type="primary" size="large" round @click="startPractice"
                      :loading="data.generating" :disabled="data.generating"
                      style="width: 100%; margin-top: 8px;">
-            <el-icon><EditPen /></el-icon> 开始练习
+            <el-icon><EditPen /></el-icon> 开始模拟
           </el-button>
         </div>
       </div>
@@ -65,7 +65,7 @@
       <div class="stats-row">
         <div class="stat-item" style="--accent: var(--primary-color);">
           <div class="stat-value">{{ data.totalPractices }}</div>
-          <div class="stat-label">累计练习</div>
+          <div class="stat-label">累计模拟</div>
         </div>
         <div class="stat-item" style="--accent: var(--success-color);">
           <div class="stat-value">{{ data.avgScore }}</div>
@@ -260,7 +260,7 @@
         </div>
         <h2>{{ data.record?.isPass ? '练习完成！' : '继续加油！' }}</h2>
         <p>{{ data.record?.totalScore || 0 }} / {{ data.questions.length * 10 }} 分</p>
-        <!-- 成绩分段 -->
+        <!-- 结果分段 -->
         <div class="score-segment">
           <div class="seg-item">
             <span class="seg-val correct-color">{{ correctCount }}</span>
@@ -371,10 +371,10 @@
           </div>
           <div v-if="!q.isCorrect" class="wrong-action">
             <el-button size="small" type="warning" plain @click="addToWrong(q)" :disabled="q.addedToWrong">
-              <el-icon><Star /></el-icon> {{ q.addedToWrong ? '已加入错题集' : '加入错题集' }}
+              <el-icon><Star /></el-icon> {{ q.addedToWrong ? '已加入错题复盘' : '加入错题复盘' }}
             </el-button>
             <el-button size="small" type="primary" plain @click="addToFavorites(q)">
-              <el-icon><Star /></el-icon> 收藏题目
+              <el-icon><Star /></el-icon> 标记题目
             </el-button>
           </div>
         </div>
@@ -732,7 +732,7 @@ const addToWrong = (q) => {
   }).then(res => {
     if (res.code === '200') {
       q.addedToWrong = true
-      ElMessage.success('已加入错题集')
+      ElMessage.success('已加入错题复盘')
     }
   })
 }
@@ -744,9 +744,9 @@ const addToFavorites = (q) => {
     questionId: q.questionId
   }).then(res => {
     if (res.code === '200') {
-      ElMessage.success('已收藏题目')
+      ElMessage.success('已标记题目')
     } else {
-      ElMessage.info(res.msg || '已收藏')
+      ElMessage.info(res.msg || '已标记')
     }
   })
 }

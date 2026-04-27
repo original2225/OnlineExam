@@ -11,7 +11,7 @@ UPDATE `admin` SET `level` = 4 WHERE `id` = 1;
 ALTER TABLE `question` ADD COLUMN `images` JSON NULL COMMENT '题目图片JSON: [{"url":"...", "caption":"..."}]';
 
 -- 3. invitation_code 表添加 target_role 字段
-ALTER TABLE `invitation_code` ADD COLUMN `target_role` VARCHAR(20) DEFAULT 'STUDENT' COMMENT '目标角色: STUDENT-考生, EXAMINER-阅卷人';
+ALTER TABLE `invitation_code` ADD COLUMN `target_role` VARCHAR(20) DEFAULT 'USER' COMMENT '目标角色: USER-成员, HELPER-审核员';
 
--- 4. 更新已有的邀请码默认为考生类型
-UPDATE `invitation_code` SET `target_role` = 'STUDENT' WHERE `target_role` IS NULL;
+-- 4. 更新已有的邀请码默认为玩家类型
+UPDATE `invitation_code` SET `target_role` = 'USER' WHERE `target_role` IS NULL;

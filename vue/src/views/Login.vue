@@ -13,10 +13,10 @@
           <div class="left-logo">
             <img src="@/assets/imgs/logo.png" alt="Logo" />
           </div>
-          <h1 class="left-title">北冥·群组服</h1>
+          <h1 class="left-title">北冥审核系统</h1>
           <p class="left-desc">
-            专业、高效的在线考试与学习系统。<br />
-            支持多角色协作，智能数据统计与分析。
+            专业、高效的 Minecraft 进服审核系统。<br />
+            支持四项审核、在线审核与结果统计。
           </p>
           <div class="left-divider"></div>
           <div class="left-features">
@@ -30,7 +30,7 @@
             </div>
             <div class="feature-item">
               <span class="feature-icon">🏆</span>
-              <span>学习成就系统</span>
+              <span>审核结果管理</span>
             </div>
           </div>
           <div class="left-decoration">
@@ -88,7 +88,7 @@
                 <el-option value="OWNER" label="👑 所有者" />
                 <el-option value="ADMIN" label="🔧 管理员" />
                 <el-option value="HELPER" label="📋 阅卷人" />
-                <el-option value="USER" label="👤 用户" />
+                <el-option value="USER" label="👤 玩家" />
               </el-select>
             </el-form-item>
 
@@ -119,7 +119,7 @@
 
     <!-- 郑重声明弹窗 -->
     <el-dialog
-      title="考试规则声明"
+      title="审核规则声明"
       v-model="data.dialogVisible"
       :show-close="false"
       width="42%"
@@ -128,15 +128,15 @@
       append-to-body
     >
       <div class="declare-content">
-        <p>本平台对所有考试及其相关项目进行了严格的监管，并要求参与者遵守相关的考试规范与规定。</p>
-        <p><strong>所有参与考试的用户需提供真实信息，考试过程中<span style="color: #f53f3f;">严禁作弊</span>。违反规定者将会被取消考试资格，并且记录在案。</strong></p>
-        <p>请务必遵守考试纪律，确保考试的公正性和公平性。</p>
+        <p>本平台仅用于 Minecraft Java 生电服务器入服审核，并要求参与者遵守相关审核规范与服务器规则。</p>
+        <p><strong>所有参与审核的玩家需提供真实信息，审核过程中<span style="color: #f53f3f;">严禁作弊</span>。违反规定者将会被取消入服审核资格，并且记录在案。</strong></p>
+        <p>请务必遵守审核纪律，确保入服审核的公正性和公平性。</p>
         <div class="declare-link">
           本服务指南：<a href="https://docs.beiming.games" target="_blank">docs.beiming.games</a>
         </div>
       </div>
       <template #footer>
-        <el-button type="primary" size="large" @click="confirmAndEnter" style="width: 100%;">我已阅读并同意考试规则</el-button>
+        <el-button type="primary" size="large" @click="confirmAndEnter" style="width: 100%;">我已阅读并同意审核规则</el-button>
       </template>
     </el-dialog>
 

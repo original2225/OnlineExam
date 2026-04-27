@@ -2,11 +2,11 @@
   <div class="fr">
     <!-- 顶栏 -->
     <header class="fr-header">
-      <div class="frh-left" @click="router.push('/')">
+      <div class="frh-left" @click="handleBrandClick">
         <img src="@/assets/imgs/logo.png" alt="" class="frh-logo">
         <div class="frh-brand">
-          <b>北冥</b>
-          <span>在线考试</span>
+          <b>北冥审核系统</b>
+          <span>进服审核</span>
         </div>
       </div>
 
@@ -50,9 +50,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="person"><el-icon><User /></el-icon> 个人中心</el-dropdown-item>
-                <el-dropdown-item command="scores"><el-icon><DataAnalysis /></el-icon> 我的成绩</el-dropdown-item>
-                <el-dropdown-item command="achievements"><el-icon><Trophy /></el-icon> 成就中心</el-dropdown-item>
-                <el-dropdown-item command="favorites"><el-icon><Star /></el-icon> 我的收藏</el-dropdown-item>
+                <el-dropdown-item command="scores"><el-icon><DataAnalysis /></el-icon> 审核结果</el-dropdown-item>
                 <el-dropdown-item v-if="data.user.role !== 'USER'" command="manager" divided>
                   <el-icon><Setting /></el-icon> 管理后台
                 </el-dropdown-item>
@@ -87,8 +85,8 @@
         <div class="frf-left">
           <img src="@/assets/imgs/logo.png" alt="" class="frf-logo">
           <div class="frf-brand">
-            <b>北冥·群组服</b>
-            <span>专业 · 公正 · 高效</span>
+            <b>北冥审核系统服务器</b>
+            <span>建筑 · 后期 · 红石 · 见习</span>
           </div>
         </div>
         <div class="frf-right">
@@ -107,28 +105,14 @@ import { reactive, onMounted, onUnmounted } from "vue"
 import request from "@/utils/request.js"
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue"
 import NotificationBell from "@/components/NotificationBell.vue"
+import { ElMessage } from "element-plus"
 import {
   HomeFilled, Collection, EditPen, Edit, WarnTriangleFilled, DataLine,
-  Trophy, Reading, ChatLineSquare, ArrowDown, User, DataAnalysis,
+  Trophy, Reading, ArrowDown, User, DataAnalysis,
   Star, Setting, SwitchButton
 } from "@element-plus/icons-vue"
 
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-
-const navItems = [
-  { path: '/front/home', label: '首页', icon: 'HomeFilled', color: '' },
-  { path: '/front/subjects', label: '题库', icon: 'Collection', color: 'blue' },
-  { path: '/front/examList', label: '考试', icon: 'EditPen', color: 'green' },
-  { path: '/front/practiceMode', label: '练习', icon: 'Edit', color: 'cyan' },
-  { path: '/front/wrongQuestions', label: '错题', icon: 'WarnTriangleFilled', color: 'orange' },
-  { path: '/front/dashboard', label: '数据', icon: 'DataLine', color: 'purple' },
-  { path: '/front/leaderboard', label: '排行', icon: 'Trophy', color: 'gold' },
-  { path: '/front/tutorials', label: '教程', icon: 'Reading', color: 'teal' },
-  { path: '/front/forum', label: '论坛', icon: 'ChatLineSquare', color: 'pink' },
-]
-
-const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
-const roleColor = roleColors[JSON.parse(localStorage.getItem('xm-user') || '{}').role] || '#4ade80'
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
@@ -136,17 +120,60 @@ const data = reactive({
   topNotice: '',
   noticeIndex: 0,
   noticeTimer: null,
+  brandClickCount: 0,
+  brandClickTimer: null,
 })
 
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '用户' }[role] || '用户')
+const navItems = [
+  { path: '/front/home', label: '首页', icon: 'HomeFilled', color: '' },
+  { path: '/front/subjects', label: '审核题库', icon: 'Collection', color: 'blue' },
+  { path: '/front/examList', label: '进服审核', icon: 'EditPen', color: 'green' },
+  { path: '/front/practiceMode', label: '审核模拟', icon: 'Edit', color: 'orange' },
+  { path: '/front/wrongQuestions', label: '错题复盘', icon: 'WarnTriangleFilled', color: 'red' },
+  ...(data.user.role && data.user.role !== 'USER' ? [{ path: '/front/contributeQuestion', label: '提交题目', icon: 'EditPen', color: 'teal' }] : []),
+  { path: '/front/myScores', label: '审核结果', icon: 'DataAnalysis', color: 'purple' },
+  { path: '/front/leaderboard', label: '审核榜单', icon: 'Trophy', color: 'gold' },
+]
+
+const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
+const roleColor = roleColors[JSON.parse(localStorage.getItem('xm-user') || '{}').role] || '#4ade80'
+
+
+const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
 
 const isActive = (path) => {
   const current = router.currentRoute.value.path
   return current === path || current.startsWith(path + '/')
 }
 
+const discoverEgg = (eggName) => {
+  if (!data.user.id) return
+  request.post('/easterEgg/discover', {
+    userId: data.user.id,
+    userName: data.user.name,
+    userRole: data.user.role,
+    eggName
+  }).then(res => {
+    if (res.code === '200') {
+      ElMessage.success(res.data?.alreadyDiscovered ? '你已经发现过北冥入口彩蛋' : '发现彩蛋：北冥入口守门人')
+    }
+  }).catch(() => {})
+}
+
+const handleBrandClick = () => {
+  data.brandClickCount++
+  clearTimeout(data.brandClickTimer)
+  data.brandClickTimer = setTimeout(() => { data.brandClickCount = 0 }, 1800)
+  if (data.brandClickCount >= 7) {
+    data.brandClickCount = 0
+    discoverEgg('beiming_entry_gate')
+  } else {
+    router.push('/')
+  }
+}
+
 const handleCommand = (cmd) => {
-  const map = { person: '/front/person', scores: '/front/myScores', achievements: '/front/achievements', favorites: '/front/favorites', manager: '/manager/home' }
+  const map = { person: '/front/person', scores: '/front/myScores', manager: '/manager/home' }
   if (cmd === 'logout') { localStorage.removeItem('xm-user'); router.push('/login') }
   else if (map[cmd]) router.push(map[cmd])
 }
@@ -169,7 +196,10 @@ const loadNotice = () => {
 }
 
 onMounted(() => loadNotice())
-onUnmounted(() => { if (data.noticeTimer) clearInterval(data.noticeTimer) })
+onUnmounted(() => {
+  if (data.noticeTimer) clearInterval(data.noticeTimer)
+  if (data.brandClickTimer) clearTimeout(data.brandClickTimer)
+})
 </script>
 
 <style scoped>

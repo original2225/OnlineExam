@@ -74,6 +74,11 @@
             <if test="isPublished != null">is_published,</if>
             <if test="publishedAt != null">published_at,</if>
             <if test="switchCount != null">switch_count,</if>
+            <if test="chiefExaminerId != null">chief_examiner_id,</if>
+            <if test="chiefExaminerRole != null">chief_examiner_role,</if>
+            <if test="chiefExaminerName != null">chief_examiner_name,</if>
+            <if test="finalDecisionReason != null">final_decision_reason,</if>
+            <if test="finalEvaluatedAt != null">final_evaluated_at,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id},</if>
@@ -94,6 +99,11 @@
             <if test="isPublished != null">#{isPublished},</if>
             <if test="publishedAt != null">#{publishedAt},</if>
             <if test="switchCount != null">#{switchCount},</if>
+            <if test="chiefExaminerId != null">#{chiefExaminerId},</if>
+            <if test="chiefExaminerRole != null">#{chiefExaminerRole},</if>
+            <if test="chiefExaminerName != null">#{chiefExaminerName},</if>
+            <if test="finalDecisionReason != null">#{finalDecisionReason},</if>
+            <if test="finalEvaluatedAt != null">#{finalEvaluatedAt},</if>
         </trim>
     </insert>
 
@@ -139,6 +149,21 @@
             <if test="switchCount != null">
                 switch_count = #{switchCount},
             </if>
+            <if test="chiefExaminerId != null">
+                chief_examiner_id = #{chiefExaminerId},
+            </if>
+            <if test="chiefExaminerRole != null">
+                chief_examiner_role = #{chiefExaminerRole},
+            </if>
+            <if test="chiefExaminerName != null">
+                chief_examiner_name = #{chiefExaminerName},
+            </if>
+            <if test="finalDecisionReason != null">
+                final_decision_reason = #{finalDecisionReason},
+            </if>
+            <if test="finalEvaluatedAt != null">
+                final_evaluated_at = #{finalEvaluatedAt},
+            </if>
         </set>
         where id = #{id}
     </update>
@@ -157,6 +182,25 @@
         where er.is_published = 1 and er.status = 'completed'
         order by er.published_at desc
         limit 50
+    </select>
+
+    <select id="selectEntryReviewLeaderboard" resultType="java.util.Map">
+        select
+            s.id,
+            s.name,
+            s.branch,
+            count(*) as reviewCount,
+            round(avg(er.total_score), 1) as avgScore,
+            sum(case when er.exam_status = 'PASSED' or er.is_pass = 1 then 1 else 0 end) as passCount,
+            max(er.submit_time) as lastSubmitTime
+        from `exam_record` er
+        left join `student` s on er.student_id = s.id
+        where er.status = 'completed'
+          and er.total_score is not null
+          and (er.is_published = 1 or er.exam_status = 'PASSED')
+        group by s.id, s.name, s.branch
+        order by passCount desc, avgScore desc, lastSubmitTime desc
+        limit 30
     </select>
 
     <select id="getGradingProgress" resultType="java.util.Map">

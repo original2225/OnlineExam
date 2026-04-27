@@ -417,90 +417,12 @@
 :root[data-theme="dark"] .shortcut-item:hover span { color: #4ade80; }
 :root[data-theme="dark"] .shortcut-item span { color: #9ca3af; }
 
-/* === 深色主题通用覆盖（page-hero / 投票区 / 帖子列表等新组件） === */
+/* === 深色主题通用覆盖（page-hero 等组件） === */
 :root[data-theme="dark"] .page-hero,
 :root[data-theme="cyber"] .page-hero,
 :root[data-theme="gold"] .page-hero {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-darker) 100%);
   border: 1px solid var(--border-light);
-}
-:root[data-theme="dark"] .poll-spotlight,
-:root[data-theme="cyber"] .poll-spotlight,
-:root[data-theme="gold"] .poll-spotlight {
-  background: var(--bg-card);
-  border-color: var(--border-light);
-}
-:root[data-theme="dark"] .poll-option,
-:root[data-theme="cyber"] .poll-option,
-:root[data-theme="gold"] .poll-option {
-  background: var(--bg-page);
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-:root[data-theme="dark"] .poll-option:hover,
-:root[data-theme="dark"] .poll-option.selected,
-:root[data-theme="cyber"] .poll-option:hover,
-:root[data-theme="cyber"] .poll-option.selected,
-:root[data-theme="gold"] .poll-option:hover,
-:root[data-theme="gold"] .poll-option.selected {
-  background: var(--primary-light);
-  border-color: var(--primary-color);
-}
-:root[data-theme="dark"] .poll-option-check,
-:root[data-theme="cyber"] .poll-option-check,
-:root[data-theme="gold"] .poll-option-check {
-  border-color: var(--border-light);
-}
-:root[data-theme="dark"] .poll-option.selected .poll-option-check,
-:root[data-theme="cyber"] .poll-option.selected .poll-option-check,
-:root[data-theme="gold"] .poll-option.selected .poll-option-check {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-:root[data-theme="dark"] .poll-result-bar-bg,
-:root[data-theme="cyber"] .poll-result-bar-bg,
-:root[data-theme="gold"] .poll-result-bar-bg {
-  background: var(--bg-page);
-}
-:root[data-theme="dark"] .poll-result-bar,
-:root[data-theme="cyber"] .poll-result-bar,
-:root[data-theme="gold"] .poll-result-bar {
-  background: var(--border-light);
-}
-:root[data-theme="dark"] .poll-result-bar.voted,
-:root[data-theme="cyber"] .poll-result-bar.voted,
-:root[data-theme="gold"] .poll-result-bar.voted {
-  background: var(--primary-color);
-}
-:root[data-theme="dark"] .poll-result-pct,
-:root[data-theme="cyber"] .poll-result-pct,
-:root[data-theme="gold"] .poll-result-pct {
-  color: var(--primary-color);
-}
-:root[data-theme="dark"] .poll-voted-footer,
-:root[data-theme="dark"] .poll-card-actions,
-:root[data-theme="cyber"] .poll-voted-footer,
-:root[data-theme="cyber"] .poll-card-actions,
-:root[data-theme="gold"] .poll-voted-footer,
-:root[data-theme="gold"] .poll-card-actions {
-  border-top-color: var(--border-light);
-}
-:root[data-theme="dark"] .poll-opt-num,
-:root[data-theme="cyber"] .poll-opt-num,
-:root[data-theme="gold"] .poll-opt-num {
-  background: var(--primary-color);
-  color: var(--primary-dark);
-}
-:root[data-theme="dark"] .post-item,
-:root[data-theme="cyber"] .post-item,
-:root[data-theme="gold"] .post-item {
-  background: var(--bg-card);
-  border-color: var(--border-light);
-}
-:root[data-theme="dark"] .post-item:hover,
-:root[data-theme="cyber"] .post-item:hover,
-:root[data-theme="gold"] .post-item:hover {
-  border-color: var(--primary-color);
 }
 :root[data-theme="dark"] .toolbar-card,
 :root[data-theme="dark"] .toolbar-inner,
@@ -613,9 +535,4 @@
 :root[data-theme="cyber"] .tag-count,
 :root[data-theme="gold"] .tag-count {
   background: rgba(255,255,255,0.06);
-}
-:root[data-theme="dark"] .post-avatar-default,
-:root[data-theme="cyber"] .post-avatar-default,
-:root[data-theme="gold"] .post-avatar-default {
-  background: var(--gradient-primary);
 }

@@ -37,7 +37,7 @@ public class InvitationCode {
     /** 备注 */
     private String remark;
 
-    /** 目标角色: STUDENT 或 EXAMINER */
+    /** 目标角色: USER 或 HELPER */
     private String targetRole;
 
     public Integer getId() {

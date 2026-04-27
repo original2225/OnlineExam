@@ -51,17 +51,12 @@ public class QuestionCategoryController {
     }
 
     /**
-     * 初始化完整学科树
-     * 顶级学科：我的世界进服审核题目、小学算术、看图写话
-     * 子分类按学科展开
+     * 初始化进服审核分类树
      */
     @PostMapping("/initFullDefaults")
     public Result initFullDefaults() {
-        // 定义学科结构：{学科名, 图标, 描述, 子分类[]}
         Object[][] subjects = {
-                {"我的世界进服审核题目", "minecraft", "Minecraft 服务器进服审核相关题目", new String[]{"红石工程", "建筑设计", "后勤管理", "基础知识"}},
-                {"小学算术", "math", "小学数学基础运算与应用题", new String[]{"加减运算", "乘除运算", "应用题"}},
-                {"看图写话", "writing", "看图理解与短文写作练习", new String[]{"词语理解", "短文写作"}}
+                {"Minecraft Java 生电服务器进服审核", "minecraft", "面向生电服务器成员准入的四项审核题库", new String[]{"建筑审核", "后期审核", "红石审核", "普通(见习)审核"}}
         };
 
         for (Object[] subject : subjects) {
@@ -106,7 +101,7 @@ public class QuestionCategoryController {
                 }
             }
         }
-        return Result.success("完整学科树已初始化");
+        return Result.success("进服审核分类树已初始化");
     }
 
     /**

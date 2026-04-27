@@ -12,6 +12,10 @@ public class GradingSubmission {
     private String graderRole;
     private BigDecimal manualScore;
     private BigDecimal totalScore;
+    private BigDecimal performanceScore;
+    private String advisoryVote;
+    private String rejectionReasons;
+    private String customReason;
     private String comment;
     private LocalDateTime createdAt;
 
@@ -69,6 +73,38 @@ public class GradingSubmission {
 
     public void setTotalScore(BigDecimal totalScore) {
         this.totalScore = totalScore;
+    }
+
+    public BigDecimal getPerformanceScore() {
+        return performanceScore;
+    }
+
+    public void setPerformanceScore(BigDecimal performanceScore) {
+        this.performanceScore = performanceScore;
+    }
+
+    public String getAdvisoryVote() {
+        return advisoryVote;
+    }
+
+    public void setAdvisoryVote(String advisoryVote) {
+        this.advisoryVote = advisoryVote;
+    }
+
+    public String getRejectionReasons() {
+        return rejectionReasons;
+    }
+
+    public void setRejectionReasons(String rejectionReasons) {
+        this.rejectionReasons = rejectionReasons;
+    }
+
+    public String getCustomReason() {
+        return customReason;
+    }
+
+    public void setCustomReason(String customReason) {
+        this.customReason = customReason;
     }
 
     public String getComment() {

@@ -14,11 +14,11 @@ public class ExamRecord {
     private String examName;
     /** 试卷ID */
     private Integer paperId;
-    /** 学生ID */
+    /** 玩家ID */
     private Integer studentId;
-    /** 学生姓名（关联查询用） */
+    /** 玩家姓名（关联查询用） */
     private String studentName;
-    /** 学号（关联查询用） */
+    /** 玩家编号（关联查询用） */
     private String studentNo;
     /** 开始时间 */
     private LocalDateTime startTime;
@@ -56,6 +56,16 @@ public class ExamRecord {
     private List<ExamAnswer> answers;
     /** 切屏次数 */
     private Integer switchCount;
+    /** 主考官ID */
+    private Integer chiefExaminerId;
+    /** 主考官角色 */
+    private String chiefExaminerRole;
+    /** 主考官姓名 */
+    private String chiefExaminerName;
+    /** 最终判定原因 */
+    private String finalDecisionReason;
+    /** 最终判定时间 */
+    private LocalDateTime finalEvaluatedAt;
 
     public Integer getId() {
         return id;
@@ -255,5 +265,45 @@ public class ExamRecord {
 
     public void setSwitchCount(Integer switchCount) {
         this.switchCount = switchCount;
+    }
+
+    public Integer getChiefExaminerId() {
+        return chiefExaminerId;
+    }
+
+    public void setChiefExaminerId(Integer chiefExaminerId) {
+        this.chiefExaminerId = chiefExaminerId;
+    }
+
+    public String getChiefExaminerRole() {
+        return chiefExaminerRole;
+    }
+
+    public void setChiefExaminerRole(String chiefExaminerRole) {
+        this.chiefExaminerRole = chiefExaminerRole;
+    }
+
+    public String getChiefExaminerName() {
+        return chiefExaminerName;
+    }
+
+    public void setChiefExaminerName(String chiefExaminerName) {
+        this.chiefExaminerName = chiefExaminerName;
+    }
+
+    public String getFinalDecisionReason() {
+        return finalDecisionReason;
+    }
+
+    public void setFinalDecisionReason(String finalDecisionReason) {
+        this.finalDecisionReason = finalDecisionReason;
+    }
+
+    public LocalDateTime getFinalEvaluatedAt() {
+        return finalEvaluatedAt;
+    }
+
+    public void setFinalEvaluatedAt(LocalDateTime finalEvaluatedAt) {
+        this.finalEvaluatedAt = finalEvaluatedAt;
     }
 }

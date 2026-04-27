@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `invitation_code` (
     `created_by` INT COMMENT '创建者ID（管理员）',
     `expire_time` DATETIME COMMENT '过期时间',
     `remark` VARCHAR(200) COMMENT '备注',
-    `target_role` VARCHAR(20) DEFAULT 'STUDENT' COMMENT '目标角色: STUDENT-考生, EXAMINER-阅卷人',
+    `target_role` VARCHAR(20) DEFAULT 'USER' COMMENT '目标角色: USER-成员, HELPER-审核员',
     INDEX idx_code (`code`),
     INDEX idx_status (`status`),
     INDEX idx_create_time (`create_time`)

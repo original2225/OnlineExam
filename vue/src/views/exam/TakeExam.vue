@@ -1,7 +1,7 @@
 <template>
   <div class="take-exam">
 
-    <!-- 参加考试列表 -->
+    <!-- 参加审核列表 -->
     <template v-if="!data.inExam">
 
       <!-- 页面标题 -->
@@ -14,8 +14,8 @@
             </svg>
           </div>
           <div>
-            <h1>参加考试</h1>
-            <p>选择考试、进入答题、完成交卷</p>
+            <h1>参加审核</h1>
+            <p>选择审核、进入答题、完成提交</p>
           </div>
         </div>
       </div>
@@ -26,7 +26,7 @@
         <div class="stat-card stat-ongoing"><div class="stat-inner"><div class="stat-num">{{ ongoingCount }}</div><div class="stat-label">进行中</div></div></div>
       </div>
 
-      <!-- 考试列表 -->
+      <!-- 审核列表 -->
       <div class="exam-list-card" v-loading="data.loading">
         <transition-group name="exam-anim">
           <div v-for="exam in data.availableExams" :key="exam.id" class="exam-card-item">
@@ -41,7 +41,7 @@
                 <div class="exam-info">
                   <span class="exam-name">{{ exam.name }}</span>
                   <div class="exam-tags">
-                    <span class="exam-type-badge">{{ exam.examType === 'scheduled' ? '统一考试' : '常驻考试' }}</span>
+                    <span class="exam-type-badge">{{ exam.examType === 'scheduled' ? '统一审核' : '常驻审核' }}</span>
                     <el-tag v-if="exam.enableRecording" type="warning" size="small" effect="plain">录屏监控</el-tag>
                   </div>
                 </div>
@@ -68,7 +68,7 @@
             </div>
             <div class="exam-card-action">
               <el-button type="primary" round @click="startExam(exam)" style="--el-button-bg-color: #4338ca; --el-button-border-color: #4338ca;">
-                <el-icon><Edit /></el-icon> 进入考试
+                <el-icon><Edit /></el-icon> 进入审核
               </el-button>
             </div>
           </div>
@@ -79,12 +79,12 @@
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <p>暂无可参加的考试</p>
+          <p>暂无可参加的审核</p>
         </div>
       </div>
     </template>
 
-    <!-- 考试答题界面 -->
+    <!-- 审核答题界面 -->
     <template v-else>
       <!-- 答题页头部 -->
       <div class="exam-taking-hero">
@@ -103,7 +103,7 @@
         </div>
         <div class="exam-taking-actions">
           <el-button type="success" round @click="submitExam" style="--el-button-bg-color: #16a34a; --el-button-border-color: #16a34a;">
-            <el-icon><Check /></el-icon> 交卷
+            <el-icon><Check /></el-icon> 提交审核
           </el-button>
         </div>
       </div>
@@ -188,7 +188,7 @@
                 下一题 <el-icon><ArrowRight /></el-icon>
               </el-button>
               <el-button v-else @click="submitExam" round type="success" size="default">
-                <el-icon><Check /></el-icon> 交卷
+                <el-icon><Check /></el-icon> 提交审核
               </el-button>
             </div>
           </div>
@@ -200,13 +200,13 @@
     <el-dialog v-model="data.recordingDialog" title="录屏提示" width="440px" :close-on-click-modal="false" :show-close="false">
       <div class="record-tip-box">
         <el-icon size="32" color="#f59e0b"><VideoCamera /></el-icon>
-        <p>本次考试需要开启录屏监控，请选择要分享的屏幕。</p>
-        <p style="color: #92400e; font-size: 13px; background: #fef3c7; border-radius: 8px; padding: 8px;">请选择整个屏幕进行分享，考试期间请勿切换窗口。</p>
+        <p>本次审核需要开启录屏监控，请选择要分享的屏幕。</p>
+        <p style="color: #92400e; font-size: 13px; background: #fef3c7; border-radius: 8px; padding: 8px;">请选择整个屏幕进行分享，审核期间请勿切换窗口。</p>
       </div>
       <template #footer>
         <el-button @click="data.recordingDialog = false" size="default">取消</el-button>
         <el-button type="primary" @click="startRecordingAndExam" size="default">
-          <el-icon><VideoCamera /></el-icon> 开始录屏并进入考试
+          <el-icon><VideoCamera /></el-icon> 开始录屏并进入审核
         </el-button>
       </template>
     </el-dialog>
@@ -350,7 +350,7 @@ const doStartExam = (exam) => {
       data.timeLeft = exam.duration * 60
       data.answers = {}
       data.currentQ = 0
-      request.get('/examPaper/selectById', { params: { id: exam.paperId } }).then(paperRes => {
+      request.get('/examPaper/selectById/' + exam.paperId).then(paperRes => {
         if (paperRes.code === '200' && paperRes.data) {
           request.get('/question/selectByPaperId/' + exam.paperId).then(qRes => {
             if (qRes.code === '200') data.questions = qRes.data || []
@@ -372,7 +372,7 @@ const doStartExam = (exam) => {
 }
 
 const submitExam = () => {
-  ElMessageBox.confirm(`确定要交卷吗？已答 ${answeredCount.value} / ${data.questions.length} 题`, '确认交卷').then(() => {
+  ElMessageBox.confirm(`确定要提交审核吗？已答 ${answeredCount.value} / ${data.questions.length} 题`, '确认提交').then(() => {
     doSubmit()
   }).catch(() => {})
 }
@@ -390,7 +390,7 @@ const doSubmit = () => {
   savePromise.then(() => {
     request.post('/examRecord/submit', null, { params: { recordId: data.currentRecord.id } }).then(res => {
       if (res.code === '200') {
-        ElMessage.success('交卷成功！')
+        ElMessage.success('提交成功！')
         if (data.mediaRecorder && data.mediaRecorder.state !== 'inactive') data.mediaRecorder.stop()
         document.removeEventListener('visibilitychange', onVisibilityChange)
         data.inExam = false
@@ -431,7 +431,7 @@ const downloadLocal = (blob) => {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `exam_recording_${data.currentExam.id}_${data.user.id}.webm`
+  a.download = `review_recording_${data.currentExam.id}_${data.user.id}.webm`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -466,7 +466,7 @@ onUnmounted(() => {
 .stat-num { font-size: 26px; font-weight: 800; }
 .stat-label { font-size: 12px; opacity: 0.85; margin-top: 4px; }
 
-/* ===== 考试列表卡片 ===== */
+/* ===== 审核列表卡片 ===== */
 .exam-list-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--el-border-color-lighter); }
 .exam-card-item { display: flex; align-items: center; gap: 20px; padding: 22px 24px; border-bottom: 1px solid var(--el-border-color-lighter); transition: background 0.2s; }
 .exam-card-item:last-child { border-bottom: none; }

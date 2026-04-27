@@ -7,7 +7,7 @@
         <div class="page-hero-left">
           <div class="page-hero-icon">📊</div>
           <div>
-            <div class="page-hero-title">我的成绩</div>
+            <div class="page-hero-title">我的结果</div>
             <div class="page-hero-subtitle">每一次努力，都是成长的印记</div>
           </div>
         </div>
@@ -15,7 +15,7 @@
           <div class="page-hero-stats">
             <div class="page-hero-stat">
               <div class="page-hero-stat-val">{{ data.stats.total }}</div>
-              <div class="page-hero-stat-lbl">总考试数</div>
+              <div class="page-hero-stat-lbl">总审核数</div>
             </div>
             <div class="page-hero-stat-div"></div>
             <div class="page-hero-stat">
@@ -40,7 +40,7 @@
         </div>
         <div class="stats-body">
           <div class="stats-value">{{ data.stats.total }}</div>
-          <div class="stats-label">总考试数</div>
+          <div class="stats-label">总审核数</div>
         </div>
       </div>
       <div class="stats-card">
@@ -77,7 +77,7 @@
       <div class="toolbar-inner">
         <div class="toolbar-title">
           <span class="t-dot"></span>
-          成绩记录
+          结果记录
           <span class="toolbar-count">共 {{ data.stats.total }} 条</span>
         </div>
         <div class="toolbar-actions">
@@ -92,7 +92,7 @@
       </div>
     </div>
 
-    <!-- 成绩列表 -->
+    <!-- 结果列表 -->
     <div class="card list-card">
       <div v-if="data.loading" class="loading-state">
         <el-icon class="spin" :size="28"><Loading /></el-icon>
@@ -101,8 +101,8 @@
 
       <div v-else-if="sortedData.length === 0" class="empty-state">
         <div class="empty-icon">📊</div>
-        <div class="empty-text">暂无考试成绩</div>
-        <div class="empty-hint">参加考试后，成绩会自动同步到这里</div>
+        <div class="empty-text">暂无审核结果</div>
+        <div class="empty-hint">参加审核后，结果会自动同步到这里</div>
       </div>
       <div v-else class="score-card-list">
         <div v-for="record in paginatedData" :key="record.id" class="score-card">
@@ -163,7 +163,7 @@
     <!-- 详情对话框 -->
     <el-dialog
       v-model="data.detailDialogVisible"
-      title="考试详情"
+      title="审核详情"
       width="70%"
       :close-on-click-modal="false"
       destroy-on-close
@@ -190,13 +190,13 @@
           </div>
         </div>
 
-        <!-- 成绩对比 -->
+        <!-- 结果对比 -->
         <div v-if="data.compareData" class="detail-compare">
-          <div class="dc-title">成绩对比</div>
+          <div class="dc-title">结果对比</div>
           <div class="dc-grid">
             <div class="dc-item">
               <div class="dc-val">{{ data.compareData.avgScore }}</div>
-              <div class="dc-lbl">班级平均</div>
+              <div class="dc-lbl">分支平均</div>
             </div>
             <div class="dc-item">
               <div class="dc-val">{{ data.compareData.maxScore }}</div>
@@ -267,7 +267,7 @@
             </div>
             <div v-if="answer.comment" class="comment-box">
               <el-icon :size="14"><ChatDotRound /></el-icon>
-              <span><strong>老师评语：</strong>{{ answer.comment }}</span>
+              <span><strong>阅卷评语：</strong>{{ answer.comment }}</span>
             </div>
           </div>
         </div>
@@ -501,7 +501,7 @@ export default { name: 'MyScores' }
 .empty-text { color: var(--text-primary); font-size: 15px; font-weight: 500; margin-bottom: 6px; }
 .empty-hint { color: var(--text-secondary); font-size: 13px; }
 
-/* 成绩卡片 */
+/* 结果卡片 */
 .score-card-list { display: flex; flex-direction: column; gap: 12px; }
 .score-card {
   background: var(--bg-card);

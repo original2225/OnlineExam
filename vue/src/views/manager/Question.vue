@@ -110,7 +110,7 @@
       <el-button type="success" size="large" @click="initSample" class="init-btn">
         <el-icon><Lightning /></el-icon> 一键初始化示例题目
       </el-button>
-      <span class="init-tip">点击后将初始化小学算术示例题目</span>
+      <span class="init-tip">点击后将初始化四项进服审核示例题目</span>
     </div>
 
     <!-- 新增/编辑弹窗 -->
@@ -158,7 +158,7 @@ const save = () => { (data.form.id ? request.put('/question/update', data.form) 
 const del = (id) => { request.delete('/question/delete/' + id).then(res => { if (res.code === '200') { ElMessage.success('删除成功'); load() } else ElMessage.error(res.msg) }) }
 const delBatch = () => { if (!data.ids.length) return; ElMessageBox.confirm(`确定删除选中的 ${data.ids.length} 道题目吗？`, '批量删除', { confirmButtonText: '确认删除', cancelButtonText: '取消', type: 'warning' }).then(() => { request.delete('/question/delete/batch', { data: data.ids }).then(res => { if (res.code === '200') { ElMessage.success('批量删除成功'); load() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
 const handleSelectionChange = (rows) => { data.ids = rows.map(v => v.id) }
-const initSample = () => { ElMessageBox.confirm('将初始化5道小学算术示例题目，确定继续吗？', '初始化确认', { type: 'info' }).then(() => { request.post('/question/initSample').then(res => { if (res.code === '200') { ElMessage.success('初始化成功'); load(); loadCategories() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
+const initSample = () => { ElMessageBox.confirm('将初始化四项进服审核示例题目，确定继续吗？', '初始化确认', { type: 'info' }).then(() => { request.post('/question/initSample').then(res => { if (res.code === '200') { ElMessage.success('初始化成功'); load(); loadCategories() } else ElMessage.error(res.msg) }) }).catch(() => {}) }
 const reset = () => { data.content = null; data.type = null; data.categoryId = null; data.difficulty = null; data.pageNum = 1; load() }
 const handleSizeChange = (size) => { data.pageSize = size; load() }
 const handleCurrentChange = (page) => { data.pageNum = page; load() }

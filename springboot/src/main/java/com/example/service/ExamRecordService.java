@@ -130,11 +130,11 @@ public class ExamRecordService {
         examRecordMapper.updateById(record);
         assignBranchOnPass(record);
 
-        // 通知管理员有新考试提交
+        // 通知管理员有新审核提交
         Exam exam = examMapper.selectById(record.getExamId());
-        String examName = exam != null ? exam.getName() : "考试";
+        String examName = exam != null ? exam.getName() : "审核";
         Student student = studentMapper.selectById(record.getStudentId());
-        String studentName = student != null ? student.getName() : "学生";
+        String studentName = student != null ? student.getName() : "玩家";
         notificationService.notifyExamSubmitted(studentName, examName);
 
         return record;

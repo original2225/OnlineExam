@@ -8,11 +8,11 @@ public class ExamPermission {
     private Integer id;
     /** 考试ID */
     private Integer examId;
-    /** 学生ID */
+    /** 玩家ID */
     private Integer studentId;
-    /** 学生姓名（关联查询用） */
+    /** 玩家姓名（关联查询用） */
     private String studentName;
-    /** 学号（关联查询用） */
+    /** 玩家编号（关联查询用） */
     private String studentNo;
     /** 创建时间 */
     private LocalDateTime createdAt;

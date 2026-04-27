@@ -2,8 +2,8 @@
   <div class="main-content">
     <div class="page-hero">
       <div class="page-hero-icon">📝</div>
-      <div class="page-hero-title">错题本</div>
-      <div class="page-hero-subtitle">温故知新，从错误中学习</div>
+      <div class="page-hero-title">错题复盘</div>
+      <div class="page-hero-subtitle">复盘入服审核薄弱点，重新理解服务器规则与方向要求</div>
       <div class="page-hero-stats">
         <div class="page-hero-stat"><div class="page-hero-stat-val">{{ data.wrongList.length }}</div><div class="page-hero-stat-lbl">错题总数</div></div>
         <div class="page-hero-stat-div"></div>
@@ -54,7 +54,7 @@
           <el-tag v-else-if="wq.question?.difficulty === 'medium'" type="warning" size="small" effect="light">中等</el-tag>
           <el-tag v-else-if="wq.question?.difficulty === 'hard'" type="danger" size="small" effect="light">困难</el-tag>
           <span class="wrong-source">
-            {{ wq.source === 'exam' ? '来自考试' : wq.source === 'practice' ? '来自练习' : '手动添加' }}
+            {{ wq.source === 'exam' ? '来自正式审核' : wq.source === 'practice' ? '来自审核模拟' : '手动添加' }}
           </span>
           <span class="wrong-time">{{ formatTime(wq.createdAt) }}</span>
           <el-button size="small" type="danger" text @click="removeWrong(wq.id)">
@@ -91,7 +91,7 @@
         </div>
 
         <div class="annotations-section" v-if="wq.annotations?.length">
-          <div class="anno-header">💡 满分考生批注</div>
+          <div class="anno-header">💡 高分审核批注</div>
           <div v-for="anno in wq.annotations" :key="anno.id" class="anno-item">
             <div class="anno-meta">
               <span class="anno-user">{{ anno.userName }}</span>
@@ -161,7 +161,7 @@ const loadWrongQuestions = () => {
 }
 
 const removeWrong = (id) => {
-  ElMessageBox.confirm('确定要从错题集中移除吗？', '确认', { type: 'warning' }).then(() => {
+  ElMessageBox.confirm('确定要从错题复盘中移除吗？', '确认', { type: 'warning' }).then(() => {
     request.delete('/wrongQuestion/delete/' + id).then(res => {
       if (res.code === '200') {
         ElMessage.success('已移除')

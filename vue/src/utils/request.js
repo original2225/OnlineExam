@@ -39,6 +39,9 @@ request.interceptors.response.use(
         return res;
     },
     error => {
+        if (error.config?.silentError) {
+            return Promise.reject(error)
+        }
         // 处理不同类型的错误
         if (error.response) {
             // 服务器返回了错误状态码

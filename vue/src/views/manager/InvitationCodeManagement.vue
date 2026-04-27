@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>邀请码管理</h1>
-          <p>统一管理用户及阅卷人注册邀请码，支持批量生成与自动清理</p>
+          <p>统一管理玩家及阅卷人注册邀请码，支持批量生成与自动清理</p>
         </div>
       </div>
       <div class="hero-actions">
@@ -34,7 +34,7 @@
       <div class="stat-item stat-user">
         <div class="stat-inner">
           <div class="stat-num" v-count-up="{ val: data.statistics.studentUnused }">{{ data.statistics.studentUnused || 0 }}</div>
-          <div class="stat-label">用户邀请码</div>
+          <div class="stat-label">玩家邀请码</div>
           <div class="stat-desc">未使用</div>
         </div>
       </div>
@@ -77,7 +77,7 @@
         <el-select v-model="data.searchForm.targetRole" placeholder="类型" @change="load" class="filter-select">
           <template #prefix><el-icon><User /></el-icon></template>
           <el-option label="全部类型" value=""></el-option>
-          <el-option label="用户" value="USER" />
+          <el-option label="玩家" value="USER" />
           <el-option label="阅卷人" value="HELPER" />
         </el-select>
         <el-button plain @click="reset" class="reset-btn">重置</el-button>
@@ -112,7 +112,7 @@
         <el-table-column prop="targetRole" label="类型" width="110">
           <template #default="scope">
             <span class="type-badge" :class="scope.row.targetRole === 'HELPER' ? 'type-examiner' : 'type-user'">
-              {{ scope.row.targetRole === 'HELPER' ? '阅卷人' : '用户' }}
+              {{ scope.row.targetRole === 'HELPER' ? '阅卷人' : '玩家' }}
             </span>
           </template>
         </el-table-column>
@@ -124,7 +124,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="usedByUsername" label="使用用户" width="130">
+        <el-table-column prop="usedByUsername" label="使用玩家" width="130">
           <template #default="scope">
             <span class="user-name" v-if="scope.row.usedByUsername">{{ scope.row.usedByUsername }}</span>
             <span class="user-empty" v-else>—</span>
@@ -202,8 +202,8 @@
                 <el-icon><User /></el-icon>
               </div>
               <div class="type-info">
-                <div class="type-name">用户邀请码</div>
-                <div class="type-desc">注册为普通考生用户</div>
+                <div class="type-name">玩家邀请码</div>
+                <div class="type-desc">注册为服务器玩家</div>
               </div>
               <div class="type-check">
                 <el-icon><Check /></el-icon>
@@ -281,7 +281,7 @@
           </div>
           <div class="result-info">
             <div class="result-count">{{ generatedCount }} 个邀请码</div>
-            <div class="result-type">{{ data.generateForm.targetRole === 'USER' ? '用户邀请码' : '阅卷人邀请码' }}</div>
+            <div class="result-type">{{ data.generateForm.targetRole === 'USER' ? '玩家邀请码' : '阅卷人邀请码' }}</div>
           </div>
         </div>
         <el-alert

@@ -173,7 +173,7 @@
               <el-image v-if="data.form.avatar" :src="data.form.avatar" fit="cover" />
               <el-icon v-else><Plus /></el-icon>
             </div>
-            <el-upload :action="baseUrl + '/files/upload'" :on-success="handleFileUpload" :show-file-list="false" accept="image/*">
+            <el-upload :action="baseUrl + '/files/upload'" :headers="uploadHeaders" :on-success="handleFileUpload" :show-file-list="false" accept="image/*">
               <el-button size="small" type="primary">上传头像</el-button>
             </el-upload>
           </div>
@@ -202,8 +202,10 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Edit, Delete, Top, Plus, Search, User, Postcard, Phone, Message, Reading, CircleCheck, EditPen, Bell } from '@element-plus/icons-vue'
 import request from '@/utils/request.js'
+import { getUploadHeaders } from '@/utils/upload.js'
 
 const baseUrl = import.meta.env.VITE_BASE_URL
+const uploadHeaders = getUploadHeaders()
 const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
 const userLevel = user.level || 0
 
@@ -276,7 +278,7 @@ const handleSelectionChange = (rows) => { data.ids = rows.map(v => v.id) }
 const handleFileUpload = (res) => { if (res.code === '200') data.form.avatar = res.data }
 
 const promoteToAdmin = (row) => {
-  ElMessageBox.confirm(`确定将「${row.name}」提拔为管理员吗？提拔后该用户将拥有管理员权限。`, '提拔确认', { confirmButtonText: '确认提拔', cancelButtonText: '取消', type: 'warning' })
+  ElMessageBox.confirm(`确定将「${row.name}」提拔为管理员吗？提拔后该成员将拥有管理员权限。`, '提拔确认', { confirmButtonText: '确认提拔', cancelButtonText: '取消', type: 'warning' })
     .then(() => {
       const transferForm = {
         id: row.id, _originalSource: 'HELPER', source: 'ADMIN',

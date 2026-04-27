@@ -8,6 +8,7 @@ import com.example.entity.Account;
 import com.example.entity.Examiner;
 import com.example.exception.CustomException;
 import com.example.mapper.ExaminerMapper;
+import com.example.utils.PasswordUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +34,7 @@ public class ExaminerService {
         if (ObjectUtil.isEmpty(examiner.getPassword())) {
             examiner.setPassword(Constants.USER_DEFAULT_PASSWORD);
         }
+        examiner.setPassword(PasswordUtils.encode(examiner.getPassword()));
         if (ObjectUtil.isEmpty(examiner.getName())) {
             examiner.setName(examiner.getUsername());
         }
@@ -76,11 +78,15 @@ public class ExaminerService {
         if (ObjectUtil.isNull(dbExaminer)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!dbExaminer.getPassword().equals(account.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbExaminer.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
         }
+        if (PasswordUtils.needsUpgrade(dbExaminer.getPassword())) {
+            dbExaminer.setPassword(PasswordUtils.encode(account.getPassword()));
+            examinerMapper.updateById(dbExaminer);
+        }
         // 生成token
-        String token = TokenUtils.createToken(dbExaminer.getId() + "-" + dbExaminer.getRole(), dbExaminer.getPassword());
+        String token = TokenUtils.createToken(dbExaminer.getId() + "-" + dbExaminer.getRole());
         dbExaminer.setToken(token);
         return dbExaminer;
     }
@@ -93,10 +99,10 @@ public class ExaminerService {
         if (ObjectUtil.isNull(dbExaminer)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbExaminer.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbExaminer.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbExaminer.setPassword(account.getNewPassword());
+        dbExaminer.setPassword(PasswordUtils.encode(account.getNewPassword()));
         examinerMapper.updateById(dbExaminer);
     }
 

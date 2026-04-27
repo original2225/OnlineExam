@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `question_favorite` (
   UNIQUE KEY `uk_user_question` (`user_id`, `user_role`, `question_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='题目收藏表';
 
--- 学习打卡记录表
+-- 审核打卡记录表
 CREATE TABLE IF NOT EXISTS `study_checkin` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `study_checkin` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_date` (`user_id`, `user_role`, `checkin_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='学习打卡记录表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='审核打卡记录表';
 
 -- 用户贡献题目表
 CREATE TABLE IF NOT EXISTS `question_contribution` (
@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `question_contribution` (
   `reviewer_name` varchar(50),
   `review_comment` text,
   `reviewed_at` datetime,
+  `approved_question_id` int,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户贡献题目表';

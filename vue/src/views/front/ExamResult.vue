@@ -21,7 +21,7 @@
           <CircleClose v-else />
         </el-icon>
       </div>
-      <h2 class="result-title">{{ data.record?.isPass ? '恭喜你，考试通过！' : '很遗憾，考试未通过' }}</h2>
+      <h2 class="result-title">{{ data.record?.isPass ? '恭喜你，审核通过！' : '很遗憾，审核未通过' }}</h2>
       <p class="result-sub" v-if="data.record?.isPass && data.record?.totalScore >= 95">太强了！接近满分！</p>
       <p class="result-sub" v-else-if="data.record?.isPass && data.record?.totalScore >= 90">太厉害了，优秀！</p>
       <p class="result-sub" v-else-if="data.record?.isPass && data.record?.totalScore >= 80">表现不错，继续保持！</p>
@@ -31,8 +31,8 @@
 
     <div class="score-compare-card" v-if="data.compareData">
       <div class="compare-header">
-        <span class="compare-title">📊 成绩对比</span>
-        <el-tag size="small" type="info">击败了 {{ data.compareData.percentile }}% 的考生</el-tag>
+        <span class="compare-title">📊 结果对比</span>
+        <el-tag size="small" type="info">击败了 {{ data.compareData.percentile }}% 的玩家</el-tag>
       </div>
       <div class="compare-bars">
         <div class="compare-item">
@@ -87,16 +87,10 @@
 
     <div class="action-bar">
       <el-button type="primary" size="large" round @click="goBack">
-        <el-icon><Back /></el-icon> 返回考试列表
+        <el-icon><Back /></el-icon> 返回审核列表
       </el-button>
       <el-button size="large" round @click="router.push('/front/myScores')">
-        <el-icon><DataLine /></el-icon> 查看成绩单
-      </el-button>
-      <el-button size="large" round @click="shareToForum" v-if="data.record?.isPass">
-        <el-icon><Share /></el-icon> 分享到社区
-      </el-button>
-      <el-button size="large" round @click="challengeMode" v-if="!data.record?.isPass">
-        <el-icon><RefreshRight /></el-icon> 挑战练习
+        <el-icon><DataLine /></el-icon> 查看结果单
       </el-button>
     </div>
 
@@ -183,22 +177,11 @@
           <div v-else-if="!data.annoInputVisible[answer.questionId]" class="anno-empty">暂无批注，做第一个分享的人吧</div>
         </div>
 
-        <div v-if="!answer.isCorrect && answer.question?.type !== 'essay'" class="wrong-actions">
-          <el-divider class="wrong-divider" />
-          <div class="wrong-btns">
-            <el-button size="small" type="warning" plain @click="addToWrong(answer)" :disabled="data.wrongAdded[answer.questionId]">
-              <el-icon><Star /></el-icon> {{ data.wrongAdded[answer.questionId] ? '已加入错题集' : '加入错题集' }}
-            </el-button>
-            <el-button size="small" type="primary" plain @click="practiceThis(answer)">
-              <el-icon><RefreshRight /></el-icon> 针对练习
-            </el-button>
-          </div>
-        </div>
       </div>
     </div>
 
     <div class="result-footer">
-      <el-button type="primary" size="large" round @click="goBack">返回考试列表</el-button>
+      <el-button type="primary" size="large" round @click="goBack">返回审核列表</el-button>
     </div>
   </div>
 </template>
@@ -330,7 +313,7 @@ const addToWrong = (answer) => {
   }).then(res => {
     if (res.code === '200') {
       data.wrongAdded[answer.questionId] = true
-      ElMessage.success('已加入错题集')
+      ElMessage.success('已加入错题复盘')
     }
   })
 }
@@ -342,17 +325,6 @@ const reactMood = (mood) => {
   ElMessage.success({ message: mood === 'laugh' ? '😄 太棒了！' : mood === 'clap' ? '👏 继续加油！' : '🤔 思考使人进步！', duration: 2000 })
 }
 
-const shareToForum = () => {
-  router.push({ path: '/front/forumEdit', query: { title: `我在《${data.record?.examName}》中取得了${data.record?.totalScore}分的好成绩！`, autoText: `总分：${data.record?.totalScore}分\n客观题：${data.record?.autoScore}分\n用时：${formatDuration(data.record?.duration)}\n感谢这个平台！` } })
-}
-
-const challengeMode = () => {
-  router.push({ path: '/front/practiceMode', query: { categoryId: data.record?.categoryId } })
-}
-
-const practiceThis = (answer) => {
-  router.push({ path: '/front/practiceMode', query: { questionId: answer.questionId } })
-}
 
 const startCelebration = () => {
   const canvas = celebrateCanvas.value

@@ -16,10 +16,10 @@
             <circle class="ring-bg" cx="22" cy="22" r="18" />
             <circle class="ring-fill" cx="22" cy="22" r="18"
               :stroke-dasharray="113.1"
-              :stroke-dashoffset="113.1 - (113.1 * data.progressPercent / 100)"
+              :stroke-dashoffset="113.1 - (113.1 * progressPercent / 100)"
             />
           </svg>
-          <span class="ring-text">{{ data.progressPercent }}%</span>
+          <span class="ring-text">{{ progressPercent }}%</span>
         </div>
         <div class="progress-label">答题进度</div>
       </div>
@@ -163,11 +163,11 @@
         <div class="answer-stats">
           <div class="stat-row">
             <span class="stat-label">已答</span>
-            <span class="stat-value answered">{{ data.answeredCount }}</span>
+            <span class="stat-value answered">{{ answeredCount }}</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">未答</span>
-            <span class="stat-value unanswered">{{ data.questions.length - data.answeredCount }}</span>
+            <span class="stat-value unanswered">{{ data.questions.length - answeredCount }}</span>
           </div>
         </div>
 
@@ -179,10 +179,10 @@
 
     <!-- 交卷确认弹窗 -->
     <el-dialog v-model="data.submitDialogVisible" title="📋 提交确认" width="420px" :close-on-click-modal="false" destroy-on-close append-to-body>
-      <div v-if="data.questions.length - data.answeredCount > 0" class="submit-warning">
+      <div v-if="data.questions.length - answeredCount > 0" class="submit-warning">
         <el-alert type="warning" :closable="false" show-icon>
           <template #title>
-            还有 <strong>{{ data.questions.length - data.answeredCount }}</strong> 道题未作答，确定要提交吗？
+            还有 <strong>{{ data.questions.length - answeredCount }}</strong> 道题未作答，确定要提交吗？
           </template>
         </el-alert>
       </div>
@@ -279,42 +279,54 @@ const formatDuration = (seconds) => {
   return `${s}秒`
 }
 
-// 加载考试数据
-const loadExam = () => {
+// 加载审核数据
+const loadExam = async () => {
   data.examId = parseInt(router.currentRoute.value.query.examId)
-  request.get('/exam/selectById/' + data.examId).then(res => {
-    if (res.code === '200') {
-      data.exam = res.data
-      request.get('/examPaper/selectById/' + data.exam.paperId).then(res2 => {
-        if (res2.code === '200') {
-          data.paper = res2.data
-          request.get('/question/selectByPaperId/' + data.exam.paperId).then(res3 => {
-            if (res3.code === '200') {
-              data.questions = (res3.data || []).sort(() => Math.random() - 0.5)
-              data.questions.forEach(q => {
-                if (q.type === 'fillin') {
-                  const blanks = getFillinBlanks(q)
-                  initFillinAnswers(q.id, blanks.length)
-                }
-              })
-            }
-          })
-        }
-      })
-    }
-  })
+  if (!data.examId || !user.id) {
+    ElMessage.error('审核信息异常，请重新进入审核')
+    router.push('/front/examList')
+    return false
+  }
+
+  try {
+    const examRes = await request.get('/exam/selectById/' + data.examId)
+    if (examRes.code !== '200' || !examRes.data) throw new Error(examRes.msg || '审核不存在')
+    data.exam = examRes.data
+
+    const paperRes = await request.get('/examPaper/selectById/' + data.exam.paperId)
+    if (paperRes.code !== '200' || !paperRes.data) throw new Error(paperRes.msg || '试卷不存在')
+    data.paper = paperRes.data
+
+    const questionRes = await request.get('/question/selectByPaperId/' + data.exam.paperId)
+    if (questionRes.code !== '200') throw new Error(questionRes.msg || '题目加载失败')
+    data.questions = (questionRes.data || []).sort(() => Math.random() - 0.5)
+    data.questions.forEach(q => {
+      if (q.type === 'fillin') {
+        const blanks = getFillinBlanks(q)
+        initFillinAnswers(q.id, blanks.length)
+      }
+    })
+    return true
+  } catch (e) {
+    ElMessage.error(e.message || '审核加载失败')
+    data.loading = false
+    return false
+  }
 }
 
-// 开始考试
+// 开始审核
 const startExam = () => {
-  request.post('/examRecord/start?examId=' + data.examId + '&studentId=' + user.id).then(res => {
+  request.post('/examRecord/start', null, { params: { examId: data.examId, studentId: user.id } }).then(res => {
     if (res.code === '200') {
       data.recordId = res.data.id
       data.remainingTime = data.exam.duration * 60
       data.loading = false
       startTimer()
+    } else {
+      data.loading = false
+      ElMessage.error(res.msg || '审核启动失败')
     }
-  })
+  }).catch(() => { data.loading = false })
 }
 
 // 通用答案处理
@@ -465,7 +477,7 @@ const startTimer = () => {
     }
     if (data.remainingTime <= 0) {
       clearInterval(data.timer)
-      ElMessage.warning('考试时间到，自动提交！')
+      ElMessage.warning('审核时间到，自动提交！')
       submitExam()
     }
   }, 1000)
@@ -498,9 +510,9 @@ const checkTimerEasterEgg = () => {
   }
 }
 
-onMounted(() => {
-  loadExam()
-  startExam()
+onMounted(async () => {
+  const loaded = await loadExam()
+  if (loaded) startExam()
   document.addEventListener('visibilitychange', handleVisibilityChange)
   document.addEventListener('keydown', handleKeyDown)
   autoSave = setInterval(() => {
@@ -538,7 +550,7 @@ const handleVisibilityChange = () => {
 }
 
 window.onbeforeunload = () => {
-  if (data.recordId && data.remainingTime > 0) return '考试正在进行中，确定要离开吗？'
+  if (data.recordId && data.remainingTime > 0) return '审核正在进行中，确定要离开吗？'
 }
 </script>
 

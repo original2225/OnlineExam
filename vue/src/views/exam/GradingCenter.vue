@@ -4,7 +4,7 @@
     <!-- 顶部工具栏 -->
     <div class="gc-toolbar">
       <div class="gct-left">
-        <el-select v-model="data.selectedExamId" placeholder="选择考试" clearable @change="loadRecords" style="width: 260px">
+        <el-select v-model="data.selectedExamId" placeholder="选择审核" clearable @change="loadRecords" style="width: 260px">
           <template #prefix><el-icon><Document /></el-icon></template>
           <el-option v-for="e in data.examList" :key="e.id" :label="e.name" :value="e.id" />
         </el-select>
@@ -47,7 +47,7 @@
           <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="var(--border-light)" stroke-width="1.5"/>
         </svg>
       </div>
-      <p>请从上方选择一个考试</p>
+      <p>请从上方选择一个审核</p>
       <span>选择后可查看并批阅答卷</span>
     </div>
 
@@ -122,7 +122,7 @@
     <el-dialog v-model="data.gradeDialog" title="批阅试卷" width="880px" class="grade-dialog" destroy-on-close top="3vh">
       <div class="grade-dialog-body">
         <div class="grade-left">
-          <!-- 考生信息条 -->
+          <!-- 玩家信息条 -->
           <div class="grade-student-bar">
             <div class="gsb-avatar" :style="{ background: avatarGradient(data.currentRecord) }">
               {{ (data.currentRecord.studentName || '?')[0] }}
@@ -159,7 +159,7 @@
             <!-- 答案对照 -->
             <div class="gqc-answer-row">
               <div class="gqar-row">
-                <span class="gqar-label">考生答案</span>
+                <span class="gqar-label">玩家答案</span>
                 <span class="gqar-val student">{{ getAnswer(q) || '未作答' }}</span>
               </div>
               <div class="gqar-row" v-if="q.answer">
@@ -197,14 +197,24 @@
 
           <div class="grade-action-panel">
             <div class="gap-comment">
+              <el-input-number v-model="data.performanceScore" :min="0" :max="100" :step="5" placeholder="表现评分" style="width: 100%; margin-bottom: 8px" />
+              <el-radio-group v-model="data.advisoryVote" style="margin-bottom: 8px">
+                <el-radio value="PASS">建议通过</el-radio>
+                <el-radio value="FAIL">建议不通过</el-radio>
+                <el-radio value="ABSTAIN">弃权</el-radio>
+              </el-radio-group>
+              <el-checkbox-group v-if="data.advisoryVote === 'FAIL'" v-model="data.rejectionReasons" style="margin-bottom: 8px">
+                <el-checkbox label="规则理解不足" />
+                <el-checkbox label="沟通态度不合适" />
+                <el-checkbox label="名声或历史记录不佳" />
+                <el-checkbox label="不适合当前服务器氛围" />
+              </el-checkbox-group>
+              <el-input v-if="data.advisoryVote === 'FAIL'" v-model="data.customReason" placeholder="其他原因（可选）" style="margin-bottom: 8px" />
               <el-input v-model="data.gradeComment" type="textarea" :rows="3" placeholder="总评语（可选）" />
             </div>
             <div class="gap-btns">
-              <el-button type="primary" size="large" @click="submitGrade('UNDER_REVIEW')" class="gap-submit">
-                <el-icon><Check /></el-icon> 提交批阅
-              </el-button>
-              <el-button type="success" size="large" @click="submitGrade('PASSED')" class="gap-pass">
-                <el-icon><CircleCheck /></el-icon> 直接通过
+              <el-button type="primary" size="large" @click="submitGrade" class="gap-submit">
+                <el-icon><Check /></el-icon> 提交批阅与表决
               </el-button>
             </div>
             <div class="gap-hint">
@@ -246,8 +256,13 @@ const data = reactive({
   currentRecord: {},
   questions: [],
   answers: {},
+  answerIds: {},
   gradeScores: {},
   gradeComment: '',
+  performanceScore: 80,
+  advisoryVote: 'PASS',
+  rejectionReasons: [],
+  customReason: '',
   gradeCommentMap: {},
 })
 
@@ -322,50 +337,49 @@ const loadRecords = () => {
 const openGrade = (record) => {
   data.currentRecord = { ...record }
   data.gradeScores = {}
-  data.gradeComment = ''
+  data.performanceScore = 80
+  data.advisoryVote = 'PASS'
+  data.rejectionReasons = []
+  data.customReason = ''
   data.gradeCommentMap = {}
   data.questions = []
-  data.answers = {}
+  data.answerIds = {}
 
   request.get('/examRecord/detail/' + record.id).then(res => {
     if (res.code === '200' && res.data?.answers) {
-      res.data.answers.forEach(a => { data.answers[a.questionId] = a.studentAnswer })
+      res.data.answers.forEach(a => { data.answers[a.questionId] = a.studentAnswer; data.answerIds[a.questionId] = a.id })
     }
   })
 
-  request.get('/examApproval/selectByPaperId/' + record.paperId).then(res => {
+  request.get('/question/selectByPaperId/' + record.paperId).then(res => {
     if (res.code === '200') {
       data.questions = res.data || []
       data.questions.forEach(q => { data.gradeScores[q.id] = 0 })
     }
-  }).catch(() => {
-    request.get('/question/selectByPaperId/' + record.paperId).then(res => {
-      if (res.code === '200') {
-        data.questions = res.data || []
-        data.questions.forEach(q => { data.gradeScores[q.id] = 0 })
-      }
-    })
   })
 
   data.gradeDialog = true
 }
 
-const submitGrade = (status) => {
-  const manualScore = Object.values(data.gradeScores).reduce((sum, v) => sum + (v || 0), 0)
-  const autoScore = parseFloat(data.currentRecord.autoScore) || 0
-  const total = autoScore + manualScore
-  const fullScore = data.questions.reduce((sum, q) => sum + (q.score || 0), 0)
-  const isPass = fullScore > 0 ? total >= fullScore * 0.6 : total >= 60
+const submitGrade = () => {
+  const answers = data.questions
+    .filter(q => q.type === 'essay' || q.type === 'fillin' || q.type === 'fill')
+    .map(q => ({
+      id: data.answerIds[q.id],
+      score: data.gradeScores[q.id] || 0,
+      comment: data.gradeCommentMap[q.id]
+    }))
 
-  request.put('/examRecord/update', {
-    id: data.currentRecord.id,
-    manualScore: manualScore.toFixed(1),
-    totalScore: total.toFixed(1),
-    isPass: isPass,
-    examStatus: status
+  request.post('/grading/batchGrade?recordId=' + data.currentRecord.id, {
+    answers,
+    performanceScore: data.performanceScore,
+    advisoryVote: data.advisoryVote,
+    rejectionReasons: data.rejectionReasons.join(','),
+    customReason: data.customReason,
+    comment: data.gradeComment
   }).then(res => {
     if (res.code === '200') {
-      ElMessage.success('批阅成功')
+      ElMessage.success('批阅与表决已提交')
       data.gradeDialog = false
       loadRecords()
     } else {
@@ -375,7 +389,7 @@ const submitGrade = (status) => {
 }
 
 const onKeyDown = (e) => {
-  if (data.gradeDialog && e.ctrlKey && e.key === 'Enter') submitGrade('UNDER_REVIEW')
+  if (data.gradeDialog && e.ctrlKey && e.key === 'Enter') submitGrade()
 }
 
 onMounted(() => { loadExams(); window.addEventListener('keydown', onKeyDown) })
@@ -449,7 +463,7 @@ onUnmounted(() => { window.removeEventListener('keydown', onKeyDown) })
 .grade-dialog-body { display: flex; gap: 20px; max-height: 72vh; }
 .grade-left { flex: 1; overflow-y: auto; padding-right: 8px; }
 
-/* 考生信息条 */
+/* 玩家信息条 */
 .grade-student-bar {
   display: flex; align-items: center; gap: 14px;
   background: var(--bg-page); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;

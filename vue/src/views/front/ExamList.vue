@@ -7,8 +7,8 @@
         <div class="page-hero-left">
           <div class="page-hero-icon">📋</div>
           <div>
-            <div class="page-hero-title">在线考试</div>
-            <div class="page-hero-subtitle">认真作答，诚信考试，展现真实实力</div>
+            <div class="page-hero-title">进服审核</div>
+            <div class="page-hero-subtitle">认真作答，诚信审核，展现真实入服实力</div>
           </div>
         </div>
         <div class="page-hero-right">
@@ -38,7 +38,7 @@
         <div class="toolbar-search">
           <div class="search-box">
             <el-icon class="search-icon"><Search /></el-icon>
-            <input v-model="data.searchText" placeholder="搜索考试名称..." />
+            <input v-model="data.searchText" placeholder="搜索审核名称..." />
             <el-icon v-if="data.searchText" class="search-clear" @click="data.searchText = ''"><Close /></el-icon>
           </div>
         </div>
@@ -65,11 +65,11 @@
       <div style="margin-top: 12px;">加载中...</div>
     </div>
 
-    <!-- 考试卡片列表 -->
+    <!-- 审核卡片列表 -->
     <div v-else-if="filteredExams.length === 0" class="card">
       <div class="empty-state">
         <div class="empty-icon">📋</div>
-        <div class="empty-text">{{ data.searchText ? '未找到匹配的考试' : '暂无可参加的考试' }}</div>
+        <div class="empty-text">{{ data.searchText ? '未找到匹配的审核' : '暂无可参加的审核' }}</div>
       </div>
     </div>
     <div v-else class="exam-card-list">
@@ -112,7 +112,7 @@
             round
             @click="startExam(exam)"
           >
-            <el-icon><VideoPlay /></el-icon> 开始考试
+            <el-icon><VideoPlay /></el-icon> 开始审核
           </el-button>
           <el-button
             v-else-if="getExamStatus(exam) === 'notStarted'"
@@ -298,7 +298,7 @@ export default { name: 'ExamList' }
 }
 .tab.active .tab-badge { background: rgba(255,255,255,0.25); }
 
-/* 考试卡片 */
+/* 审核卡片 */
 .exam-card-list { display: flex; flex-direction: column; gap: 12px; }
 .exam-card {
   position: relative;

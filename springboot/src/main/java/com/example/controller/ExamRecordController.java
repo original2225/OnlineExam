@@ -90,7 +90,7 @@ public class ExamRecordController {
     }
 
     /**
-     * 获取学生的考试记录
+     * 获取玩家的考试记录
      */
     @GetMapping("/getByStudentId/{studentId}")
     public Result getByStudentId(@PathVariable Integer studentId) {

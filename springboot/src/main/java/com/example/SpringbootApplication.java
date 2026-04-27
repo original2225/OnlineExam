@@ -12,7 +12,7 @@ public class SpringbootApplication {
         SpringApplication.run(SpringbootApplication.class, args);
 
         System.out.println("\n==============================================================");
-        System.out.println("              在线考试管理系统  Online Exam System             ");
+        System.out.println("              北冥审核系统  Beiming Review System             ");
         System.out.println("==============================================================");
         System.out.println("  系统已成功启动！");
         System.out.println("  后端服务地址: http://localhost:9090");
@@ -22,7 +22,7 @@ public class SpringbootApplication {
         System.out.println("   - 用户管理");
         System.out.println("   - 题库管理");
         System.out.println("   - 试卷管理");
-        System.out.println("   - 在线考试");
+        System.out.println("   - 入服审核");
         System.out.println("   - 成绩统计分析");
         System.out.println("--------------------------------------------------------------");
         System.out.println("  本系统仅供北冥服务器内部考核使用。");

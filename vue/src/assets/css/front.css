@@ -220,7 +220,7 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* 学习进度环 */
+/* 审核进度环 */
 .study-progress-ring {
     position: relative;
     cursor: pointer;
@@ -373,7 +373,7 @@
 .qa-arrow { color: var(--text-secondary); flex-shrink: 0; transition: transform 0.2s; }
 .qa-item:hover .qa-arrow { transform: translateX(3px); color: var(--primary-color); }
 
-/* ========== 学习打卡 ========== */
+/* ========== 审核打卡 ========== */
 .checkin-card {
     display: flex;
     align-items: center;
@@ -470,7 +470,7 @@
 .trend-up { color: var(--primary-color); font-weight: 600; }
 .trend-down { color: var(--danger-color); font-weight: 600; }
 
-/* ========== 学习小贴士悬浮球 ========== */
+/* ========== 审核小贴士悬浮球 ========== */
 .study-tip-float {
     position: fixed; bottom: 80px; right: 24px; z-index: 1000;
     cursor: pointer;
@@ -647,7 +647,7 @@
 }
 .subject-card:hover .subject-enter { gap: 8px; }
 
-/* ========== 即将开始考试卡片 ========== */
+/* ========== 即将开始审核卡片 ========== */
 .upcoming-exams {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -681,7 +681,7 @@
 .upcoming-exam-card .uec-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
 .upcoming-exam-card .uec-meta { font-size: 12px; color: var(--text-secondary); }
 
-/* ========== 成绩卡片 ========== */
+/* ========== 结果卡片 ========== */
 .score-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -877,7 +877,7 @@
 .empty-state .empty-icon { font-size: 42px; margin-bottom: 10px; opacity: 0.35; }
 .empty-state .empty-text { font-size: 13px; }
 
-/* ========== 考试卡片 ========== */
+/* ========== 审核卡片 ========== */
 .exam-filters {
     display: flex;
     align-items: center;
@@ -980,7 +980,7 @@
 .leaderboard-time { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
 .leaderboard-tag { font-size: 11px; color: var(--primary-color); background: var(--primary-light); padding: 2px 8px; border-radius: 8px; font-weight: 600; flex-shrink: 0; }
 
-/* ========== 考试通过公示 ========== */
+/* ========== 审核通过公示 ========== */
 .public-result-list { display: flex; flex-direction: column; gap: 2px; }
 .public-result-item {
     display: flex; align-items: center; gap: 12px;

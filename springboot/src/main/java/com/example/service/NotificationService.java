@@ -55,14 +55,14 @@ public class NotificationService {
     }
 
     /**
-     * 发送考核通过通知给学生
+     * 发送考核通过通知给玩家
      */
     public void notifyApprovalPassed(Integer studentId, String examName) {
         send(studentId, "USER", "考核通过", "恭喜！你通过了「" + examName + "」的考核", "approval", "/front/myScores");
     }
 
     /**
-     * 发送考核未通过通知给学生
+     * 发送考核未通过通知给玩家
      */
     public void notifyApprovalFailed(Integer studentId, String examName) {
         send(studentId, "USER", "考核未通过", "「" + examName + "」考核未通过，请继续努力", "approval", "/front/myScores");

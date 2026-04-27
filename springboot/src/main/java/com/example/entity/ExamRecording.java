@@ -20,7 +20,7 @@ public class ExamRecording {
     private LocalDateTime updatedAt;
     /** 考试名称（非数据库字段） */
     private String examName;
-    /** 学生姓名（非数据库字段） */
+    /** 玩家姓名（非数据库字段） */
     private String studentName;
 
     public Integer getId() { return id; }

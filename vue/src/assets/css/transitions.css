@@ -91,7 +91,7 @@
   transform: scale(1.08);
 }
 
-/* ── 3. 前台用户中心：上浮淡入 ── */
+/* ── 3. 前台玩家中心：上浮淡入 ── */
 .float-enter-active {
   transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }

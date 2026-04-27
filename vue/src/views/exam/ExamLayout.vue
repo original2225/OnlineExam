@@ -13,7 +13,7 @@
         </transition>
       </div>
 
-      <!-- 用户卡片 -->
+      <!-- 成员卡片 -->
       <div class="exs-profile" v-if="!data.fold">
         <img :src="data.user.avatar || defaultAvatar" class="exs-avatar" alt="">
         <div class="exs-profile-info">
@@ -29,7 +29,7 @@
       <div class="exs-back-btn" @click="router.push(isAdmin ? '/manager/home' : '/front/home')">
         <div class="exs-back-shine"></div>
         <el-icon :size="14"><Back /></el-icon>
-        <span v-if="!data.fold">{{ isAdmin ? '管理后台' : '用户前台' }}</span>
+        <span v-if="!data.fold">{{ isAdmin ? '管理后台' : '玩家前台' }}</span>
       </div>
 
       <!-- 导航 -->
@@ -99,7 +99,7 @@ const data = reactive({
 
 const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
 const roleColor = computed(() => roleColors[data.user.user?.role || data.user.role] || '#4ade80')
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '用户' }[role] || '用户')
+const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
 
 const isAdmin = computed(() => ['OWNER', 'ADMIN'].includes(data.user.role))
 
@@ -113,9 +113,9 @@ const allGroups = [
   {
     title: '管理',
     items: [
-      { path: '/exam/examAdmin', label: '考试管理', icon: 'Document', color: 'blue', roles: ['OWNER', 'ADMIN'] },
+      { path: '/exam/examAdmin', label: '审核管理', icon: 'Document', color: 'blue', roles: ['OWNER', 'ADMIN'] },
       { path: '/exam/approvalCenter', label: '审批中心', icon: 'Stamp', color: 'orange', roles: ['OWNER', 'ADMIN'] },
-      { path: '/exam/scoreManage', label: '成绩管理', icon: 'DataLine', color: 'purple', roles: ['OWNER', 'ADMIN'] },
+      { path: '/exam/scoreManage', label: '结果管理', icon: 'DataLine', color: 'purple', roles: ['OWNER', 'ADMIN'] },
     ]
   },
   {
@@ -127,7 +127,7 @@ const allGroups = [
   {
     title: '公示',
     items: [
-      { path: '/exam/resultsCenter', label: '成绩公示', icon: 'DataAnalysis', color: 'cyan', roles: ['OWNER', 'ADMIN', 'HELPER', 'USER'] },
+      { path: '/exam/resultsCenter', label: '结果公示', icon: 'DataAnalysis', color: 'cyan', roles: ['OWNER', 'ADMIN', 'HELPER', 'USER'] },
       { path: '/exam/announcements', label: '公告中心', icon: 'Bell', color: 'teal', roles: ['OWNER', 'ADMIN', 'HELPER', 'USER'] },
     ]
   },
@@ -145,11 +145,11 @@ const nav = (p) => router.push(p)
 
 const pageNameMap = {
   '/exam/dashboard': '工作台',
-  '/exam/examAdmin': '考试管理',
+  '/exam/examAdmin': '审核管理',
   '/exam/approvalCenter': '审批中心',
-  '/exam/scoreManage': '成绩管理',
+  '/exam/scoreManage': '结果管理',
   '/exam/gradingCenter': '阅卷中心',
-  '/exam/resultsCenter': '成绩公示',
+  '/exam/resultsCenter': '结果公示',
   '/exam/announcements': '公告中心',
 }
 const currentPageName = computed(() => pageNameMap[router.currentRoute.value.path] || '')
@@ -192,7 +192,7 @@ if (!data.user.id) { router.push('/login'); ElMessage.error('请登录！') }
 .exs-logo-text b { font-size: 16px; color: #fff; letter-spacing: 1px; }
 .exs-logo-text span { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
 
-/* 用户卡 */
+/* 成员卡 */
 .exs-profile {
   display: flex; align-items: center; gap: 10px;
   margin: 0 14px 10px; padding: 10px 12px;

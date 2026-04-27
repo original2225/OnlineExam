@@ -12,7 +12,7 @@
         </div>
         <div>
           <h1>审批中心</h1>
-          <p>审核批阅完成的试卷成绩，决定是否公示</p>
+          <p>查看阅卷表决结果，由主考官作出入服最终判定</p>
         </div>
       </div>
     </div>
@@ -29,16 +29,11 @@
       <div class="toolbar-left">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-select v-model="data.selectedExamId" placeholder="选择考试" clearable @change="loadData" style="width: 220px" class="exam-sel">
+          <el-select v-model="data.selectedExamId" placeholder="选择审核" clearable @change="loadData" style="width: 220px" class="exam-sel">
             <template #prefix><el-icon><Document /></el-icon></template>
             <el-option v-for="e in data.examList" :key="e.id" :label="e.name" :value="e.id" />
           </el-select>
         </div>
-      </div>
-      <div class="toolbar-right">
-        <el-button type="success" plain size="small" :disabled="!data.selectedIds.length" @click="batchApprove">
-          <el-icon><Check /></el-icon> 批量通过 {{ data.selectedIds.length ? `(${data.selectedIds.length})` : '' }}
-        </el-button>
       </div>
     </div>
 
@@ -61,16 +56,14 @@
                 <span class="sc-val">{{ row.totalScore || 0 }}</span>
               </div>
               <span class="is-pass-tag" :class="row.isPass ? 'pass' : 'fail'">
-                {{ row.isPass ? '及格' : '不及格' }}
+                {{ row.isPass ? '分数达标' : '分数未达标' }}
               </span>
+              <span class="chief-chip">主考官：{{ row.chiefExaminerName || '未指定' }}</span>
             </div>
           </div>
           <div class="review-actions">
-            <el-button type="success" round size="small" @click="approveOne(row)">
-              <el-icon><Check /></el-icon> 通过
-            </el-button>
-            <el-button type="danger" round size="small" @click="rejectOne(row)">
-              <el-icon><Close /></el-icon> 不通过
+            <el-button type="primary" round size="small" @click="openDecision(row)">
+              <el-icon><Document /></el-icon> 查看表决
             </el-button>
           </div>
         </div>
@@ -91,14 +84,55 @@
       </div>
     </div>
 
+    <el-dialog v-model="data.decisionVisible" title="入服最终判定" width="720px" destroy-on-close>
+      <div v-if="data.currentRecord" class="decision-panel">
+        <div class="decision-head">
+          <strong>{{ data.currentRecord.studentName }}</strong>
+          <span>{{ data.currentRecord.examName }}</span>
+          <el-tag type="warning">主考官：{{ data.currentRecord.chiefExaminerName || '未指定' }}</el-tag>
+        </div>
+
+        <div class="chief-form" v-if="isAdmin">
+          <el-input-number v-model="data.chiefExaminerId" :min="1" placeholder="主考官ID" />
+          <el-select v-model="data.chiefExaminerRole" style="width: 130px">
+            <el-option label="阅卷人" value="HELPER" />
+            <el-option label="管理员" value="ADMIN" />
+            <el-option label="所有者" value="OWNER" />
+          </el-select>
+          <el-button type="primary" plain @click="assignChief">任命/更换主考官</el-button>
+        </div>
+
+        <el-table :data="data.submissions" size="small" stripe>
+          <el-table-column prop="graderName" label="阅卷人" width="110" />
+          <el-table-column prop="performanceScore" label="表现分" width="90" />
+          <el-table-column label="参考表决" width="100">
+            <template #default="scope">{{ voteLabel(scope.row.advisoryVote) }}</template>
+          </el-table-column>
+          <el-table-column prop="rejectionReasons" label="不通过原因" show-overflow-tooltip />
+          <el-table-column prop="customReason" label="其他原因" show-overflow-tooltip />
+        </el-table>
+
+        <el-input v-model="data.finalReason" type="textarea" :rows="3" placeholder="最终判定理由（可选）" style="margin-top: 12px" />
+      </div>
+      <template #footer>
+        <el-button @click="data.decisionVisible = false">关闭</el-button>
+        <el-button type="danger" @click="rejectOne(data.currentRecord)">最终不通过</el-button>
+        <el-button type="success" @click="approveOne(data.currentRecord)">最终通过</el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted, computed } from 'vue'
+import { reactive, onMounted } from 'vue'
 import request from '@/utils/request.js'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Document, Check, Close } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { Search, Document } from '@element-plus/icons-vue'
+
+const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const isAdmin = ['OWNER', 'ADMIN'].includes(user.role)
+const voteLabel = (vote) => ({ PASS: '建议通过', FAIL: '建议不通过', ABSTAIN: '弃权' })[vote] || '未表决'
 
 const data = reactive({
   examList: [],
@@ -106,13 +140,18 @@ const data = reactive({
   pendingList: [],
   approvedList: [],
   loading: false,
-  selectedIds: [],
   pendingPage: 1,
   approvedPage: 1,
   pageSize: 10,
   pendingTotal: 0,
   approvedTotal: 0,
-  stats: { pendingApproval: 0, approved: 0, rejected: 0 }
+  stats: { pendingApproval: 0, approved: 0, rejected: 0 },
+  decisionVisible: false,
+  currentRecord: null,
+  submissions: [],
+  chiefExaminerId: null,
+  chiefExaminerRole: 'HELPER',
+  finalReason: ''
 })
 
 const loadExams = () => {
@@ -128,6 +167,9 @@ const loadStats = () => {
   request.get('/examApproval/approved', { params: { pageNum: 1, pageSize: 1 } }).then(res => {
     if (res.code === '200') data.stats.approved = res.data?.total || 0
   }).catch(() => {})
+  request.get('/examApproval/rejected', { params: { pageNum: 1, pageSize: 1 } }).then(res => {
+    if (res.code === '200') data.stats.rejected = res.data?.total || 0
+  }).catch(() => {})
 }
 
 const loadData = () => {
@@ -139,29 +181,42 @@ const loadData = () => {
   }).finally(() => { data.loading = false })
 }
 
-const onSelectionChange = (rows) => { data.selectedIds = rows.map(r => r.id) }
+const openDecision = (row) => {
+  data.currentRecord = row
+  data.finalReason = ''
+  data.chiefExaminerId = row.chiefExaminerId || null
+  data.chiefExaminerRole = 'HELPER'
+  request.get('/examApproval/detail/' + row.id).then(res => {
+    if (res.code === '200') {
+      data.currentRecord = res.data?.record || row
+      data.submissions = res.data?.submissions || []
+      data.chiefExaminerId = data.currentRecord.chiefExaminerId || null
+      data.decisionVisible = true
+    }
+  })
+}
+
+const assignChief = () => {
+  if (!data.chiefExaminerId) { ElMessage.warning('请输入主考官ID'); return }
+  request.put('/examApproval/chiefExaminer/' + data.currentRecord.id, {
+    chiefExaminerId: data.chiefExaminerId,
+    chiefExaminerRole: data.chiefExaminerRole
+  }).then(res => {
+    if (res.code === '200') { ElMessage.success('主考官已更新'); data.decisionVisible = false; loadData() }
+    else ElMessage.error(res.msg || '操作失败')
+  })
+}
 
 const approveOne = (row) => {
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
-  request.put('/examApproval/approve/' + row.id, { approvedBy: user.id }).then(res => {
-    if (res.code === '200') { ElMessage.success('审批通过'); loadData(); loadStats() }
+  request.put('/examApproval/approve/' + row.id, { reason: data.finalReason }).then(res => {
+    if (res.code === '200') { ElMessage.success('最终判定通过'); data.decisionVisible = false; loadData(); loadStats() }
     else ElMessage.error(res.msg || '操作失败')
   })
 }
 
 const rejectOne = (row) => {
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
-  request.put('/examApproval/reject/' + row.id, { approvedBy: user.id }).then(res => {
-    if (res.code === '200') { ElMessage.success('审批不通过'); loadData() }
-    else ElMessage.error(res.msg || '操作失败')
-  })
-}
-
-const batchApprove = () => {
-  if (!data.selectedIds.length) return
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
-  request.put('/examApproval/batchApprove', { ids: data.selectedIds, approvedBy: user.id }).then(res => {
-    if (res.code === '200') { ElMessage.success('批量审批成功'); data.selectedIds = []; loadData() }
+  request.put('/examApproval/reject/' + row.id, { reason: data.finalReason }).then(res => {
+    if (res.code === '200') { ElMessage.success('最终判定不通过'); data.decisionVisible = false; loadData(); loadStats() }
     else ElMessage.error(res.msg || '操作失败')
   })
 }
@@ -221,6 +276,11 @@ onMounted(() => { loadExams(); loadStats(); loadData() })
 /* 空状态 */
 .empty-state { padding: 80px; text-align: center; }
 .empty-state p { margin-top: 16px; color: #9ca3af; font-size: 14px; }
+
+.chief-chip { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #fef3c7; color: #b45309; }
+.decision-panel { display: flex; flex-direction: column; gap: 14px; }
+.decision-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chief-form { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; background: var(--el-fill-color-light); }
 
 /* 分页 */
 .pagination-wrap { padding: 16px 20px; display: flex; justify-content: flex-end; border-top: 1px solid var(--el-border-color-lighter); }

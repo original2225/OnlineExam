@@ -19,7 +19,7 @@ public class RegistrationRequest {
     /** 姓名 */
     private String name;
 
-    /** 学号 */
+    /** 玩家编号 */
     private String studentNo;
 
     /** 邮箱 */

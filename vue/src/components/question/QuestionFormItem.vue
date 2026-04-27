@@ -106,6 +106,7 @@
         </div>
         <el-upload
           :action="uploadUrl"
+          :headers="uploadHeaders"
           :show-file-list="false"
           :on-success="handleUploadSuccess"
           :before-upload="beforeUpload"
@@ -139,6 +140,7 @@ import { ref, watch, onMounted } from 'vue'
 import { Delete, Plus, Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { loadCascaderCategories } from '@/utils/categoryUtils.js'
+import { getUploadHeaders } from '@/utils/upload.js'
 
 const props = defineProps({
   form: Object
@@ -151,6 +153,7 @@ const categoryIdPath = ref(null)
 const multipleAnswers = ref([])
 const fillinBlanks = ref([''])
 const uploadUrl = import.meta.env.VITE_BASE_URL + '/files/upload'
+const uploadHeaders = getUploadHeaders()
 
 // 确保 form.images 存在
 if (!props.form.images) {

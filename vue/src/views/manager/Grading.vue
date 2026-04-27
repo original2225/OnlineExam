@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>阅卷管理</h1>
-          <p>在线批阅主观题试卷，支持简答题与填空题人工评分</p>
+          <p>在线批阅主观题答卷，支持简答题与填空题人工评分</p>
         </div>
       </div>
     </div>
@@ -22,14 +22,14 @@
       <div class="toolbar-left">
         <div class="search-wrap">
           <el-icon class="s-icon"><Search /></el-icon>
-          <el-select v-model="data.examId" placeholder="选择考试" style="width: 240px" clearable @change="onExamChange" class="exam-sel">
+          <el-select v-model="data.examId" placeholder="选择审核" style="width: 240px" clearable @change="onExamChange" class="exam-sel">
             <template #prefix><el-icon><Document /></el-icon></template>
             <el-option v-for="exam in data.exams" :key="exam.id" :label="exam.name" :value="exam.id" />
           </el-select>
         </div>
       </div>
       <div class="toolbar-right">
-        <span class="total-tip" v-if="data.tableData.length">共 <strong>{{ data.tableData.length }}</strong> 份试卷</span>
+        <span class="total-tip" v-if="data.tableData.length">共 <strong>{{ data.tableData.length }}</strong> 份答卷</span>
       </div>
     </div>
 
@@ -51,10 +51,10 @@
         <path d="M9 12l2 2 4-4" stroke="#60a5fa" stroke-width="1.5" stroke-linecap="round"/>
         <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#93c5fd" stroke-width="1.5"/>
       </svg>
-      <p>请从上方选择一个考试，开始批阅试卷</p>
+      <p>请从上方选择一个审核，开始批阅答卷</p>
     </div>
 
-    <!-- 试卷卡片列表 -->
+    <!-- 答卷卡片列表 -->
     <div class="grading-list-card" v-if="data.examId && data.tableData.length">
       <transition-group name="grade-anim">
         <div v-for="row in data.tableData" :key="row.id" class="grade-card-item">
@@ -102,13 +102,13 @@
     <el-dialog v-model="data.gradingDialogVisible" width="70%" destroy-on-close top="4vh" class="grade-dialog">
       <template #header>
         <div class="dialog-hero">
-          <span class="dialog-title">批阅试卷</span>
+          <span class="dialog-title">批阅答卷</span>
           <el-tag type="info" size="small" effect="plain">{{ data.currentRecord?.studentName }}</el-tag>
         </div>
       </template>
 
       <div v-if="data.currentRecord">
-        <!-- 考生信息 -->
+        <!-- 玩家信息 -->
         <div class="grade-info-bar">
           <div class="gi-left">
             <div class="gi-avatar">{{ (data.currentRecord.studentName || '?')[0] }}</div>
@@ -167,7 +167,7 @@
             </div>
             <div class="answer-content">{{ answer.question?.content }}</div>
             <div class="answer-row">
-              <span class="answer-label">考生答案：</span>
+              <span class="answer-label">玩家答案：</span>
               <span class="answer-value">{{ answer.studentAnswer || '未作答' }}</span>
             </div>
             <div class="answer-row" v-if="answer.question?.answer && needManualGrade(answer.question?.type)">
@@ -185,7 +185,37 @@
         </div>
       </div>
 
-      <template #footer>
+        <div class="final-vote-card">
+          <div class="sub-label"><el-icon><Check /></el-icon> 入服参考表决</div>
+          <el-form label-width="96px">
+            <el-form-item label="表现评分">
+              <el-input-number v-model="data.performanceScore" :min="0" :max="100" :step="5" />
+            </el-form-item>
+            <el-form-item label="参考表决">
+              <el-radio-group v-model="data.advisoryVote">
+                <el-radio value="PASS">建议通过</el-radio>
+                <el-radio value="FAIL">建议不通过</el-radio>
+                <el-radio value="ABSTAIN">弃权</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item v-if="data.advisoryVote === 'FAIL'" label="原因">
+              <el-checkbox-group v-model="data.rejectionReasons">
+                <el-checkbox label="规则理解不足" />
+                <el-checkbox label="沟通态度不合适" />
+                <el-checkbox label="名声或历史记录不佳" />
+                <el-checkbox label="不适合当前服务器氛围" />
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item v-if="data.advisoryVote === 'FAIL'" label="其他原因">
+              <el-input v-model="data.customReason" placeholder="可手动填写其他原因" />
+            </el-form-item>
+            <el-form-item label="总评语">
+              <el-input v-model="data.gradeComment" type="textarea" :rows="2" placeholder="可选" />
+            </el-form-item>
+          </el-form>
+        </div>
+
+        <template #footer>
         <el-button @click="data.gradingDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submitGrading">
           <el-icon><Check /></el-icon> 提交批阅
@@ -209,7 +239,12 @@ const data = reactive({
   gradingDialogVisible: false,
   currentRecord: null,
   currentAnswers: [],
-  submissions: []
+  submissions: [],
+  performanceScore: 80,
+  advisoryVote: 'PASS',
+  rejectionReasons: [],
+  customReason: '',
+  gradeComment: ''
 });
 
 const submissionCounts = reactive({});
@@ -241,7 +276,7 @@ const loadExams = () => { request.get('/exam/selectAll').then(res => { if (res.c
 const onExamChange = () => { if (data.examId) load(); else data.tableData = [] };
 
 const load = () => {
-  if (!data.examId) { ElMessage.warning('请先选择考试'); return; }
+  if (!data.examId) { ElMessage.warning('请先选择审核'); return; }
   request.get('/examRecord/getByExamId/' + data.examId).then(res => {
     if (res.code === '200') {
       data.tableData = res.data || [];
@@ -256,6 +291,11 @@ const load = () => {
 
 const handleGrade = (row) => {
   data.currentRecord = row;
+  data.performanceScore = 80;
+  data.advisoryVote = 'PASS';
+  data.rejectionReasons = [];
+  data.customReason = '';
+  data.gradeComment = '';
   const detailPromise = request.get('/examRecord/detail/' + row.id);
   const submissionsPromise = request.get('/grading/getSubmissions/' + row.id);
   detailPromise.then(res => { if (res.code === '200') data.currentAnswers = res.data.answers || [] });
@@ -264,10 +304,16 @@ const handleGrade = (row) => {
 };
 
 const submitGrading = () => {
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}');
   const answers = data.currentAnswers.map(a => ({ id: a.id, score: a.score || 0, comment: a.comment }));
-  request.post('/grading/batchGrade?recordId=' + data.currentRecord.id + '&gradedBy=' + user.id, answers).then(res => {
-    if (res.code === '200') { ElMessage.success('批阅完成'); data.gradingDialogVisible = false; load(); }
+  request.post('/grading/batchGrade?recordId=' + data.currentRecord.id, {
+    answers,
+    performanceScore: data.performanceScore,
+    advisoryVote: data.advisoryVote,
+    rejectionReasons: data.rejectionReasons.join(','),
+    customReason: data.customReason,
+    comment: data.gradeComment
+  }).then(res => {
+    if (res.code === '200') { ElMessage.success('批阅与表决已提交'); data.gradingDialogVisible = false; load(); }
     else { ElMessage.error(res.msg || '批阅失败'); }
   });
 };

@@ -26,12 +26,16 @@ public class EasterEggController {
      */
     @PostMapping("/discover")
     public Result discover(@RequestBody Map<String, Object> params) {
-        Integer userId = ((Number) params.get("userId")).intValue();
+        Object userIdValue = params.get("userId");
+        if (!(userIdValue instanceof Number)) {
+            return Result.error("请先登录");
+        }
+        Integer userId = ((Number) userIdValue).intValue();
         String userName = (String) params.get("userName");
         String userRole = (String) params.get("userRole");
         String eggName = (String) params.getOrDefault("eggName", "logo_click");
 
-        if (userId == null) {
+        if (userId == null || userRole == null || userRole.isBlank()) {
             return Result.error("请先登录");
         }
 

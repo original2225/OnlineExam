@@ -58,7 +58,7 @@
               </div>
               <span class="gdp-pct">{{ calcProgress(exam) }}%</span>
             </div>
-            <div v-if="!data.examList.length" class="gd-empty">暂无考试数据</div>
+            <div v-if="!data.examList.length" class="gd-empty">暂无审核数据</div>
           </div>
         </div>
 
@@ -147,7 +147,7 @@
       </div>
     </template>
 
-    <!-- 学生视图 -->
+    <!-- 玩家视图 -->
     <template v-else>
       <div class="gd-stats">
         <div class="gd-stat-card">
@@ -155,7 +155,7 @@
             <div class="gsc-icon"><el-icon><Notebook /></el-icon></div>
             <div class="gsc-body">
               <div class="gsc-num">{{ data.stats.examCount }}</div>
-              <div class="gsc-label">可参加考试</div>
+              <div class="gsc-label">可参加审核</div>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@
             <div class="gsc-icon"><el-icon><DataLine /></el-icon></div>
             <div class="gsc-body">
               <div class="gsc-num">{{ data.stats.myScoreCount }}</div>
-              <div class="gsc-label">已出成绩</div>
+              <div class="gsc-label">已出结果</div>
             </div>
           </div>
         </div>
@@ -219,17 +219,17 @@ const greeting = computed(() => {
 const heroTitle = computed(() => {
   if (isAdmin.value) return '阅卷工作台'
   if (data.user.role === 'HELPER') return '阅卷任务'
-  return '考试中心'
+  return '审核中心'
 })
 const heroSub = computed(() => {
-  if (isAdmin.value) return '实时掌握考试进度与阅卷状态'
-  if (data.user.role === 'HELPER') return '高效批阅每一份试卷'
-  return '查看可参加的考试与成绩公示'
+  if (isAdmin.value) return '实时掌握审核进度与阅卷状态'
+  if (data.user.role === 'HELPER') return '高效批阅每一份审核答卷'
+  return '查看可参加的审核与结果公示'
 })
 
 const heroStats = computed(() => {
   if (isAdmin.value) return [
-    { val: data.examList.length, label: '考试总数' },
+    { val: data.examList.length, label: '审核总数' },
     { val: data.stats.pendingApproval, label: '待审批' },
     { val: data.stats.gradedCount, label: '已批阅' },
   ]
@@ -239,12 +239,12 @@ const heroStats = computed(() => {
   ]
   return [
     { val: data.stats.examCount, label: '可参加' },
-    { val: data.stats.myScoreCount, label: '已出成绩' },
+    { val: data.stats.myScoreCount, label: '已出结果' },
   ]
 })
 
 const adminStats = computed(() => [
-  { label: '考试总数', val: data.examList.length, icon: 'Notebook', gradient: 'linear-gradient(135deg, #0284c7, #38bdf8)', path: '/exam/examAdmin' },
+  { label: '审核总数', val: data.examList.length, icon: 'Notebook', gradient: 'linear-gradient(135deg, #0284c7, #38bdf8)', path: '/exam/examAdmin' },
   { label: '待审批', val: data.stats.pendingApproval, icon: 'Stamp', gradient: 'linear-gradient(135deg, #d97706, #fbbf24)', path: '/exam/approvalCenter' },
   { label: '已批阅', val: data.stats.gradedCount, icon: 'Check', gradient: 'linear-gradient(135deg, #16a34a, #4ade80)', path: '/exam/gradingCenter' },
   { label: '已公示', val: data.stats.publishedCount, icon: 'DataAnalysis', gradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)', path: '/exam/resultsCenter' },
@@ -253,11 +253,11 @@ const adminStats = computed(() => [
 const quickActions = [
   { label: '阅卷中心', path: '/exam/gradingCenter', icon: 'EditPen', gradient: 'rgba(0,180,42,0.1)', color: '#00b42a' },
   { label: '审批中心', path: '/exam/approvalCenter', icon: 'Stamp', gradient: 'rgba(217,119,6,0.1)', color: '#d97706' },
-  { label: '成绩公示', path: '/exam/resultsCenter', icon: 'DataAnalysis', gradient: 'rgba(124,58,237,0.1)', color: '#7c3aed' },
+  { label: '结果公示', path: '/exam/resultsCenter', icon: 'DataAnalysis', gradient: 'rgba(124,58,237,0.1)', color: '#7c3aed' },
   { label: '公告中心', path: '/exam/announcements', icon: 'Bell', gradient: 'rgba(14,116,144,0.1)', color: '#0891b2' },
 ]
 
-const typeLabel = (type) => ({ general: '公告', exam: '考试', result: '成绩', notice: '通知' }[type] || '公告')
+const typeLabel = (type) => ({ general: '公告', exam: '审核', result: '结果', notice: '通知' }[type] || '公告')
 
 const calcProgress = (exam) => {
   if (!exam._gradingProgress) return 0

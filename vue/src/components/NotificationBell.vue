@@ -38,6 +38,7 @@ const data = reactive({
   list: [],
   unreadCount: 0,
 })
+const silent = { silentError: true }
 
 let timer = null
 
@@ -53,6 +54,7 @@ onUnmounted(() => {
 const loadUnread = () => {
   if (!user.id) return
   request.get('/notification/unreadCount', {
+    ...silent,
     params: { userId: user.id, userRole: user.role }
   }).then(res => {
     data.unreadCount = res.data || 0
@@ -65,6 +67,7 @@ const onOpen = () => {
 
 const loadList = () => {
   request.get('/notification/selectByUser', {
+    ...silent,
     params: { userId: user.id, userRole: user.role }
   }).then(res => {
     data.list = res.data || []
@@ -73,6 +76,7 @@ const loadList = () => {
 
 const markAllRead = () => {
   request.put('/notification/readAll', null, {
+    ...silent,
     params: { userId: user.id, userRole: user.role }
   }).then(res => {
     if (res.code === '200') {
@@ -84,7 +88,7 @@ const markAllRead = () => {
 
 const handleNotif = (n) => {
   if (!n.isRead) {
-    request.put('/notification/read/' + n.id).then(() => {
+    request.put('/notification/read/' + n.id, null, silent).then(() => {
       n.isRead = true
       data.unreadCount = Math.max(0, data.unreadCount - 1)
     })

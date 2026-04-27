@@ -4,7 +4,7 @@ public class Student extends Account {
 
     /** 主键ID */
     private Integer id;
-    /** 学号 */
+    /** 玩家编号 */
     private String studentNo;
     /** 账号 */
     private String username;

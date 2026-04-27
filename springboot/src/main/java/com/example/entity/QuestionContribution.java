@@ -20,6 +20,7 @@ public class QuestionContribution {
     private String reviewComment;
     private LocalDateTime reviewedAt;
     private LocalDateTime createdAt;
+    private Integer approvedQuestionId;
     private String categoryName;
 
     public Integer getId() { return id; }
@@ -56,6 +57,8 @@ public class QuestionContribution {
     public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Integer getApprovedQuestionId() { return approvedQuestionId; }
+    public void setApprovedQuestionId(Integer approvedQuestionId) { this.approvedQuestionId = approvedQuestionId; }
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 }

@@ -2,8 +2,8 @@
   <div class="main-content">
     <div class="page-hero">
       <div class="page-hero-icon">✏️</div>
-      <div class="page-hero-title">贡献题目</div>
-      <div class="page-hero-subtitle">分享你的知识，帮助更多人学习</div>
+      <div class="page-hero-title">提交审核题目</div>
+      <div class="page-hero-subtitle">由阅卷人或管理员补充入服审核题，经管理员通过后进入题库并可用于组卷</div>
       <div class="page-hero-stats">
         <div class="page-hero-stat">
           <div class="page-hero-stat-val">{{ data.myList.length }}</div>
@@ -40,9 +40,11 @@
               <div class="form-row">
                 <el-form-item label="题目类型" class="form-item-half">
                   <el-select v-model="data.form.type" placeholder="请选择" class="full-width">
-                    <el-option label="选择题" value="选择题" />
-                    <el-option label="判断题" value="判断题" />
-                    <el-option label="填空题" value="填空题" />
+                    <el-option label="单选题" value="single" />
+                    <el-option label="多选题" value="multiple" />
+                    <el-option label="判断题" value="judge" />
+                    <el-option label="填空题" value="fillin" />
+                    <el-option label="简答题" value="essay" />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="题目分类" class="form-item-half">
@@ -79,7 +81,7 @@
               <el-form-item label="题目内容">
                 <el-input v-model="data.form.content" type="textarea" :rows="4" placeholder="请输入题目内容" class="full-width" />
               </el-form-item>
-              <el-form-item v-if="data.form.type === '选择题'" label="选项">
+              <el-form-item v-if="['single', 'multiple'].includes(data.form.type)" label="选项">
                 <div class="options-list">
                   <div v-for="(opt, idx) in data.form.optionList" :key="idx" class="option-row">
                     <span class="option-letter" :class="{ 'letter-selected': data.form.answer === String.fromCharCode(65 + idx) }">
@@ -107,10 +109,10 @@
                 </div>
               </el-form-item>
               <el-form-item label="正确答案">
-                <el-input v-model="data.form.answer" placeholder="选择题填A/B/C/D，判断题填对/错，填空题填答案" class="answer-input" />
+                <el-input v-model="data.form.answer" placeholder="单选填A，多选填ABC，判断填对/错，填空和简答填写参考答案" class="answer-input" />
               </el-form-item>
               <el-form-item label="解析">
-                <el-input v-model="data.form.analysis" type="textarea" :rows="3" placeholder="选填，解析会展示给其他同学" class="full-width" />
+                <el-input v-model="data.form.analysis" type="textarea" :rows="3" placeholder="选填，说明题目考察的服务器规则、审核要点或判断依据" class="full-width" />
               </el-form-item>
               <el-form-item class="form-actions">
                 <el-button type="primary" @click="submitQuestion" :loading="data.submitting" class="submit-btn">
@@ -133,13 +135,13 @@
             </div>
             <div class="preview-content" v-if="data.form.content">
               <div class="preview-badge-row">
-                <span class="preview-type-badge">{{ data.form.type }}</span>
+                <span class="preview-type-badge">{{ typeLabel(data.form.type) }}</span>
                 <span class="preview-diff-badge" :class="'diff-' + data.form.difficulty">
                   {{ data.form.difficulty === 'easy' ? '简单' : data.form.difficulty === 'medium' ? '中等' : '困难' }}
                 </span>
               </div>
               <div class="preview-question">{{ data.form.content }}</div>
-              <div class="preview-options" v-if="data.form.type === '选择题' && data.form.optionList.length">
+              <div class="preview-options" v-if="['single', 'multiple'].includes(data.form.type) && data.form.optionList.length">
                 <div v-for="(opt, idx) in data.form.optionList" :key="idx" class="preview-option" :class="{ 'preview-option-correct': data.form.answer === String.fromCharCode(65 + idx) }">
                   <span class="preview-option-letter">{{ String.fromCharCode(65 + idx) }}</span>
                   <span class="preview-option-text">{{ opt || '(空)' }}</span>
@@ -189,7 +191,7 @@
         </div>
         <div class="empty-state" v-else>
           <div class="empty-icon"><el-icon><Document /></el-icon></div>
-          <div class="empty-text">暂无贡献记录，快去提交第一道题目吧</div>
+          <div class="empty-text">暂无提交记录，可以先补充一道入服审核题</div>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -203,13 +205,14 @@ import { EditPen, Plus, Delete, Document, Star, Trophy, View, RefreshRight, Circ
 import request from '@/utils/request.js'
 
 const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const typeLabel = (t) => ({ single: '单选题', multiple: '多选题', judge: '判断题', fillin: '填空题', essay: '简答题' })[t] || t
 
 const data = reactive({
   activeTab: 'submit',
   categories: [],
   submitting: false,
   form: {
-    type: '选择题',
+    type: 'single',
     categoryId: '',
     difficulty: 'medium',
     content: '',
@@ -235,9 +238,7 @@ const loadCategories = () => {
 }
 
 const loadMyContributions = () => {
-  request.get('/questionContribution/myContributions', {
-    params: { userId: user.id, userRole: user.role }
-  }).then(res => {
+  request.get('/questionContribution/myContributions').then(res => {
     data.myList = res.data || []
   })
 }
@@ -248,16 +249,13 @@ const submitQuestion = () => {
   if (!data.form.answer) { ElMessage.warning('请输入正确答案'); return }
 
   data.submitting = true
-  const options = data.form.type === '选择题'
+  const options = ['single', 'multiple'].includes(data.form.type)
     ? JSON.stringify(data.form.optionList.reduce((m, v, i) => { m[String.fromCharCode(65 + i)] = v; return m }, {}))
     : null
 
   request.post('/questionContribution/submit', {
     ...data.form,
     options,
-    userId: user.id,
-    userName: user.name,
-    userRole: user.role,
   }).then(res => {
     if (res.code === '200') {
       ElMessage.success('提交成功，等待审核')
@@ -270,7 +268,7 @@ const submitQuestion = () => {
 }
 
 const resetForm = () => {
-  data.form = { type: '选择题', categoryId: '', difficulty: 'medium', content: '', optionList: ['', '', '', ''], answer: '', analysis: '' }
+  data.form = { type: 'single', categoryId: '', difficulty: 'medium', content: '', optionList: ['', '', '', ''], answer: '', analysis: '' }
 }
 
 watch(() => data.activeTab, (tab) => {
