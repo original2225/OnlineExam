@@ -1,0 +1,13 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.NotificationMapper">
+    <select id="selectByUser" resultType="com.example.entity.Notification">
+        select * from `notification`
+        where user_id = #{userId} and user_role = #{userRole}
+        order by created_at desc
+        limit 50
+    </select>
+    <insert id="insert" parameterType="com.example.entity.Notification" useGeneratedKeys="true">
+        insert into `notification` (user_id, user_role, title, content, type, link)
+        values (#{userId}, #{userRole}, #{title}, #{content}, #{type}, #{link})
+    </insert>
+</mapper>

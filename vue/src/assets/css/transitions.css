@@ -1,0 +1,243 @@
+/* ===== 全局转场动画库 ===== */
+
+/* ── 1. 管理后台：滑动 + 模糊渐变 ── */
+.page-enter-active {
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0, 1, 0.45);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(40px) scale(0.97);
+  filter: blur(4px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-30px) scale(0.98);
+  filter: blur(2px);
+}
+
+/* 管理后台 - 反向（返回上级） */
+.page-back-enter-active {
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-back-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0, 1, 0.45);
+}
+.page-back-enter-from {
+  opacity: 0;
+  transform: translateX(-40px) scale(0.97);
+  filter: blur(4px);
+}
+.page-back-leave-to {
+  opacity: 0;
+  transform: translateX(30px) scale(0.98);
+  filter: blur(2px);
+}
+
+/* ── 2. 阅卷系统：向上滑入 + 淡入 ── */
+.fade-enter-active {
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fade-leave-active {
+  transition: all 0.2s cubic-bezier(0.55, 0, 1, 0.45);
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.99);
+}
+
+/* 阅卷系统 - 深度切换（模糊淡变） */
+.blur-fade-enter-active {
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.blur-fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.55, 0, 1, 0.45);
+  position: absolute;
+  width: 100%;
+}
+.blur-fade-enter-from {
+  opacity: 0;
+  filter: blur(12px);
+  transform: scale(1.03);
+}
+.blur-fade-leave-to {
+  opacity: 0;
+  filter: blur(8px);
+  transform: scale(0.97);
+}
+
+/* 阅卷系统 - 缩放进入 */
+.zoom-enter-active {
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.zoom-leave-active {
+  transition: all 0.2s cubic-bezier(0.55, 0, 1, 0.45);
+  position: absolute;
+  width: 100%;
+}
+.zoom-enter-from {
+  opacity: 0;
+  transform: scale(0.85);
+  filter: blur(4px);
+}
+.zoom-leave-to {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+/* ── 3. 前台用户中心：上浮淡入 ── */
+.float-enter-active {
+  transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.float-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0, 1, 0.45);
+}
+.float-enter-from {
+  opacity: 0;
+  transform: translateY(50px) scale(0.96);
+  filter: blur(3px);
+}
+.float-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+  filter: blur(2px);
+}
+
+/* ── 4. 答题切题 - 左滑（下一题） ── */
+.slide-left-enter-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.slide-left-leave-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: absolute;
+  width: 100%;
+}
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(100px) scale(0.95);
+}
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-100px) scale(0.95);
+}
+
+/* ── 5. 答题切题 - 右滑（上一题） ── */
+.slide-right-enter-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.slide-right-leave-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: absolute;
+  width: 100%;
+}
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-100px) scale(0.95);
+}
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(100px) scale(0.95);
+}
+
+/* ── 6. 弹性翻转（用于特殊页面切换） ── */
+.flip-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.flip-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0, 1, 0.45);
+  position: absolute;
+  width: 100%;
+}
+.flip-enter-from {
+  opacity: 0;
+  transform: perspective(800px) rotateY(-15deg) scale(0.9);
+  filter: blur(2px);
+}
+.flip-leave-to {
+  opacity: 0;
+  transform: perspective(800px) rotateY(10deg) scale(0.95);
+}
+
+/* ── 7. 旋转渐变（用于从首页进入子系统） ── */
+.rotate-enter-active {
+  transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rotate-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0, 1, 0.45);
+}
+.rotate-enter-from {
+  opacity: 0;
+  transform: rotate(-2deg) scale(0.92);
+  filter: blur(6px);
+}
+.rotate-leave-to {
+  opacity: 0;
+  transform: rotate(1deg) scale(1.04);
+}
+
+/* ===== 通用动画 ===== */
+
+/* 区块上浮入场 */
+@keyframes sectionFadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 内容卡片交错入场 */
+@keyframes cardStagger {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 光晕扫过 */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 脉冲呼吸 */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* 页面内容淡入交错 */
+.content-fade-in > * {
+  animation: cardStagger 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+}
+.content-fade-in > *:nth-child(1) { animation-delay: 0.03s; }
+.content-fade-in > *:nth-child(2) { animation-delay: 0.07s; }
+.content-fade-in > *:nth-child(3) { animation-delay: 0.11s; }
+.content-fade-in > *:nth-child(4) { animation-delay: 0.15s; }
+.content-fade-in > *:nth-child(5) { animation-delay: 0.19s; }
+.content-fade-in > *:nth-child(6) { animation-delay: 0.23s; }
+.content-fade-in > *:nth-child(7) { animation-delay: 0.27s; }
+.content-fade-in > *:nth-child(8) { animation-delay: 0.31s; }
+.content-fade-in > *:nth-child(n+9) { animation-delay: 0.35s; }
+
+/* 移动端减弱动画 */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active, .page-leave-active,
+  .page-back-enter-active, .page-back-leave-active,
+  .fade-enter-active, .fade-leave-active,
+  .blur-fade-enter-active, .blur-fade-leave-active,
+  .zoom-enter-active, .zoom-leave-active,
+  .float-enter-active, .float-leave-active,
+  .slide-left-enter-active, .slide-left-leave-active,
+  .slide-right-enter-active, .slide-right-leave-active,
+  .flip-enter-active, .flip-leave-active,
+  .rotate-enter-active, .rotate-leave-active {
+    transition: opacity 0.15s ease !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .content-fade-in > * {
+    animation: none !important;
+  }
+}

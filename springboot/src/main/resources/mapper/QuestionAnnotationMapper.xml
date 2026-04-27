@@ -1,0 +1,38 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.QuestionAnnotationMapper">
+
+    <select id="selectByQuestionId" resultType="com.example.entity.QuestionAnnotation">
+        select * from `question_annotation`
+        where question_id = #{questionId}
+        order by like_count desc, created_at desc
+    </select>
+
+    <insert id="insert" parameterType="com.example.entity.QuestionAnnotation" useGeneratedKeys="true">
+        insert into `question_annotation`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="questionId != null">question_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="userRole != null">user_role,</if>
+            <if test="content != null">content,</if>
+            <if test="likeCount != null">like_count,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="questionId != null">#{questionId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="userRole != null">#{userRole},</if>
+            <if test="content != null">#{content},</if>
+            <if test="likeCount != null">#{likeCount},</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteById">
+        delete from `question_annotation` where id = #{id}
+    </delete>
+
+</mapper>

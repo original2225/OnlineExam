@@ -1,0 +1,105 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.QuestionMapper">
+
+    <select id="selectAll" resultType="com.example.entity.Question">
+        select q.*,
+               c.name as categoryName
+        from `question` q
+        left join `question_category` c on q.category_id = c.id
+        <where>
+            <if test="content != null"> and q.content like concat('%', #{content}, '%')</if>
+            <if test="type != null"> and q.type = #{type}</if>
+            <if test="categoryId != null"> and q.category_id = #{categoryId}</if>
+            <if test="difficulty != null"> and q.difficulty = #{difficulty}</if>
+            <if test="status != null"> and q.status = #{status}</if>
+        </where>
+        order by q.id desc
+    </select>
+
+    <select id="selectByPaperId" resultType="com.example.entity.Question">
+        select q.*,
+               pq.score as questionScore,
+               pq.question_order as questionOrder
+        from `question` q
+        inner join `exam_paper_question` pq on q.id = pq.question_id
+        where pq.paper_id = #{paperId}
+        order by pq.question_order
+    </select>
+
+    <delete id="deleteById">
+        delete from `question`
+        where id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.Question" useGeneratedKeys="true">
+        insert into `question`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="type != null">type,</if>
+            <if test="content != null">content,</if>
+            <if test="options != null">options,</if>
+            <if test="answer != null">answer,</if>
+            <if test="analysis != null">analysis,</if>
+            <if test="images != null">images,</if>
+            <if test="difficulty != null">difficulty,</if>
+            <if test="score != null">score,</if>
+            <if test="createdBy != null">created_by,</if>
+            <if test="status != null">status,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="type != null">#{type},</if>
+            <if test="content != null">#{content},</if>
+            <if test="options != null">#{options, typeHandler=com.example.common.handler.JsonTypeHandler},</if>
+            <if test="answer != null">#{answer},</if>
+            <if test="analysis != null">#{analysis},</if>
+            <if test="images != null">#{images, typeHandler=com.example.common.handler.JsonListTypeHandler},</if>
+            <if test="difficulty != null">#{difficulty},</if>
+            <if test="score != null">#{score},</if>
+            <if test="createdBy != null">#{createdBy},</if>
+            <if test="status != null">#{status},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.Question">
+        update `question`
+        <set>
+            <if test="categoryId != null">
+                category_id = #{categoryId},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="options != null">
+                options = #{options, typeHandler=com.example.common.handler.JsonTypeHandler},
+            </if>
+            <if test="answer != null">
+                answer = #{answer},
+            </if>
+            <if test="analysis != null">
+                analysis = #{analysis},
+            </if>
+            <if test="images != null">
+                images = #{images, typeHandler=com.example.common.handler.JsonListTypeHandler},
+            </if>
+            <if test="difficulty != null">
+                difficulty = #{difficulty},
+            </if>
+            <if test="score != null">
+                score = #{score},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

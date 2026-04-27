@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:9090}
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/onlineexam?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}
+  # Jackson配置：支持 LocalDateTime 序列化
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: ${MAIL_HOST:smtp.qq.com}
+    default-encoding: UTF-8
+
+# MyBatis配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
+
+fileBaseUrl: ${FILE_BASE_URL:http://localhost:9090}
+
+# 应用配置
+app:
+  base-url: ${APP_BASE_URL:http://localhost:9090}
+  admin-email: ${ADMIN_EMAIL:admin@example.com}
+
+# Cloudreve 云盘配置
+cloudreve:
+  base-url: ${CLOUDREVE_BASE_URL:}
+  username: ${CLOUDREVE_USERNAME:}
+  password: ${CLOUDREVE_PASSWORD:}
+  upload-dir: ${CLOUDREVE_UPLOAD_DIR:/考试录屏}

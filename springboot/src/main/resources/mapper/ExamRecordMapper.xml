@@ -1,0 +1,183 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamRecordMapper">
+
+    <select id="selectAll" resultType="com.example.entity.ExamRecord">
+        select er.*,
+               e.name as examName,
+               s.name as studentName,
+               s.student_no as studentNo,
+               a.name as approverName
+        from `exam_record` er
+        left join `exam` e on er.exam_id = e.id
+        left join `student` s on er.student_id = s.id
+        left join `admin` a on er.approved_by = a.id
+        <where>
+            <if test="examId != null"> and er.exam_id = #{examId}</if>
+            <if test="studentId != null"> and er.student_id = #{studentId}</if>
+            <if test="status != null"> and er.status = #{status}</if>
+            <if test="examStatus != null"> and er.exam_status = #{examStatus}</if>
+            <if test="isPublished != null"> and er.is_published = #{isPublished}</if>
+        </where>
+        order by er.id desc
+    </select>
+
+    <select id="selectByExamId" resultType="com.example.entity.ExamRecord">
+        select er.*,
+               s.name as studentName,
+               s.student_no as studentNo,
+               a.name as approverName
+        from `exam_record` er
+        left join `student` s on er.student_id = s.id
+        left join `admin` a on er.approved_by = a.id
+        where er.exam_id = #{examId}
+        order by er.id desc
+    </select>
+
+    <select id="selectByStudentId" resultType="com.example.entity.ExamRecord">
+        select er.*,
+               e.name as examName,
+               p.name as paperName,
+               a.name as approverName
+        from `exam_record` er
+        left join `exam` e on er.exam_id = e.id
+        left join `exam_paper` p on er.paper_id = p.id
+        left join `admin` a on er.approved_by = a.id
+        where er.student_id = #{studentId}
+        order by er.id desc
+    </select>
+
+    <delete id="deleteById">
+        delete from `exam_record`
+        where id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.ExamRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into `exam_record`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="examId != null">exam_id,</if>
+            <if test="paperId != null">paper_id,</if>
+            <if test="studentId != null">student_id,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="duration != null">duration,</if>
+            <if test="status != null">status,</if>
+            <if test="autoScore != null">auto_score,</if>
+            <if test="manualScore != null">manual_score,</if>
+            <if test="totalScore != null">total_score,</if>
+            <if test="isPass != null">is_pass,</if>
+            <if test="examStatus != null">exam_status,</if>
+            <if test="approvedBy != null">approved_by,</if>
+            <if test="approvedAt != null">approved_at,</if>
+            <if test="isPublished != null">is_published,</if>
+            <if test="publishedAt != null">published_at,</if>
+            <if test="switchCount != null">switch_count,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="examId != null">#{examId},</if>
+            <if test="paperId != null">#{paperId},</if>
+            <if test="studentId != null">#{studentId},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="status != null">#{status},</if>
+            <if test="autoScore != null">#{autoScore},</if>
+            <if test="manualScore != null">#{manualScore},</if>
+            <if test="totalScore != null">#{totalScore},</if>
+            <if test="isPass != null">#{isPass},</if>
+            <if test="examStatus != null">#{examStatus},</if>
+            <if test="approvedBy != null">#{approvedBy},</if>
+            <if test="approvedAt != null">#{approvedAt},</if>
+            <if test="isPublished != null">#{isPublished},</if>
+            <if test="publishedAt != null">#{publishedAt},</if>
+            <if test="switchCount != null">#{switchCount},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.ExamRecord">
+        update `exam_record`
+        <set>
+            <if test="submitTime != null">
+                submit_time = #{submitTime},
+            </if>
+            <if test="duration != null">
+                duration = #{duration},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="autoScore != null">
+                auto_score = #{autoScore},
+            </if>
+            <if test="manualScore != null">
+                manual_score = #{manualScore},
+            </if>
+            <if test="totalScore != null">
+                total_score = #{totalScore},
+            </if>
+            <if test="isPass != null">
+                is_pass = #{isPass},
+            </if>
+            <if test="examStatus != null">
+                exam_status = #{examStatus},
+            </if>
+            <if test="approvedBy != null">
+                approved_by = #{approvedBy},
+            </if>
+            <if test="approvedAt != null">
+                approved_at = #{approvedAt},
+            </if>
+            <if test="isPublished != null">
+                is_published = #{isPublished},
+            </if>
+            <if test="publishedAt != null">
+                published_at = #{publishedAt},
+            </if>
+            <if test="switchCount != null">
+                switch_count = #{switchCount},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="selectPublicResults" resultType="com.example.entity.ExamRecord">
+        select er.id,
+               e.name as examName,
+               s.name as studentName,
+               er.total_score,
+               er.is_pass,
+               er.submit_time,
+               er.published_at
+        from `exam_record` er
+        left join `exam` e on er.exam_id = e.id
+        left join `student` s on er.student_id = s.id
+        where er.is_published = 1 and er.status = 'completed'
+        order by er.published_at desc
+        limit 50
+    </select>
+
+    <select id="getGradingProgress" resultType="java.util.Map">
+        select
+            count(*) as total,
+            sum(case when er.manual_score is not null then 1 else 0 end) as graded,
+            sum(case when er.exam_status = 'PASSED' then 1 else 0 end) as approved
+        from `exam_record` er
+        where er.exam_id = #{examId} and er.status = 'completed'
+    </select>
+
+    <update id="unpublishByExamId">
+        update `exam_record`
+        set is_published = 0, published_at = null
+        where exam_id = #{examId}
+    </update>
+
+    <update id="publishByExamId">
+        update `exam_record`
+        set is_published = 1, published_at = #{publishedAt}
+        where exam_id = #{examId} and exam_status = 'PASSED'
+    </update>
+
+</mapper>

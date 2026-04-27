@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.RegistrationRequestMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.RegistrationRequest">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="student_no" property="studentNo"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="class_name" property="className"/>
+        <result column="branch" property="branch"/>
+        <result column="status" property="status"/>
+        <result column="request_time" property="requestTime"/>
+        <result column="approval_time" property="approvalTime"/>
+        <result column="approved_by" property="approvedBy"/>
+        <result column="rejection_reason" property="rejectionReason"/>
+        <result column="approval_token" property="approvalToken"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.entity.RegistrationRequest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO registration_request (username, password, name, student_no, email, phone, class_name, branch, status, request_time, approval_token)
+        VALUES (#{username}, #{password}, #{name}, #{studentNo}, #{email}, #{phone}, #{className}, #{branch}, #{status}, #{requestTime}, #{approvalToken})
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM registration_request WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM registration_request WHERE username = #{username}
+    </select>
+
+    <select id="selectByToken" resultMap="BaseResultMap">
+        SELECT * FROM registration_request WHERE approval_token = #{token}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM registration_request
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY request_time DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE registration_request
+        SET status = #{status},
+            approval_time = #{approvalTime},
+            approved_by = #{approvedBy}
+            <if test="rejectionReason != null">
+                ,rejection_reason = #{rejectionReason}
+            </if>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM registration_request WHERE id = #{id}
+    </delete>
+
+    <select id="countPending" resultType="int">
+        SELECT COUNT(*) FROM registration_request WHERE status = 'PENDING'
+    </select>
+
+</mapper>

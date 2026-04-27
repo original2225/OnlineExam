@@ -1,0 +1,76 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExaminerMapper">
+
+    <select id="selectAll" resultType="com.example.entity.Examiner">
+        select * from `examiner`
+        <where>
+            <if test="name != null"> and name like concat('%', #{name}, '%')</if>
+        </where>
+        order by id asc
+    </select>
+
+    <delete id="deleteById">
+        delete from `examiner`
+        where id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.Examiner" useGeneratedKeys="true">
+        insert into `examiner`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="username != null">username,</if>
+            <if test="password != null">password,</if>
+            <if test="name != null">name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="email != null">email,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="role != null">role,</if>
+            <if test="examinerNo != null">examiner_no,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="username != null">#{username},</if>
+            <if test="password != null">#{password},</if>
+            <if test="name != null">#{name},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="email != null">#{email},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="role != null">#{role},</if>
+            <if test="examinerNo != null">#{examinerNo},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.Examiner">
+        update `examiner`
+        <set>
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="password != null">
+                password = #{password},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="avatar != null">
+                avatar = #{avatar},
+            </if>
+            <if test="role != null">
+                role = #{role},
+            </if>
+            <if test="examinerNo != null">
+                examiner_no = #{examinerNo},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,86 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.PollMapper">
+
+    <insert id="insert" parameterType="com.example.entity.Poll" useGeneratedKeys="true">
+        insert into poll
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="title != null">title,</if>
+            <if test="description != null">description,</if>
+            <if test="coverUrl != null">cover_url,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="creatorName != null">creator_name,</if>
+            <if test="creatorRole != null">creator_role,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="status != null">status,</if>
+            <if test="maxChoices != null">max_choices,</if>
+            <if test="isAnonymous != null">is_anonymous,</if>
+            <if test="totalVotes != null">total_votes,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="title != null">#{title},</if>
+            <if test="description != null">#{description},</if>
+            <if test="coverUrl != null">#{coverUrl},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="creatorName != null">#{creatorName},</if>
+            <if test="creatorRole != null">#{creatorRole},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="maxChoices != null">#{maxChoices},</if>
+            <if test="isAnonymous != null">#{isAnonymous},</if>
+            <if test="totalVotes != null">#{totalVotes},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.Poll">
+        update poll
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="maxChoices != null">max_choices = #{maxChoices},</if>
+            <if test="isAnonymous != null">is_anonymous = #{isAnonymous},</if>
+            <if test="totalVotes != null">total_votes = #{totalVotes},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from poll where id = #{id}
+    </delete>
+
+    <select id="selectAll" resultType="com.example.entity.Poll">
+        select * from poll
+        <where>
+            <if test="title != null"> and title like concat('%', #{title}, '%')</if>
+            <if test="status != null"> and status = #{status}</if>
+            <if test="creatorId != null"> and creator_id = #{creatorId}</if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectActivePolls" resultType="com.example.entity.Poll">
+        select * from poll
+        where status = 'active'
+        order by id desc
+    </select>
+
+    <insert id="insertOption" parameterType="com.example.entity.PollOption" useGeneratedKeys="true">
+        insert into poll_option (poll_id, content, color, vote_count, order_num)
+        values (#{pollId}, #{content}, #{color}, #{voteCount}, #{orderNum})
+    </insert>
+
+    <insert id="insertVote" parameterType="com.example.entity.PollVote" useGeneratedKeys="true">
+        insert into poll_vote (poll_id, option_id, user_id, user_role)
+        values (#{pollId}, #{optionId}, #{userId}, #{userRole})
+    </insert>
+
+</mapper>

@@ -1,0 +1,40 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.QuestionContributionMapper">
+    <select id="selectById" resultType="com.example.entity.QuestionContribution">
+        select qc.*, c.name as categoryName
+        from `question_contribution` qc
+        left join `question_category` c on qc.category_id = c.id
+        where qc.id = #{id}
+    </select>
+    <select id="selectAll" resultType="com.example.entity.QuestionContribution">
+        select qc.*, c.name as categoryName
+        from `question_contribution` qc
+        left join `question_category` c on qc.category_id = c.id
+        <where>
+            <if test="status != null"> and qc.status = #{status}</if>
+        </where>
+        order by qc.created_at desc
+    </select>
+    <select id="selectByUser" resultType="com.example.entity.QuestionContribution">
+        select qc.*, c.name as categoryName
+        from `question_contribution` qc
+        left join `question_category` c on qc.category_id = c.id
+        where qc.user_id = #{userId} and qc.user_role = #{userRole}
+        order by qc.created_at desc
+    </select>
+    <insert id="insert" parameterType="com.example.entity.QuestionContribution" useGeneratedKeys="true">
+        insert into `question_contribution` (user_id, user_name, user_role, category_id, type, content, options, answer, analysis, difficulty, status)
+        values (#{userId}, #{userName}, #{userRole}, #{categoryId}, #{type}, #{content}, #{options}, #{answer}, #{analysis}, #{difficulty}, #{status})
+    </insert>
+    <update id="updateById" parameterType="com.example.entity.QuestionContribution">
+        update `question_contribution`
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
+            <if test="reviewerName != null">reviewer_name = #{reviewerName},</if>
+            <if test="reviewComment != null">review_comment = #{reviewComment},</if>
+            <if test="reviewedAt != null">reviewed_at = #{reviewedAt},</if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

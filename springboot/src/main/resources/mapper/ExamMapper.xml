@@ -1,0 +1,114 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamMapper">
+
+    <select id="selectAll" resultType="com.example.entity.Exam">
+        select e.*,
+               p.name as paperName,
+               (select count(*) from exam_record r where r.exam_id = e.id and r.status = 'completed' and (r.manual_score is null or r.manual_score = 0)) as ungradedCount
+        from `exam` e
+        left join `exam_paper` p on e.paper_id = p.id
+        <where>
+            <if test="name != null"> and e.name like concat('%', #{name}, '%')</if>
+            <if test="status != null"> and e.status = #{status}</if>
+            <if test="branch != null"> and e.branch = #{branch}</if>
+            <if test="examType != null"> and e.exam_type = #{examType}</if>
+        </where>
+        order by e.id desc
+    </select>
+
+    <delete id="deleteById">
+        delete from `exam`
+        where id = #{id}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.Exam" useGeneratedKeys="true" keyProperty="id">
+        insert into `exam`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="paperId != null">paper_id,</if>
+            <if test="description != null">description,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="duration != null">duration,</if>
+            <if test="allowLate != null">allow_late,</if>
+            <if test="lateTime != null">late_time,</if>
+            <if test="createdBy != null">created_by,</if>
+            <if test="status != null">status,</if>
+            <if test="branch != null">branch,</if>
+            <if test="examType != null">exam_type,</if>
+            <if test="autoPublish != null">auto_publish,</if>
+            <if test="enableRecording != null">enable_recording,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="paperId != null">#{paperId},</if>
+            <if test="description != null">#{description},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="allowLate != null">#{allowLate},</if>
+            <if test="lateTime != null">#{lateTime},</if>
+            <if test="createdBy != null">#{createdBy},</if>
+            <if test="status != null">#{status},</if>
+            <if test="branch != null">#{branch},</if>
+            <if test="examType != null">#{examType},</if>
+            <if test="autoPublish != null">#{autoPublish},</if>
+            <if test="enableRecording != null">#{enableRecording},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.Exam">
+        update `exam`
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="paperId != null">
+                paper_id = #{paperId},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="startTime != null">
+                start_time = #{startTime},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime},
+            </if>
+            <if test="duration != null">
+                duration = #{duration},
+            </if>
+            <if test="allowLate != null">
+                allow_late = #{allowLate},
+            </if>
+            <if test="lateTime != null">
+                late_time = #{lateTime},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="branch != null">
+                branch = #{branch},
+            </if>
+            <if test="examType != null">
+                exam_type = #{examType},
+            </if>
+            <if test="autoPublish != null">
+                auto_publish = #{autoPublish},
+            </if>
+            <if test="enableRecording != null">
+                enable_recording = #{enableRecording},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update `exam` set status = #{status} where id = #{id}
+    </update>
+
+</mapper>

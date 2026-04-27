@@ -1,0 +1,31 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.UnifiedUserMapper">
+
+    <select id="selectAll" resultType="com.example.entity.UnifiedUser">
+        SELECT * FROM (
+            SELECT id, username, name, avatar, phone, email,
+                   COALESCE(admin_no, '') AS userNo,
+                   '' AS className, '' AS branch,
+                   'APPROVED' AS status, 'ADMIN' AS source, `level`
+            FROM admin
+            UNION ALL
+            SELECT id, username, name, avatar, phone, email,
+                   COALESCE(examiner_no, '') AS userNo,
+                   '' AS className, '' AS branch,
+                   'APPROVED' AS status, 'EXAMINER' AS source, NULL AS level
+            FROM examiner
+            UNION ALL
+            SELECT id, username, name, avatar, phone, email,
+                   COALESCE(student_no, '') AS userNo,
+                   COALESCE(class_name, '') AS className,
+                   COALESCE(branch, '') AS branch,
+                   COALESCE(status, 'APPROVED') AS status,
+                   'STUDENT' AS source, NULL AS level
+            FROM student
+        ) t
+        ORDER BY CASE WHEN userNo IS NULL OR userNo = '' THEN 999999 ELSE CAST(userNo AS UNSIGNED) END ASC
+    </select>
+
+</mapper>

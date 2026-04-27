@@ -1,0 +1,95 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamPaperMapper">
+
+    <select id="selectAll" resultType="com.example.entity.ExamPaper">
+        select p.*,
+               (select count(*) from exam_paper_question where paper_id = p.id) as questionCount
+        from `exam_paper` p
+        <where>
+            <if test="name != null"> and p.name like concat('%', #{name}, '%')</if>
+            <if test="type != null"> and p.type = #{type}</if>
+            <if test="status != null"> and p.status = #{status}</if>
+        </where>
+        order by p.id desc
+    </select>
+
+    <delete id="deleteById">
+        delete from `exam_paper`
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteQuestions">
+        delete from `exam_paper_question`
+        where paper_id = #{paperId}
+    </delete>
+
+    <insert id="insert" parameterType="com.example.entity.ExamPaper" useGeneratedKeys="true" keyProperty="id">
+        insert into `exam_paper`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="description != null">description,</if>
+            <if test="totalScore != null">total_score,</if>
+            <if test="totalTime != null">total_time,</if>
+            <if test="passScore != null">pass_score,</if>
+            <if test="type != null">type,</if>
+            <if test="randomConfig != null">random_config,</if>
+            <if test="createdBy != null">created_by,</if>
+            <if test="status != null">status,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="description != null">#{description},</if>
+            <if test="totalScore != null">#{totalScore},</if>
+            <if test="totalTime != null">#{totalTime},</if>
+            <if test="passScore != null">#{passScore},</if>
+            <if test="type != null">#{type},</if>
+            <if test="randomConfig != null">#{randomConfig, typeHandler=com.example.common.handler.JsonTypeHandler},</if>
+            <if test="createdBy != null">#{createdBy},</if>
+            <if test="status != null">#{status},</if>
+        </trim>
+    </insert>
+
+    <update id="updateById" parameterType="com.example.entity.ExamPaper">
+        update `exam_paper`
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="totalScore != null">
+                total_score = #{totalScore},
+            </if>
+            <if test="totalTime != null">
+                total_time = #{totalTime},
+            </if>
+            <if test="passScore != null">
+                pass_score = #{passScore},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="randomConfig != null">
+                random_config = #{randomConfig, typeHandler=com.example.common.handler.JsonTypeHandler},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <insert id="batchInsertQuestions" parameterType="java.util.List">
+        insert into `exam_paper_question` (paper_id, question_id, question_order, score)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.paperId}, #{item.questionId}, #{item.questionOrder}, #{item.score})
+        </foreach>
+    </insert>
+
+</mapper>

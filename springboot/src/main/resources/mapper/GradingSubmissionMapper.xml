@@ -1,0 +1,41 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.GradingSubmissionMapper">
+
+    <select id="selectByRecordId" resultType="com.example.entity.GradingSubmission">
+        select * from `grading_submission`
+        where record_id = #{recordId}
+        order by created_at
+    </select>
+
+    <select id="selectByRecordAndGrader" resultType="com.example.entity.GradingSubmission">
+        select * from `grading_submission`
+        where record_id = #{recordId} and grader_id = #{graderId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.entity.GradingSubmission" useGeneratedKeys="true">
+        insert into `grading_submission`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="recordId != null">record_id,</if>
+            <if test="graderId != null">grader_id,</if>
+            <if test="graderName != null">grader_name,</if>
+            <if test="graderRole != null">grader_role,</if>
+            <if test="manualScore != null">manual_score,</if>
+            <if test="totalScore != null">total_score,</if>
+            <if test="comment != null">comment,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="recordId != null">#{recordId},</if>
+            <if test="graderId != null">#{graderId},</if>
+            <if test="graderName != null">#{graderName},</if>
+            <if test="graderRole != null">#{graderRole},</if>
+            <if test="manualScore != null">#{manualScore},</if>
+            <if test="totalScore != null">#{totalScore},</if>
+            <if test="comment != null">#{comment},</if>
+        </trim>
+    </insert>
+
+</mapper>

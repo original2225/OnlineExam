@@ -1,0 +1,18 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.StudyCheckinMapper">
+    <insert id="insert" parameterType="com.example.entity.StudyCheckin" useGeneratedKeys="true">
+        insert into `study_checkin` (user_id, user_role, checkin_date, streak_days)
+        values (#{userId}, #{userRole}, #{checkinDate}, #{streakDays})
+    </insert>
+    <select id="selectLeaderboard" resultType="com.example.entity.StudyCheckin">
+        select sc.* from `study_checkin` sc
+        inner join (
+            select user_id, user_role, max(streak_days) as max_streak
+            from `study_checkin`
+            group by user_id, user_role
+        ) t on sc.user_id = t.user_id and sc.user_role = t.user_role and sc.streak_days = t.max_streak
+        group by sc.user_id, sc.user_role
+        order by sc.streak_days desc
+        limit 20
+    </select>
+</mapper>

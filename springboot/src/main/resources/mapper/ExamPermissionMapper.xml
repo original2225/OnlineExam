@@ -1,0 +1,32 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamPermissionMapper">
+
+    <select id="selectAll" resultType="com.example.entity.ExamPermission">
+        select ep.*,
+               s.name as studentName,
+               s.student_no as studentNo
+        from `exam_permission` ep
+        left join `student` s on ep.student_id = s.id
+        <where>
+            <if test="examId != null"> and ep.exam_id = #{examId}</if>
+            <if test="studentId != null"> and ep.student_id = #{studentId}</if>
+        </where>
+        order by ep.id desc
+    </select>
+
+    <insert id="insert" parameterType="com.example.entity.ExamPermission" useGeneratedKeys="true">
+        insert into `exam_permission` (exam_id, student_id)
+        values (#{examId}, #{studentId})
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into `exam_permission` (exam_id, student_id)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.examId}, #{item.studentId})
+        </foreach>
+    </insert>
+
+</mapper>

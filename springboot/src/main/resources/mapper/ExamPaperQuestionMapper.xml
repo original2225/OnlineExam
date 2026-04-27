@@ -1,0 +1,24 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamPaperQuestionMapper">
+
+    <insert id="insert" parameterType="com.example.entity.ExamPaperQuestion" useGeneratedKeys="true" keyProperty="id">
+        insert into `exam_paper_question`
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="paperId != null">paper_id,</if>
+            <if test="questionId != null">question_id,</if>
+            <if test="questionOrder != null">question_order,</if>
+            <if test="score != null">score,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="paperId != null">#{paperId},</if>
+            <if test="questionId != null">#{questionId},</if>
+            <if test="questionOrder != null">#{questionOrder},</if>
+            <if test="score != null">#{score},</if>
+        </trim>
+    </insert>
+
+</mapper>
