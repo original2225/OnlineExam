@@ -1,6 +1,6 @@
 # 在线考试系统
 
-基于 Spring Boot 3、MyBatis、MySQL、Vue 3、Vite、Element Plus 的在线考试系统。
+北冥在线考试系统，基于 Spring Boot 3、MyBatis、MySQL、Vue 3、Vite、Element Plus。
 
 ## 功能
 
