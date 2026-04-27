@@ -17,7 +17,7 @@
 3. 找到 **POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务**
 4. 开启 **POP3/SMTP服务** 或 **IMAP/SMTP服务**
 5. 点击 **生成授权码**
-6. 通过手机验证后，会获得一个 **16位授权码**（如：`abcdefgijklmnopq`）
+6. 通过手机验证后，会获得一个 **16位授权码**（如：`your-qq-authorization-code`）
 
 #### 2. 配置 application.yml
 
@@ -27,7 +27,7 @@ spring:
     host: smtp.qq.com
     port: 587
     username: your-email@qq.com        # 你的QQ邮箱
-    password: abcdefgijklmnopq         # 刚才获取的授权码
+    password: your-qq-authorization-code         # 刚才获取的授权码
     properties:
       mail:
         smtp:
@@ -54,7 +54,7 @@ spring:
    - **应用**：邮件
    - **设备**：Windows 计算机
 6. 点击 **生成**
-7. 复制生成的 **16位应用密码**（如：`abcd efgh ijkl mnop`）
+7. 复制生成的 **16位应用密码**（如：`your-gmail-app-password`）
 
 #### 2. 配置 application.yml
 
@@ -64,7 +64,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: your-email@gmail.com     # 你的Gmail地址
-    password: abcd efgh ijkl mnop      # 刚才获取的应用密码（带空格也行）
+    password: your-gmail-app-password      # 刚才获取的应用密码（带空格也行）
     properties:
       mail:
         smtp:

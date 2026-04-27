@@ -13,10 +13,16 @@ target/
 .vscode/
 .claude/
 *.iml
+.project
+.classpath
+.factorypath
+.settings/
 
 # Local environment
 .env
-.env.*.local
+.env.*
+!.env.example
+!.env.development
 application-local.yml
 application-local.properties
 

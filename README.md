@@ -119,9 +119,27 @@ npm run dev
 
 ## 开源前注意
 
-- 不要提交 `node_modules/`、`dist/`、`target/`、`.idea/`、本地上传文件。
+- 不要提交 `node_modules/`、`dist/`、`target/`、`.idea/`、`.settings/`、本地上传文件。
 - 不要提交真实数据库、邮箱、Cloudreve 等账号密码。
+- `springboot/src/main/resources/sql/init_members.sql` 只保留示例成员数据；生产成员请使用私有导入脚本。
 - 如果真实密码曾经提交到 Git 历史，需要轮换密码并清理 Git 历史。
+
+## 发布前清理
+
+发布到 GitHub/Gitee 前，建议确认以下目录不在提交内容中：
+
+```bash
+git status --ignored
+```
+
+应被忽略的本地目录包括：
+
+- `vue/node_modules/`
+- `vue/dist/`
+- `springboot/target/`
+- `.idea/`
+- `springboot/.settings/`
+- `files/`
 
 ## License
 

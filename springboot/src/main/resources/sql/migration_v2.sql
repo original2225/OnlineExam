@@ -5,8 +5,6 @@
 ALTER TABLE `admin` ADD COLUMN `level` INT DEFAULT 3 COMMENT '权限等级: 3-Helper, 4-Owner';
 
 -- 将默认管理员设为 Owner (level=4)，其他管理员为 Helper (level=3)
--- huachan 用户（如果存在）设为 Owner
-UPDATE `admin` SET `level` = 4 WHERE `username` = 'huachan';
 UPDATE `admin` SET `level` = 4 WHERE `id` = 1;
 
 -- 2. question 表添加 images 字段
