@@ -30,10 +30,11 @@ public class FileController {
             "pdf", "doc", "docx", "ppt", "pptx", "md", "markdown", "txt"
     );
 
-    private static final String filePath = System.getProperty("user.dir") + "/files/";
-
     @Value("${fileBaseUrl:}")
     private String fileBaseUrl;
+
+    @Value("${app.upload-dir}")
+    private String filePath;
 
     @PostMapping("/upload")
     public Result upload(MultipartFile file) {

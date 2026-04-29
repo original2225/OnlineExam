@@ -72,7 +72,7 @@ const petCat = () => {
 
 const goHome = () => {
   try {
-    const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+    const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
     if (user.role === 'OWNER' || user.role === 'ADMIN' || user.role === 'HELPER') {
       window.location.href = '/manager/home'
     } else if (user.role === 'USER') {

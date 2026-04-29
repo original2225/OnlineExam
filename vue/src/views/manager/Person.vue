@@ -42,7 +42,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL
 const uploadHeaders = getUploadHeaders()
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}')
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 })
 
 const handleFileUpload = (res) => {
@@ -60,7 +60,7 @@ const update = () => {
   request.put(getUpdateApi(data.user.role), data.user).then(res => {
     if (res.code === '200') {
       ElMessage.success('保存成功')
-      localStorage.setItem('xm-user', JSON.stringify(data.user))
+      localStorage.setItem('beiming-onlineexam-user', JSON.stringify(data.user))
       emit('updateUser')
     } else {
       ElMessage.error(res.msg)

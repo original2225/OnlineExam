@@ -130,7 +130,7 @@ import request from '@/utils/request.js'
 import { ElMessage } from 'element-plus'
 import { Search, Document } from '@element-plus/icons-vue'
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 const isAdmin = ['OWNER', 'ADMIN'].includes(user.role)
 const voteLabel = (vote) => ({ PASS: '建议通过', FAIL: '建议不通过', ABSTAIN: '弃权' })[vote] || '未表决'
 

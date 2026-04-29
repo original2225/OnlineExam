@@ -147,7 +147,7 @@ import { ElMessage } from 'element-plus'
 import request from '@/utils/request.js'
 import { View, Check, Close, Folder, CircleCheck, EditPen, List, InfoFilled, WarningFilled } from '@element-plus/icons-vue'
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const statusOptions = [
   { label: '待审核', value: 'PENDING' },

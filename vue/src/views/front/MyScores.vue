@@ -143,6 +143,9 @@
             <el-button type="primary" size="small" round @click="viewDetail(record)">
               <el-icon><View /></el-icon> 查看详情
             </el-button>
+            <el-button size="small" round @click="openChat(record)">
+              <el-icon><ChatDotRound /></el-icon> 追问室
+            </el-button>
           </div>
         </div>
       </div>
@@ -170,6 +173,12 @@
       class="detail-dialog"
     >
       <div v-if="data.currentRecord" class="detail-body">
+        <div class="detail-tools">
+          <el-button type="primary" plain round @click="openChat(data.currentRecord)">
+            <el-icon><ChatDotRound /></el-icon> 打开答卷追问室
+          </el-button>
+        </div>
+
         <!-- 分数概览 -->
         <div class="detail-overview">
           <div class="do-card primary">
@@ -276,18 +285,27 @@
 
     <!-- 图片预览 -->
     <el-image-viewer v-if="data.previewVisible" :url-list="[data.previewUrl]" @close="data.previewVisible = false" />
+
+    <ExamRecordChatDrawer
+      v-model="data.chatVisible"
+      :record-id="data.chatRecordId"
+      :record="data.chatRecord"
+    />
   </div>
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, watch } from "vue";
 import request from "@/utils/request.js";
+import { useRoute } from "vue-router";
 import {
   Document, Trophy, TrendCharts, CircleCheck, CircleClose,
   InfoFilled, ChatDotRound, Edit, Clock, Calendar, View,
   Refresh, Loading
 } from "@element-plus/icons-vue";
+import ExamRecordChatDrawer from "@/components/ExamRecordChatDrawer.vue";
 
+const route = useRoute()
 const data = reactive({
   tableData: [],
   detailDialogVisible: false,
@@ -301,7 +319,10 @@ const data = reactive({
   pageSize: 10,
   compareData: null,
   previewVisible: false,
-  previewUrl: ''
+  previewUrl: '',
+  chatVisible: false,
+  chatRecordId: null,
+  chatRecord: null,
 })
 
 // 排序后的数据
@@ -328,7 +349,7 @@ const paginatedData = computed(() => {
   return sortedData.value.slice(start, start + data.pageSize)
 })
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const getScoreClass = (score) => {
   if (score >= 90) return 'excellent'
@@ -372,6 +393,22 @@ const viewDetail = (row) => {
   }
 }
 
+const openChat = (record) => {
+  if (!record?.id) return
+  data.chatRecordId = record.id
+  data.chatRecord = record
+  data.chatVisible = true
+}
+
+const openInitialChat = () => {
+  const queryRecordId = route.query.chatRecordId
+  if (!queryRecordId) return
+  const recordId = Number(queryRecordId)
+  data.chatRecordId = recordId
+  data.chatRecord = data.tableData.find(item => item.id === recordId) || null
+  data.chatVisible = true
+}
+
 const load = () => {
   data.loading = true
   request.get('/score/getByStudentId/' + user.id).then(res => {
@@ -392,6 +429,7 @@ const load = () => {
         data.stats.avg = 0
         data.stats.passRate = 0
       }
+      openInitialChat()
     }
   }).finally(() => {
     data.loading = false
@@ -400,6 +438,10 @@ const load = () => {
 
 onMounted(() => {
   load()
+})
+
+watch(() => route.query.chatRecordId, () => {
+  openInitialChat()
 })
 </script>
 
@@ -551,12 +593,13 @@ export default { name: 'MyScores' }
   font-size: 12px; color: var(--text-secondary);
 }
 .score-detail span { display: flex; align-items: center; gap: 3px; }
-.score-action { flex-shrink: 0; }
+.score-action { flex-shrink: 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 .pagination-wrap { display: flex; justify-content: center; padding-top: 20px; }
 
 /* 详情弹窗 */
 .detail-body { padding: 4px; }
+.detail-tools { display: flex; justify-content: flex-end; margin-bottom: 14px; }
 .detail-overview {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

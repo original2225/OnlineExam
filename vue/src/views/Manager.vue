@@ -1,202 +1,198 @@
 <template>
-  <div class="layout">
-    <!-- 侧边栏 -->
-    <aside class="sidebar" :class="{ fold: data.fold }">
-      <!-- Logo -->
-      <div class="sb-logo" @click="goHome">
-        <img src="@/assets/imgs/logo.png" alt="">
-        <transition name="fade">
-          <div v-if="!data.fold" class="sb-logo-text">
-            <b>北冥</b>
-            <span>管理后台</span>
-          </div>
-        </transition>
-      </div>
+  <div class="admin-shell" :class="{ collapsed: data.collapsed }">
+    <aside class="admin-sidebar">
+      <button class="brand" type="button" @click="router.push('/manager/home')">
+        <img src="@/assets/imgs/logo.png" alt="北冥审核系统">
+        <span class="brand-copy">
+          <strong>北冥审核</strong>
+          <small>管理控制台</small>
+        </span>
+      </button>
 
-      <!-- 成员卡片 -->
-      <div class="sb-profile" v-if="!data.fold">
-        <img :src="data.user.avatar || defaultAvatar" class="sb-avatar" alt="">
-        <div class="sb-profile-info">
-          <strong>{{ data.user.name }}</strong>
-          <span class="sb-profile-role" :style="{ color: roleColor, borderColor: roleColor }">{{ getRoleLabel(data.user.role) }}</span>
-        </div>
-      </div>
-      <div v-else class="sb-profile-mini">
+      <div class="operator">
         <img :src="data.user.avatar || defaultAvatar" alt="">
+        <div class="operator-copy">
+          <strong>{{ data.user.name || data.user.username || '管理员' }}</strong>
+          <span :style="{ color: roleColor }">{{ getRoleLabel(data.user.role) }}</span>
+        </div>
       </div>
 
-      <!-- 阅卷入口 -->
-      <div class="sb-exam-btn" @click="router.push('/exam/dashboard')">
-        <div class="sb-exam-shine"></div>
-        <el-icon :size="15"><Checked /></el-icon>
-        <span v-if="!data.fold">进入审核阅卷</span>
-        <el-icon v-if="!data.fold" style="margin-left:auto;font-size:12px;opacity:.5"><ArrowRight /></el-icon>
-      </div>
+      <button class="review-entry" type="button" @click="router.push('/exam/dashboard')">
+        <el-icon><Checked /></el-icon>
+        <span>阅卷工作台</span>
+      </button>
 
-      <!-- 导航列表 -->
-      <nav class="sb-nav">
-        <div class="sb-group">
-          <div class="sb-item" :class="{ active: isCurrent('/manager/home') }" @click="nav('/manager/home')">
-            <div class="sb-item-icon"><el-icon><HomeFilled /></el-icon></div>
-            <span v-if="!data.fold">控制台</span>
-          </div>
-        </div>
-
-        <div class="sb-group">
-          <div v-if="!data.fold" class="sb-group-title">内容</div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/notice') }" @click="nav('/manager/notice')">
-            <div class="sb-item-icon"><el-icon><Bell /></el-icon></div>
-            <span v-if="!data.fold">系统公告</span>
-          </div>
-        </div>
-
-        <div class="sb-group" v-if="isAdmin">
-          <div v-if="!data.fold" class="sb-group-title">成员</div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/admin') }" @click="nav('/manager/admin')">
-            <div class="sb-item-icon blue"><el-icon><UserFilled /></el-icon></div>
-            <span v-if="!data.fold">管理员</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/examiner') }" @click="nav('/manager/examiner')">
-            <div class="sb-item-icon cyan"><el-icon><Checked /></el-icon></div>
-            <span v-if="!data.fold">阅卷人</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/student') }" @click="nav('/manager/student')">
-            <div class="sb-item-icon green"><el-icon><User /></el-icon></div>
-            <span v-if="!data.fold">玩家</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/registrationApproval') }" @click="nav('/manager/registrationApproval')">
-            <div class="sb-item-icon orange"><el-icon><Stamp /></el-icon></div>
-            <span v-if="!data.fold">注册审批</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/invitationCode') }" @click="nav('/manager/invitationCode')">
-            <div class="sb-item-icon purple"><el-icon><Ticket /></el-icon></div>
-            <span v-if="!data.fold">邀请码</span>
-          </div>
-        </div>
-
-        <div class="sb-group">
-          <div v-if="!data.fold" class="sb-group-title">题库</div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/questionCategory') }" @click="nav('/manager/questionCategory')" v-if="isAdmin">
-            <div class="sb-item-icon teal"><el-icon><FolderOpened /></el-icon></div>
-            <span v-if="!data.fold">题目分类</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/question') }" @click="nav('/manager/question')">
-            <div class="sb-item-icon"><el-icon><Collection /></el-icon></div>
-            <span v-if="!data.fold">题目列表</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/questionReview') }" @click="nav('/manager/questionReview')" v-if="isAdmin">
-            <div class="sb-item-icon orange"><el-icon><Stamp /></el-icon></div>
-            <span v-if="!data.fold">题目审核</span>
-          </div>
-        </div>
-
-        <div class="sb-group">
-          <div v-if="!data.fold" class="sb-group-title">审核</div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/examPaper') }" @click="nav('/manager/examPaper')">
-            <div class="sb-item-icon"><el-icon><Document /></el-icon></div>
-            <span v-if="!data.fold">试卷管理</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/exam') }" @click="nav('/manager/exam')">
-            <div class="sb-item-icon"><el-icon><EditPen /></el-icon></div>
-            <span v-if="!data.fold">审核管理</span>
-          </div>
-          <div class="sb-item" :class="{ active: isCurrent('/manager/score') }" @click="nav('/manager/score')">
-            <div class="sb-item-icon"><el-icon><DataAnalysis /></el-icon></div>
-            <span v-if="!data.fold">结果管理</span>
-          </div>
-        </div>
+      <nav class="admin-nav" aria-label="管理后台导航">
+        <section v-for="group in visibleNavGroups" :key="group.title" class="nav-group">
+          <p class="nav-title">{{ group.title }}</p>
+          <button
+            v-for="item in group.items"
+            :key="item.path"
+            class="nav-item"
+            :class="{ active: isCurrent(item.path) }"
+            type="button"
+            @click="router.push(item.path)"
+          >
+            <span class="nav-icon" :class="item.tone">
+              <el-icon><component :is="item.icon" /></el-icon>
+            </span>
+            <span class="nav-label">{{ item.label }}</span>
+          </button>
+        </section>
       </nav>
 
-      <!-- 底部折叠 -->
-      <div class="sb-footer">
-        <div class="sb-fold" @click="data.fold = !data.fold">
-          <el-icon><component :is="data.fold ? 'DArrowRight' : 'DArrowLeft'" /></el-icon>
-          <span v-if="!data.fold">{{ data.fold ? '展开' : '收起' }}</span>
-        </div>
+      <div class="sidebar-tools">
+        <button type="button" class="fold-btn" @click="data.collapsed = !data.collapsed">
+          <el-icon><component :is="data.collapsed ? 'Expand' : 'Fold'" /></el-icon>
+          <span>{{ data.collapsed ? '展开' : '收起' }}</span>
+        </button>
       </div>
     </aside>
 
-    <!-- 右侧 -->
-    <div class="right">
-      <!-- 顶栏 -->
-      <header class="topbar">
-        <div class="tb-left">
-          <span class="tb-hi">{{ greeting }}，</span>
-          <span class="tb-who">{{ data.user.name }}</span>
-          <template v-if="router.currentRoute.value.meta.name">
-            <span class="tb-sep">|</span>
-            <span class="tb-page">{{ router.currentRoute.value.meta.name }}</span>
-          </template>
+    <section class="admin-workspace">
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu" type="button" @click="data.collapsed = !data.collapsed">
+            <el-icon><Menu /></el-icon>
+          </button>
+          <div>
+            <p class="eyebrow">{{ greeting }}</p>
+            <h1>{{ currentTitle }}</h1>
+          </div>
         </div>
-        <div class="tb-right">
+
+        <div class="topbar-right">
           <ThemeSwitcher />
+          <ExamRecordChatLauncher />
           <NotificationBell />
-          <el-dropdown trigger="click">
-            <div class="tb-setting"><el-icon><Setting /></el-icon></div>
+          <el-dropdown trigger="click" @command="handleCommand">
+            <button class="user-menu" type="button">
+              <img :src="data.user.avatar || defaultAvatar" alt="">
+              <span>{{ data.user.name || data.user.username }}</span>
+              <el-icon><ArrowDown /></el-icon>
+            </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="router.push('/front/home')"><el-icon><Monitor /></el-icon> 玩家前台</el-dropdown-item>
-                <el-dropdown-item @click="router.push('/manager/person')"><el-icon><User /></el-icon> 个人资料</el-dropdown-item>
-                <el-dropdown-item @click="router.push('/manager/password')"><el-icon><Lock /></el-icon> 修改密码</el-dropdown-item>
-                <el-dropdown-item divided @click="logout"><el-icon><SwitchButton /></el-icon> 退出登录</el-dropdown-item>
+                <el-dropdown-item command="front"><el-icon><Monitor /></el-icon> 学生前台</el-dropdown-item>
+                <el-dropdown-item command="person"><el-icon><User /></el-icon> 个人资料</el-dropdown-item>
+                <el-dropdown-item command="password"><el-icon><Lock /></el-icon> 修改密码</el-dropdown-item>
+                <el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon> 退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </div>
       </header>
 
-      <!-- 内容 -->
-      <main class="content">
+      <main class="admin-content">
         <router-view v-slot="{ Component, route: currentRoute }">
           <Suspense>
-            <component :is="Component" :key="currentRoute.path" @updateUser="updateUser" />
+            <transition name="fade" mode="out-in">
+              <component :is="Component" :key="currentRoute.path" @updateUser="updateUser" />
+            </transition>
             <template #fallback>
-              <div class="page-loading">页面加载中...</div>
+              <div class="loading-panel">页面加载中...</div>
             </template>
           </Suspense>
         </router-view>
       </main>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from "vue"
-import router from "@/router/index.js"
+import { computed, onMounted, reactive } from "vue"
 import { ElMessage } from "element-plus"
+import router from "@/router/index.js"
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue"
 import NotificationBell from "@/components/NotificationBell.vue"
+import ExamRecordChatLauncher from "@/components/ExamRecordChatLauncher.vue"
 
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
-  fold: false,
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
+  collapsed: false,
 })
+
+const roleColors = { OWNER: '#ef4444', ADMIN: '#b45309', HELPER: '#2563eb', USER: '#0f9f6e' }
+const roleColor = computed(() => roleColors[data.user.role] || '#0f9f6e')
+const isAdmin = computed(() => ['OWNER', 'ADMIN'].includes(data.user.role))
+
+const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '成员')
+
+const navGroups = computed(() => [
+  {
+    title: '总览',
+    items: [
+      { path: '/manager/home', label: '控制台', icon: 'DataBoard', tone: 'green' },
+      { path: '/manager/notice', label: '系统公告', icon: 'Bell', tone: 'blue' },
+    ],
+  },
+  {
+    title: '成员',
+    adminOnly: true,
+    items: [
+      { path: '/manager/admin', label: '管理员', icon: 'UserFilled', tone: 'red' },
+      { path: '/manager/examiner', label: '阅卷人', icon: 'Checked', tone: 'cyan' },
+      { path: '/manager/student', label: '玩家', icon: 'User', tone: 'green' },
+      { path: '/manager/registrationApproval', label: '注册审批', icon: 'Stamp', tone: 'orange' },
+      { path: '/manager/invitationCode', label: '邀请码', icon: 'Ticket', tone: 'purple' },
+    ],
+  },
+  {
+    title: '题库',
+    items: [
+      ...(isAdmin.value ? [{ path: '/manager/questionCategory', label: '题目分类', icon: 'FolderOpened', tone: 'teal' }] : []),
+      { path: '/manager/question', label: '题目列表', icon: 'Collection', tone: 'blue' },
+      ...(isAdmin.value ? [{ path: '/manager/questionReview', label: '题目审核', icon: 'DocumentChecked', tone: 'orange' }] : []),
+    ],
+  },
+  {
+    title: '审核',
+    items: [
+      { path: '/manager/examPaper', label: '试卷管理', icon: 'Document', tone: 'purple' },
+      { path: '/manager/exam', label: '审核管理', icon: 'EditPen', tone: 'green' },
+      { path: '/manager/grading', label: '阅卷管理', icon: 'Finished', tone: 'cyan' },
+      { path: '/manager/score', label: '结果管理', icon: 'DataAnalysis', tone: 'orange' },
+    ],
+  },
+])
+
+const visibleNavGroups = computed(() => navGroups.value.filter(group => !group.adminOnly || isAdmin.value))
+const currentTitle = computed(() => router.currentRoute.value.meta?.name || '管理后台')
 
 const greeting = computed(() => {
   const h = new Date().getHours()
-  if (h < 6) return '夜深了'
-  if (h < 12) return '早上好'
-  if (h < 14) return '中午好'
+  if (h < 6) return '夜间值守'
+  if (h < 12) return '上午好'
+  if (h < 14) return '午间巡检'
   if (h < 18) return '下午好'
-  return '晚上好'
+  return '晚间复盘'
 })
+
+const isCurrent = (path) => router.currentRoute.value.path === path
+
+const handleCommand = (cmd) => {
+  const map = { front: '/front/home', person: '/manager/person', password: '/manager/password' }
+  if (cmd === 'logout') {
+    localStorage.removeItem('beiming-onlineexam-user')
+    router.push('/login')
+  } else if (map[cmd]) {
+    router.push(map[cmd])
+  }
+}
+
+const updateUser = () => {
+  data.user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
+}
 
 const preloadManagerPages = () => {
   const pages = [
     () => import('@/views/manager/Admin.vue'),
     () => import('@/views/manager/Notice.vue'),
-    () => import('@/views/manager/Person.vue'),
-    () => import('@/views/manager/Password.vue'),
     () => import('@/views/manager/Examiner.vue'),
     () => import('@/views/manager/Student.vue'),
-    () => import('@/views/manager/RegistrationApproval.vue'),
-    () => import('@/views/manager/InvitationCodeManagement.vue'),
-    () => import('@/views/manager/QuestionCategory.vue'),
     () => import('@/views/manager/Question.vue'),
-    () => import('@/views/manager/QuestionReview.vue'),
-    () => import('@/views/manager/ExamPaper.vue'),
     () => import('@/views/manager/Exam.vue'),
     () => import('@/views/manager/Score.vue'),
   ]
@@ -205,238 +201,325 @@ const preloadManagerPages = () => {
 
 onMounted(() => setTimeout(preloadManagerPages, 500))
 
-const isCurrent = (p) => router.currentRoute.value.path === p
-const nav = (p) => router.push(p)
-const isAdmin = computed(() => data.user.role === 'ADMIN' || data.user.role === 'OWNER')
-const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
-const roleColor = computed(() => roleColors[data.user.role] || '#4ade80')
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
-
-const goHome = () => router.push('/')
-const logout = () => { localStorage.removeItem('xm-user'); router.push('/login') }
-const updateUser = () => { data.user = JSON.parse(localStorage.getItem('xm-user') || '{}') }
-
-if (!data.user.id) { logout(); ElMessage.error('请登录！') }
+if (!data.user.id) {
+  ElMessage.error('请登录')
+  router.push('/login')
+}
 </script>
 
 <style scoped>
-@import "@/assets/css/transitions.css";
+.admin-shell {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--bg-page);
+}
 
-/* ===== 布局 ===== */
-.layout { display: flex; min-height: 100vh; }
-
-/* ===== 侧边栏 ===== */
-.sidebar {
-  width: 230px;
-  background: linear-gradient(180deg, #151820 0%, #1a1f2b 40%, #181c26 100%);
-  color: rgba(255,255,255,0.8);
+.admin-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+  gap: 14px;
+  padding: 18px 14px;
   overflow: hidden;
-  user-select: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), transparent),
+    var(--gradient-header);
+  color: #fff;
 }
-.sidebar.fold { width: 62px; }
 
-/* Logo */
-.sb-logo {
+.brand,
+.review-entry,
+.nav-item,
+.fold-btn,
+.mobile-menu,
+.user-menu {
+  border: 0;
+  cursor: pointer;
+}
+
+.brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 16px 14px;
-  cursor: pointer;
-}
-.sb-logo:hover { opacity: 0.85; }
-.sb-logo img { width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; }
-.sb-logo-text { display: flex; flex-direction: column; line-height: 1.15; white-space: nowrap; }
-.sb-logo-text b { font-size: 16px; color: #fff; letter-spacing: 1px; }
-.sb-logo-text span { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 2px; }
-
-/* 成员卡 */
-.sb-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 14px 10px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-.sb-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-.sb-profile-info { display: flex; flex-direction: column; min-width: 0; }
-.sb-profile-info strong { font-size: 13px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sb-profile-role {
-  font-size: 10px; font-weight: 700; margin-top: 3px;
-  border: 1px solid; border-radius: 4px; padding: 0 5px; width: fit-content;
-}
-.sb-profile-mini { padding: 6px 0; text-align: center; }
-.sb-profile-mini img { width: 30px; height: 30px; border-radius: 50%; }
-
-/* 阅卷按钮 */
-.sb-exam-btn {
-  position: relative;
-  margin: 0 14px 14px;
-  padding: 9px 14px;
-  background: linear-gradient(135deg, rgba(0,180,42,0.25), rgba(0,180,42,0.1));
-  border: 1px solid rgba(0,180,42,0.2);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #4ade80;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.sb-exam-btn:hover { background: linear-gradient(135deg, rgba(0,180,42,0.35), rgba(0,180,42,0.15)); }
-.sb-exam-shine {
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(74,222,128,0.08), transparent);
-  animation: shine 4s ease-in-out infinite;
-}
-@keyframes shine { 0%,100%{transform:translateX(-100%)} 50%{transform:translateX(100%)} }
-
-/* 导航 */
-.sb-nav { flex: 1; overflow-y: auto; padding: 0 10px; }
-.sb-nav::-webkit-scrollbar { width: 3px; }
-.sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-.sb-group { margin-bottom: 2px; }
-.sb-group-title {
-  font-size: 10px; font-weight: 700;
-  color: rgba(255,255,255,0.2);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 14px 10px 4px;
-}
-
-.sb-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 10px;
-  height: 36px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.5);
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  position: relative;
-}
-.sb-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
-
-.sb-item.active {
+  min-height: 48px;
+  padding: 6px 8px;
   color: #fff;
-  background: rgba(0,180,42,0.15);
-  font-weight: 600;
-}
-.sb-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 6px; bottom: 6px;
-  width: 3px;
-  border-radius: 0 3px 3px 0;
-  background: var(--primary-color, #00b42a);
+  background: transparent;
+  text-align: left;
 }
 
-.sb-item-icon {
-  width: 28px; height: 28px;
-  border-radius: 7px;
+.brand img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.brand-copy {
+  display: grid;
+  line-height: 1.2;
+}
+
+.brand-copy strong {
+  font-size: 16px;
+}
+
+.brand-copy small {
+  color: rgba(255,255,255,0.52);
+  font-size: 11px;
+}
+
+.operator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
   background: rgba(255,255,255,0.06);
+}
+
+.operator img,
+.user-menu img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.operator-copy {
+  display: grid;
+  min-width: 0;
+}
+
+.operator-copy strong {
+  overflow: hidden;
+  color: rgba(255,255,255,0.95);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.operator-copy span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.review-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 13px;
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(var(--primary-rgb), 0.42);
+  font-weight: 700;
+}
+
+.admin-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.nav-group {
+  margin-top: 14px;
+}
+
+.nav-title {
+  margin: 0 0 7px;
+  padding-left: 10px;
+  color: rgba(255,255,255,0.36);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  margin-bottom: 4px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.64);
+  background: transparent;
+  text-align: left;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: #fff;
+  background: rgba(255,255,255,0.09);
+}
+
+.nav-item.active {
+  box-shadow: inset 3px 0 0 var(--primary-color);
+}
+
+.nav-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.07);
+}
+
+.nav-icon.green { color: #34d399; }
+.nav-icon.blue { color: #60a5fa; }
+.nav-icon.red { color: #f87171; }
+.nav-icon.cyan { color: #22d3ee; }
+.nav-icon.orange { color: #f59e0b; }
+.nav-icon.purple { color: #a78bfa; }
+.nav-icon.teal { color: #2dd4bf; }
+
+.sidebar-tools {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 12px;
+}
+
+.fold-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  color: rgba(255,255,255,0.5);
-  flex-shrink: 0;
-  transition: all 0.15s;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.52);
+  background: rgba(255,255,255,0.05);
 }
-.sb-item:hover .sb-item-icon { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.1); }
-.sb-item.active .sb-item-icon { background: rgba(0,180,42,0.25); color: #4ade80; }
 
-.sb-item-icon.blue { background: rgba(64,158,255,0.12); color: #60a5fa; }
-.sb-item-icon.cyan { background: rgba(34,211,238,0.12); color: #22d3ee; }
-.sb-item-icon.green { background: rgba(74,222,128,0.12); color: #4ade80; }
-.sb-item-icon.orange { background: rgba(251,146,60,0.12); color: #fb923c; }
-.sb-item-icon.purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
-.sb-item-icon.teal { background: rgba(45,212,191,0.12); color: #2dd4bf; }
-.sb-item-icon.gold { background: rgba(251,191,36,0.12); color: #fbbf24; }
-
-/* 底部 */
-.sb-footer {
-  padding: 10px 14px;
-  border-top: 1px solid rgba(255,255,255,0.04);
+.admin-workspace {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
-.sb-fold {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 10px; border-radius: 6px;
-  font-size: 12px; color: rgba(255,255,255,0.25);
-  cursor: pointer; transition: all 0.2s;
-}
-.sb-fold:hover { color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
 
-/* 折叠态 */
-.sidebar.fold .sb-logo { justify-content: center; padding: 14px 0; }
-.sidebar.fold .sb-exam-btn { justify-content: center; padding: 9px; margin: 0 8px 14px; }
-.sidebar.fold .sb-item { justify-content: center; padding: 0; }
-.sidebar.fold .sb-fold { justify-content: center; }
-.sidebar.fold .sb-nav { padding: 0 6px; }
-
-/* ===== 右侧 ===== */
-.right { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-page); }
-
-/* 顶栏 */
-.topbar {
-  height: 52px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border-lighter);
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  position: sticky; top: 0; z-index: 50;
+  gap: 18px;
+  min-height: 72px;
+  padding: 0 26px;
+  border-bottom: 1px solid var(--border-lighter);
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  backdrop-filter: blur(16px);
 }
-.tb-left { font-size: 13px; display: flex; align-items: center; gap: 6px; }
-.tb-hi { color: var(--text-secondary); }
-.tb-who { font-weight: 700; color: var(--text-primary); }
-.tb-sep { color: var(--border-light); margin: 0 4px; }
-.tb-page { color: var(--text-primary); font-weight: 600; }
-.tb-right { display: flex; align-items: center; gap: 6px; }
-.tb-setting {
-  width: 30px; height: 30px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
-}
-.tb-setting:hover { background: var(--bg-page); color: var(--text-primary); }
 
-/* 内容 */
-.content { flex: 1; padding: 20px 24px; overflow-y: auto; }
-.page-loading {
-  padding: 40px;
-  text-align: center;
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-@media (max-width: 768px) {
-  .sidebar { width: 62px; }
-  .sidebar .sb-logo-text,
-  .sidebar .sb-profile,
-  .sidebar .sb-group-title,
-  .sidebar .sb-item span,
-  .sidebar .sb-exam-btn span,
-  .sidebar .sb-fold span { display: none; }
-  .sidebar .sb-logo { justify-content: center; }
-  .sidebar .sb-exam-btn { justify-content: center; }
-  .sidebar .sb-item { justify-content: center; }
-  .sidebar .sb-fold { justify-content: center; }
-  .content { padding: 12px; }
+.topbar-left h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+}
+
+.mobile-menu {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  background: var(--bg-muted);
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 3px 10px 3px 4px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px 28px 48px;
+}
+
+.loading-panel {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+  color: var(--text-secondary);
+}
+
+.admin-shell.collapsed {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.admin-shell.collapsed .brand-copy,
+.admin-shell.collapsed .operator-copy,
+.admin-shell.collapsed .review-entry span,
+.admin-shell.collapsed .nav-title,
+.admin-shell.collapsed .nav-label,
+.admin-shell.collapsed .fold-btn span {
+  display: none;
+}
+
+.admin-shell.collapsed .operator,
+.admin-shell.collapsed .brand,
+.admin-shell.collapsed .review-entry,
+.admin-shell.collapsed .nav-item {
+  justify-content: center;
+}
+
+@media (max-width: 920px) {
+  .admin-shell,
+  .admin-shell.collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    z-index: 100;
+    width: 264px;
+    transform: translateX(-100%);
+    transition: transform 0.18s ease;
+  }
+
+  .admin-shell:not(.collapsed) .admin-sidebar {
+    transform: translateX(0);
+  }
+
+  .mobile-menu {
+    display: grid;
+    place-items: center;
+  }
+
+  .admin-content {
+    padding: 16px 12px 36px;
+  }
+
+  .admin-topbar {
+    padding: 0 12px;
+  }
 }
 </style>

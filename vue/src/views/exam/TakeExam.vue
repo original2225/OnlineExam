@@ -221,7 +221,7 @@ import request from '@/utils/request.js'
 import { Clock, Calendar, Document, Folder, Edit, Check, ArrowLeft, ArrowRight, VideoCamera } from '@element-plus/icons-vue'
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   availableExams: [],
   inExam: false,
   currentExam: {},

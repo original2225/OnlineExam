@@ -8,11 +8,11 @@
         <version>3.3.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>springboot</artifactId>
+    <groupId>com.beiming</groupId>
+    <artifactId>beiming-onlineexam-springboot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot</name>
-    <description>springboot</description>
+    <name>Beiming-OnlineExam Spring Boot</name>
+    <description>Beiming Minecraft server review system backend</description>
     <properties>
         <java.version>21</java.version>
     </properties>

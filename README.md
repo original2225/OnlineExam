@@ -49,7 +49,7 @@ Beiming-OnlineExam/
 创建 MySQL 数据库：
 
 ```sql
-CREATE DATABASE onlineexam DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE `Beiming-OnlineExam` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 导入 `system.sql`。
@@ -67,7 +67,7 @@ cd springboot
 ```bash
 export DB_USERNAME=root
 export DB_PASSWORD=your-password
-export DB_URL='jdbc:mysql://localhost:3306/onlineexam?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true'
+export DB_URL='jdbc:mysql://localhost:3306/Beiming-OnlineExam?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true'
 mvn spring-boot:run
 ```
 
@@ -80,13 +80,14 @@ mvn spring-boot:run
 | `SERVER_PORT` | `9090` | 后端端口 |
 | `DB_USERNAME` | `root` | 数据库用户名 |
 | `DB_PASSWORD` | 空 | 数据库密码 |
-| `DB_URL` | 本地 `onlineexam` | 数据库连接地址 |
+| `DB_URL` | 本地 `Beiming-OnlineExam` | 数据库连接地址 |
 | `MAIL_HOST` | `smtp.qq.com` | SMTP 地址 |
 | `MAIL_PORT` | `587` | SMTP 端口 |
 | `MAIL_USERNAME` | 空 | 发件邮箱 |
 | `MAIL_PASSWORD` | 空 | 邮箱授权码 |
 | `FILE_BASE_URL` | `http://localhost:9090` | 文件访问根地址 |
 | `APP_BASE_URL` | `http://localhost:9090` | 应用后端地址 |
+| `APP_UPLOAD_DIR` | `${user.dir}/beiming-files` | 北冥版本地上传文件目录 |
 | `ADMIN_EMAIL` | `admin@example.com` | 管理员通知邮箱 |
 | `CLOUDREVE_BASE_URL` | 空 | Cloudreve 地址 |
 | `CLOUDREVE_USERNAME` | 空 | Cloudreve 用户名 |

@@ -235,7 +235,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Filter, Plus, Edit, Delete, Document, Clock, Timer, Folder, Promotion, Close, Check } from '@element-plus/icons-vue'
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   query: { name: '', status: '', examType: '' },
   pageNum: 1,
   pageSize: 10,

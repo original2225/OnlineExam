@@ -1,77 +1,73 @@
 <template>
-  <div class="fr">
-    <!-- 顶栏 -->
-    <header class="fr-header">
-      <div class="frh-left" @click="handleBrandClick">
-        <img src="@/assets/imgs/logo.png" alt="" class="frh-logo">
-        <div class="frh-brand">
-          <b>北冥审核系统</b>
-          <span>进服审核</span>
-        </div>
-      </div>
+  <div class="front-shell">
+    <header class="front-topbar">
+      <button class="front-brand" type="button" @click="handleBrandClick">
+        <img src="@/assets/imgs/logo.png" alt="北冥审核系统" />
+        <span>
+          <strong>北冥审核系统</strong>
+          <small>玩家审核中心</small>
+        </span>
+      </button>
 
-      <nav class="frh-nav">
+      <nav class="front-nav" aria-label="学生前台导航">
         <router-link
           v-for="item in navItems"
           :key="item.path"
           :to="item.path"
-          class="frh-tab"
+          class="front-nav-link"
           :class="{ active: isActive(item.path) }"
         >
-          <div class="frh-tab-icon" :class="item.color"><el-icon><component :is="item.icon" /></el-icon></div>
+          <el-icon><component :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
         </router-link>
       </nav>
 
-      <div class="frh-right">
+      <div class="front-actions">
         <ThemeSwitcher />
+        <ExamRecordChatLauncher v-if="data.user.id" />
         <NotificationBell />
 
         <template v-if="!data.user.id">
-          <div class="frh-sep"></div>
-          <el-button size="small" round @click="router.push('/login')" class="frh-ghost">登录</el-button>
-          <el-button size="small" round type="primary" @click="router.push('/register')">注册</el-button>
+          <el-button @click="router.push('/login')">登录</el-button>
+          <el-button type="primary" @click="router.push('/register')">注册</el-button>
         </template>
 
-        <template v-else>
-          <div class="frh-sep"></div>
-          <el-dropdown trigger="click" @command="handleCommand">
-            <div class="frh-user">
-              <div class="frh-avatar">
-                <img :src="data.user.avatar || defaultAvatar" alt="">
-                <div class="frh-dot"></div>
-              </div>
-              <div class="frh-user-meta">
-                <span class="frh-uname">{{ data.user.name }}</span>
-                <span class="frh-urole" :style="{ color: roleColor, borderColor: roleColor }">{{ getRoleLabel(data.user.role) }}</span>
-              </div>
-              <el-icon class="frh-ua"><arrow-down /></el-icon>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="person"><el-icon><User /></el-icon> 个人中心</el-dropdown-item>
-                <el-dropdown-item command="scores"><el-icon><DataAnalysis /></el-icon> 审核结果</el-dropdown-item>
-                <el-dropdown-item v-if="data.user.role !== 'USER'" command="manager" divided>
-                  <el-icon><Setting /></el-icon> 管理后台
-                </el-dropdown-item>
-                <el-dropdown-item command="logout" divided>
-                  <el-icon><SwitchButton /></el-icon> 退出登录
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
+        <el-dropdown v-else trigger="click" @command="handleCommand">
+          <button class="front-user" type="button">
+            <img :src="data.user.avatar || defaultAvatar" alt="" />
+            <span>
+              <strong>{{ data.user.name }}</strong>
+              <small>{{ roleLabel }}</small>
+            </span>
+            <el-icon><ArrowDown /></el-icon>
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="person">
+                <el-icon><User /></el-icon>个人中心
+              </el-dropdown-item>
+              <el-dropdown-item command="scores">
+                <el-icon><DataAnalysis /></el-icon>审核结果
+              </el-dropdown-item>
+              <el-dropdown-item v-if="canManage" command="manager" divided>
+                <el-icon><Setting /></el-icon>管理后台
+              </el-dropdown-item>
+              <el-dropdown-item command="logout" divided>
+                <el-icon><SwitchButton /></el-icon>退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </header>
 
-    <!-- 公告条 -->
-    <div class="fr-notice" v-if="data.noticeData.length">
-      <span class="frn-badge">公告</span>
-      <span class="frn-text">{{ data.topNotice }}</span>
-    </div>
+    <section v-if="data.noticeData.length" class="front-notice-strip">
+      <el-icon><Bell /></el-icon>
+      <strong>公告</strong>
+      <span>{{ data.topNotice }}</span>
+    </section>
 
-    <!-- 内容 -->
-    <main class="fr-main">
+    <main class="front-main">
       <router-view v-slot="{ Component, route: currentRoute }">
         <transition name="fade" mode="out-in">
           <component :is="Component" :key="currentRoute.path" @updateUser="updateUser" />
@@ -79,83 +75,87 @@
       </router-view>
     </main>
 
-    <!-- 底栏 -->
-    <footer class="fr-footer">
-      <div class="frf-inner">
-        <div class="frf-left">
-          <img src="@/assets/imgs/logo.png" alt="" class="frf-logo">
-          <div class="frf-brand">
-            <b>北冥审核系统服务器</b>
-            <span>建筑 · 后期 · 红石 · 见习</span>
-          </div>
-        </div>
-        <div class="frf-right">
-          <a href="https://docs.beiming.games" target="_blank">技术文档</a>
-          <span class="frf-sep">·</span>
-          <span>&copy; 2024 北冥</span>
-        </div>
-      </div>
-    </footer>
+    <nav class="front-mobile-nav" aria-label="移动端学生前台导航">
+      <router-link
+        v-for="item in mobileNavItems"
+        :key="item.path"
+        :to="item.path"
+        class="front-mobile-link"
+        :class="{ active: isActive(item.path) }"
+      >
+        <el-icon><component :is="item.icon" /></el-icon>
+        <span>{{ item.label }}</span>
+      </router-link>
+    </nav>
   </div>
 </template>
 
 <script setup>
 import router from "@/router/index.js"
-import { reactive, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, reactive } from "vue"
+import { ElMessage } from "element-plus"
 import request from "@/utils/request.js"
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue"
 import NotificationBell from "@/components/NotificationBell.vue"
-import { ElMessage } from "element-plus"
+import ExamRecordChatLauncher from "@/components/ExamRecordChatLauncher.vue"
 import {
-  HomeFilled, Collection, EditPen, Edit, WarnTriangleFilled, DataLine,
-  Trophy, Reading, ArrowDown, User, DataAnalysis,
-  Star, Setting, SwitchButton
+  ArrowDown,
+  Bell,
+  Collection,
+  DataAnalysis,
+  Edit,
+  EditPen,
+  HomeFilled,
+  Setting,
+  SwitchButton,
+  Trophy,
+  User,
+  WarnTriangleFilled,
 } from "@element-plus/icons-vue"
 
-const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+const defaultAvatar = "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}"),
   noticeData: [],
-  topNotice: '',
+  topNotice: "",
   noticeIndex: 0,
   noticeTimer: null,
   brandClickCount: 0,
   brandClickTimer: null,
 })
 
-const navItems = [
-  { path: '/front/home', label: '首页', icon: 'HomeFilled', color: '' },
-  { path: '/front/subjects', label: '审核题库', icon: 'Collection', color: 'blue' },
-  { path: '/front/examList', label: '进服审核', icon: 'EditPen', color: 'green' },
-  { path: '/front/practiceMode', label: '审核模拟', icon: 'Edit', color: 'orange' },
-  { path: '/front/wrongQuestions', label: '错题复盘', icon: 'WarnTriangleFilled', color: 'red' },
-  ...(data.user.role && data.user.role !== 'USER' ? [{ path: '/front/contributeQuestion', label: '提交题目', icon: 'EditPen', color: 'teal' }] : []),
-  { path: '/front/myScores', label: '审核结果', icon: 'DataAnalysis', color: 'purple' },
-  { path: '/front/leaderboard', label: '审核榜单', icon: 'Trophy', color: 'gold' },
-]
+const canManage = computed(() => ["OWNER", "ADMIN", "HELPER"].includes(data.user.role))
+const roleLabel = computed(() => ({ OWNER: "所有者", ADMIN: "管理员", HELPER: "阅卷人", USER: "玩家" }[data.user.role] || "访客"))
 
-const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
-const roleColor = roleColors[JSON.parse(localStorage.getItem('xm-user') || '{}').role] || '#4ade80'
+const navItems = computed(() => [
+  { path: "/front/home", label: "首页", icon: "HomeFilled" },
+  { path: "/front/subjects", label: "题库", icon: "Collection" },
+  { path: "/front/examList", label: "审核", icon: "EditPen" },
+  { path: "/front/practiceMode", label: "模拟", icon: "Edit" },
+  { path: "/front/wrongQuestions", label: "错题", icon: "WarnTriangleFilled" },
+  ...(canManage.value ? [{ path: "/front/contributeQuestion", label: "供题", icon: "EditPen" }] : []),
+  { path: "/front/myScores", label: "结果", icon: "DataAnalysis" },
+  { path: "/front/leaderboard", label: "榜单", icon: "Trophy" },
+])
 
-
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
+const mobileNavItems = computed(() => navItems.value.filter(item => ["/front/home", "/front/examList", "/front/practiceMode", "/front/myScores"].includes(item.path)))
 
 const isActive = (path) => {
   const current = router.currentRoute.value.path
-  return current === path || current.startsWith(path + '/')
+  return current === path || current.startsWith(path + "/")
 }
 
 const discoverEgg = (eggName) => {
   if (!data.user.id) return
-  request.post('/easterEgg/discover', {
+  request.post("/easterEgg/discover", {
     userId: data.user.id,
     userName: data.user.name,
     userRole: data.user.role,
-    eggName
+    eggName,
   }).then(res => {
-    if (res.code === '200') {
-      ElMessage.success(res.data?.alreadyDiscovered ? '你已经发现过北冥入口彩蛋' : '发现彩蛋：北冥入口守门人')
+    if (res.code === "200") {
+      ElMessage.success(res.data?.alreadyDiscovered ? "你已经发现过北冥入口彩蛋" : "发现彩蛋：北冥入口守门人")
     }
   }).catch(() => {})
 }
@@ -166,36 +166,42 @@ const handleBrandClick = () => {
   data.brandClickTimer = setTimeout(() => { data.brandClickCount = 0 }, 1800)
   if (data.brandClickCount >= 7) {
     data.brandClickCount = 0
-    discoverEgg('beiming_entry_gate')
-  } else {
-    router.push('/')
+    discoverEgg("beiming_entry_gate")
+    return
   }
+  router.push("/")
 }
 
 const handleCommand = (cmd) => {
-  const map = { person: '/front/person', scores: '/front/myScores', manager: '/manager/home' }
-  if (cmd === 'logout') { localStorage.removeItem('xm-user'); router.push('/login') }
-  else if (map[cmd]) router.push(map[cmd])
+  const map = { person: "/front/person", scores: "/front/myScores", manager: "/manager/home" }
+  if (cmd === "logout") {
+    localStorage.removeItem("beiming-onlineexam-user")
+    router.push("/login")
+    return
+  }
+  if (map[cmd]) router.push(map[cmd])
 }
 
-const updateUser = () => { data.user = JSON.parse(localStorage.getItem('xm-user') || '{}') }
+const updateUser = () => {
+  data.user = JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}")
+}
 
 const loadNotice = () => {
-  request.get('/notice/selectAll').then(res => {
-    if (res.code === '200' && res.data?.length) {
+  request.get("/notice/selectAll").then(res => {
+    if (res.code === "200" && res.data?.length) {
       data.noticeData = res.data
-      data.topNotice = res.data[0]?.content || ''
+      data.topNotice = res.data[0]?.content || ""
       if (res.data.length > 1) {
         data.noticeTimer = setInterval(() => {
           data.noticeIndex = (data.noticeIndex + 1) % data.noticeData.length
-          data.topNotice = data.noticeData[data.noticeIndex]?.content || ''
-        }, 4000)
+          data.topNotice = data.noticeData[data.noticeIndex]?.content || ""
+        }, 4500)
       }
     }
   }).catch(() => {})
 }
 
-onMounted(() => loadNotice())
+onMounted(loadNotice)
 onUnmounted(() => {
   if (data.noticeTimer) clearInterval(data.noticeTimer)
   if (data.brandClickTimer) clearTimeout(data.brandClickTimer)
@@ -203,158 +209,240 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.fr { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg-page); }
-
-/* ===== 顶栏 ===== */
-.fr-header {
-  height: 58px;
-  background: var(--gradient-header);
-  display: flex; align-items: center;
-  padding: 0 20px; gap: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
-  position: sticky; top: 0; z-index: 100;
+.front-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(18, 24, 32, 0.04), transparent 260px),
+    var(--bg-page);
 }
 
-.frh-left {
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer; padding: 4px 10px; border-radius: 8px;
-  transition: background 0.2s; flex-shrink: 0;
+.front-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid var(--border-lighter);
+  backdrop-filter: blur(18px);
 }
-.frh-left:hover { background: rgba(255,255,255,0.07); }
-.frh-logo { width: 32px; height: 32px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.12); }
-.frh-brand { display: flex; flex-direction: column; line-height: 1.15; }
-.frh-brand b { color: #fff; font-size: 15px; letter-spacing: 0.5px; }
-.frh-brand span { color: rgba(255,255,255,0.3); font-size: 9px; letter-spacing: 2px; }
 
-/* 导航 */
-.frh-nav {
+[data-theme="dark"] .front-topbar {
+  background: rgba(17, 24, 39, 0.88);
+}
+
+.front-brand,
+.front-user {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.front-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.front-brand:hover {
+  background: var(--bg-page);
+}
+
+.front-brand img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.front-brand span,
+.front-user span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.front-brand strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.front-brand small,
+.front-user small {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.front-nav {
   flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  gap: 2px; overflow-x: auto;
-}
-.frh-nav::-webkit-scrollbar { height: 0; }
-
-.frh-tab {
-  display: flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: 6px;
-  font-size: 13px; font-weight: 500;
-  color: rgba(255,255,255,0.5);
-  text-decoration: none; transition: all 0.2s;
-  white-space: nowrap; position: relative;
-}
-.frh-tab:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
-
-.frh-tab.active {
-  color: #fff; font-weight: 600;
-  background: rgba(255,255,255,0.08);
-}
-.frh-tab.active::after {
-  content: ''; position: absolute; bottom: 0;
-  left: 50%; transform: translateX(-50%);
-  width: 16px; height: 2px; border-radius: 1px;
-  background: var(--primary-color, #00b42a);
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
 }
 
-.frh-tab-icon {
-  width: 24px; height: 24px; border-radius: 5px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.5); transition: all 0.2s;
-}
-.frh-tab:hover .frh-tab-icon { background: rgba(255,255,255,0.1); color: #fff; }
-.frh-tab.active .frh-tab-icon { background: rgba(0,180,42,0.2); color: #4ade80; }
-
-.frh-tab-icon.blue { background: rgba(96,165,250,0.15); color: #60a5fa; }
-.frh-tab-icon.green { background: rgba(74,222,128,0.15); color: #4ade80; }
-.frh-tab-icon.cyan { background: rgba(34,211,238,0.15); color: #22d3ee; }
-.frh-tab-icon.orange { background: rgba(251,146,60,0.15); color: #fb923c; }
-.frh-tab-icon.purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
-.frh-tab-icon.gold { background: rgba(251,191,36,0.15); color: #fbbf24; }
-.frh-tab-icon.teal { background: rgba(45,212,191,0.15); color: #2dd4bf; }
-.frh-tab-icon.pink { background: rgba(244,114,182,0.15); color: #f472b6; }
-
-/* 右侧 */
-.frh-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.frh-right :deep(.theme-trigger) { color: rgba(255,255,255,0.6); }
-.frh-right :deep(.theme-trigger:hover) { background: rgba(255,255,255,0.1); }
-.frh-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
-
-.frh-ghost {
-  color: rgba(255,255,255,0.75) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  background: transparent !important;
-}
-.frh-ghost:hover { color: #fff !important; border-color: rgba(255,255,255,0.5) !important; }
-
-.frh-user {
-  display: flex; align-items: center; gap: 8px;
-  cursor: pointer; padding: 3px 10px 3px 3px;
-  border-radius: 18px; border: 1px solid rgba(255,255,255,0.08);
-  transition: all 0.2s;
-}
-.frh-user:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
-
-.frh-avatar { position: relative; }
-.frh-avatar img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
-.frh-dot {
-  position: absolute; bottom: -1px; right: -1px;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #4ade80; border: 2px solid #1d2129;
+.front-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.frh-user-meta { display: flex; flex-direction: column; }
-.frh-uname { color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 600; line-height: 1.2; }
-.frh-urole {
-  font-size: 9px; font-weight: 700; margin-top: 1px;
-  border: 1px solid; border-radius: 3px; padding: 0 4px; width: fit-content;
-}
-.frh-ua { color: rgba(255,255,255,0.35); font-size: 11px; }
-
-/* ===== 公告 ===== */
-.fr-notice {
-  display: flex; align-items: center; gap: 10px;
-  padding: 5px 24px; font-size: 13px; color: var(--text-secondary);
-  background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border-lighter);
-}
-.frn-badge {
-  padding: 1px 8px; border-radius: 3px;
-  background: var(--primary-color, #00b42a); color: #fff;
-  font-size: 10px; font-weight: 700; flex-shrink: 0; letter-spacing: 1px;
-}
-.frn-text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
-/* ===== 内容 ===== */
-.fr-main { flex: 1; }
-
-/* ===== 底栏 ===== */
-.fr-footer {
-  background: linear-gradient(180deg, var(--bg-card), rgba(0,0,0,0.015));
-  border-top: 1px solid var(--border-lighter);
-  padding: 24px 20px;
+.front-nav-link:hover,
+.front-nav-link.active {
+  color: var(--primary-color);
+  background: var(--primary-light);
 }
 
-.frf-inner {
-  max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
+.front-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.frf-left { display: flex; align-items: center; gap: 10px; }
-.frf-logo { width: 24px; height: 24px; border-radius: 6px; }
-.frf-brand { display: flex; flex-direction: column; }
-.frf-brand b { font-size: 13px; color: var(--text-primary); }
-.frf-brand span { font-size: 10px; color: var(--text-secondary); margin-top: 1px; }
-
-.frf-right { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
-.frf-right a { color: var(--primary-color); font-weight: 500; transition: opacity 0.2s; }
-.frf-right a:hover { opacity: 0.7; }
-.frf-sep { opacity: 0.3; }
-
-@media (max-width: 900px) {
-  .frh-nav { display: none; }
-  .fr-header { padding: 0 12px; }
+.front-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px 5px 5px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 999px;
+  color: var(--text-primary);
 }
-@media (max-width: 600px) {
-  .frh-brand { display: none; }
-  .frf-inner { flex-direction: column; gap: 8px; text-align: center; }
+
+.front-user:hover {
+  border-color: rgba(var(--primary-rgb), 0.35);
+  background: var(--primary-light);
+}
+
+.front-user img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.front-user strong {
+  max-width: 84px;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.front-notice-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 28px;
+  background: var(--primary-light);
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.16);
+  color: var(--text-regular);
+  font-size: 13px;
+}
+
+.front-notice-strip strong {
+  color: var(--primary-color);
+}
+
+.front-notice-strip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.front-main {
+  min-height: calc(100vh - 68px);
+}
+
+.front-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .front-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .front-nav::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .front-topbar {
+    height: 60px;
+    padding: 0 12px;
+  }
+
+  .front-brand small,
+  .front-nav,
+  .front-user span,
+  .front-actions .el-button {
+    display: none;
+  }
+
+  .front-actions {
+    margin-left: auto;
+  }
+
+  .front-mobile-nav {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--border-lighter);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(16px);
+  }
+
+  [data-theme="dark"] .front-mobile-nav {
+    background: rgba(17, 24, 39, 0.92);
+  }
+
+  .front-mobile-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .front-mobile-link.active {
+    color: var(--primary-color);
+    background: var(--primary-light);
+  }
 }
 </style>

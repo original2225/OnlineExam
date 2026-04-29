@@ -69,6 +69,23 @@
           </div>
           <div style="font-size: 16px; margin-bottom: 15px; line-height: 1.6">{{ question.content }}</div>
 
+          <div v-if="questionVisuals(question).length" class="question-visual-guide">
+            <div
+              v-for="visual in questionVisuals(question)"
+              :key="visual.key"
+              class="question-visual-card"
+              :style="visualBackgroundStyle(visual)"
+            >
+              <div class="qv-overlay">
+                <strong>{{ visual.title }}</strong>
+                <span>{{ visual.desc }}</span>
+                <a v-if="visual.source" :href="visual.source" target="_blank" rel="noopener noreferrer">
+                  {{ visual.sourceName || '图片来源' }}
+                </a>
+              </div>
+            </div>
+          </div>
+
           <!-- 单选题 -->
           <el-radio-group v-if="question.type === 'single'" v-model="data.answers[question.id]" @change="handleAnswer(question.id, 'single')">
             <div v-for="(option, key) in question.options" :key="key" class="option-item" :class="{ selected: data.answers[question.id] === key }">
@@ -133,6 +150,12 @@
 
       <!-- 答题卡 -->
       <div class="card answer-sheet-card">
+        <div class="exam-scene-card" :style="getSceneStyle('exam')">
+          <div>
+            <strong>正式审核中</strong>
+            <span>先读题，再作答；主观题写清依据和思路。</span>
+          </div>
+        </div>
         <h3 style="margin-bottom: 15px">答题卡</h3>
         <div class="answer-sheet-grid">
           <div
@@ -211,6 +234,7 @@ import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Timer, ArrowLeft, ArrowRight, Check } from "@element-plus/icons-vue";
 import router from "@/router/index.js";
+import { getQuestionVisuals, getSceneStyle, visualBackgroundStyle } from "@/data/reviewVisuals.js";
 
 const particleCanvas = ref(null)
 const questionRefs = ref([])
@@ -235,7 +259,8 @@ const data = reactive({
   timerClicks: 0,
 })
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
+const questionVisuals = (question) => getQuestionVisuals(question, 2)
 
 // 计算属性
 const data_computed = computed(() => data)
@@ -636,6 +661,49 @@ kbd {
 .bottom-nav { border-top: 1px solid #f0f0f0; border-bottom: none; margin-top: 20px; margin-bottom: 0; padding-top: 20px; padding-bottom: 0; }
 
 /* 选项样式 */
+.question-visual-guide {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.question-visual-card {
+  min-height: 132px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #e4e7ed;
+}
+
+.qv-overlay {
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(9, 17, 28, 0.1), rgba(9, 17, 28, 0.78));
+  color: #fff;
+}
+
+.qv-overlay strong {
+  font-size: 14px;
+}
+
+.qv-overlay span,
+.qv-overlay a {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qv-overlay a {
+  width: fit-content;
+  text-decoration: underline;
+}
+
 .option-item {
   padding: 10px 14px; border-radius: 8px;
   border: 1px solid #e4e7ed; margin-bottom: 8px;
@@ -647,6 +715,34 @@ kbd {
 
 /* 答题卡 */
 .answer-sheet-card { width: 220px; flex-shrink: 0; }
+.exam-scene-card {
+  min-height: 118px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-size: 400% 200%;
+  color: #fff;
+}
+
+.exam-scene-card > div {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.7));
+}
+
+.exam-scene-card strong {
+  font-size: 14px;
+}
+
+.exam-scene-card span {
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .answer-sheet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .answer-card-item {
   width: 100%; aspect-ratio: 1;

@@ -168,8 +168,8 @@ const challengePlayer = (player) => {
     data.easterEggFound = true
     request.post('/easterEgg/discover', {
       userId: data.currentUserId,
-      userName: localStorage.getItem('xm-user') ? JSON.parse(localStorage.getItem('xm-user')).name : '',
-      userRole: localStorage.getItem('xm-user') ? JSON.parse(localStorage.getItem('xm-user')).role : '',
+      userName: localStorage.getItem('beiming-onlineexam-user') ? JSON.parse(localStorage.getItem('beiming-onlineexam-user')).name : '',
+      userRole: localStorage.getItem('beiming-onlineexam-user') ? JSON.parse(localStorage.getItem('beiming-onlineexam-user')).role : '',
       eggName: 'leaderboard_challenge'
     }).catch(() => {})
   }
@@ -177,7 +177,7 @@ const challengePlayer = (player) => {
 }
 
 onMounted(() => {
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+  const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
   data.currentUserId = user.id
   loadTab('practice')
   loadCheckin()

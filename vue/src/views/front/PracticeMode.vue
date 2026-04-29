@@ -9,8 +9,8 @@
     <!-- 选择练习参数 -->
     <template v-if="!data.practiceStarted">
       <div class="practice-setup-card">
+        <div class="practice-scene" :style="getSceneStyle('practice')"></div>
         <div class="setup-header">
-          <div class="setup-icon">🎯</div>
           <h2>审核模拟</h2>
           <p>按入服审核方向随机生成模拟题，提前熟悉建筑、后期、红石、见习审核要求</p>
         </div>
@@ -181,6 +181,21 @@
         </div>
 
         <div class="question-content">{{ currentQuestion.content }}</div>
+
+        <div v-if="currentQuestionVisuals.length" class="visual-reference-strip">
+          <div
+            v-for="visual in currentQuestionVisuals"
+            :key="visual.key"
+            class="visual-reference"
+            :style="visualBackgroundStyle(visual)"
+          >
+            <div>
+              <strong>{{ visual.title }}</strong>
+              <span>{{ visual.desc }}</span>
+              <a v-if="visual.source" :href="visual.source" target="_blank" rel="noopener noreferrer">{{ visual.sourceName }}</a>
+            </div>
+          </div>
+        </div>
 
         <!-- 图片展示（使用 Element Plus el-image 预览） -->
         <div v-if="currentQuestion.images?.length" class="question-images">
@@ -410,6 +425,7 @@ import request from "@/utils/request.js";
 import router from "@/router/index.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { CircleCheck, CircleClose, Warning } from "@element-plus/icons-vue";
+import { getQuestionVisuals, getSceneStyle, visualBackgroundStyle } from "@/data/reviewVisuals.js";
 
 const data = reactive({
   categoryId: null,
@@ -447,9 +463,10 @@ const data = reactive({
   abilityData: null
 })
 
-const user = computed(() => JSON.parse(localStorage.getItem('xm-user') || '{}'))
+const user = computed(() => JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'))
 
 const currentQuestion = computed(() => data.questions[data.currentIdx] || null)
+const currentQuestionVisuals = computed(() => getQuestionVisuals(currentQuestion.value || {}, 2))
 
 const fillCount = computed(() => {
   const q = currentQuestion.value
@@ -807,13 +824,19 @@ onUnmounted(() => {
 .practice-setup-card {
   background: var(--bg-card);
   border-radius: 16px;
-  padding: 36px;
+  padding: 0 36px 36px;
   box-shadow: var(--shadow-md);
   max-width: 560px;
   margin: 0 auto 24px;
+  overflow: hidden;
+}
+.practice-scene {
+  height: 190px;
+  margin: 0 -36px 28px;
+  background-size: 400% 200%;
+  background-position: center;
 }
 .setup-header { text-align: center; margin-bottom: 28px; }
-.setup-icon { font-size: 48px; margin-bottom: 8px; }
 .setup-header h2 { font-size: 24px; margin: 0 0 8px; color: var(--text-primary); }
 .setup-header p { color: var(--text-tertiary); margin: 0; font-size: 14px; }
 .form-group { margin-bottom: 20px; }
@@ -901,6 +924,38 @@ onUnmounted(() => {
 .q-number { font-weight: 600; color: var(--text-primary); }
 .q-score { color: var(--text-tertiary); font-size: 13px; }
 .question-content { font-size: 16px; line-height: 1.7; margin-bottom: 20px; color: var(--text-primary); }
+.visual-reference-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.visual-reference {
+  min-height: 136px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid var(--border-lighter);
+}
+.visual-reference > div {
+  min-height: 136px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 14px;
+  background: linear-gradient(180deg, rgba(9,17,28,0.08), rgba(9,17,28,0.78));
+  color: #fff;
+}
+.visual-reference strong { font-size: 14px; }
+.visual-reference span,
+.visual-reference a {
+  color: rgba(255,255,255,0.78);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.visual-reference a { width: fit-content; text-decoration: underline; }
 .question-images { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .q-img { max-width: 200px; max-height: 150px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border-lighter); }
 

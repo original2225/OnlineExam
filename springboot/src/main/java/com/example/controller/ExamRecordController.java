@@ -1,9 +1,12 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.common.enums.RoleEnum;
+import com.example.entity.Account;
 import com.example.entity.ExamAnswer;
 import com.example.entity.ExamRecord;
 import com.example.service.ExamRecordService;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * 考试记录前端请求接口
@@ -18,6 +22,8 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/examRecord")
 public class ExamRecordController {
+
+    private static final Set<String> REVIEW_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name(), RoleEnum.HELPER.name());
 
     @Resource
     private ExamRecordService examRecordService;
@@ -27,6 +33,9 @@ public class ExamRecordController {
      */
     @PostMapping("/start")
     public Result start(@RequestParam Integer examId, @RequestParam Integer studentId) {
+        if (!isCurrentStudent(studentId)) {
+            return forbidden();
+        }
         ExamRecord record = examRecordService.startExam(examId, studentId);
         return Result.success(record);
     }
@@ -38,6 +47,9 @@ public class ExamRecordController {
     public Result saveAnswer(@RequestParam Integer recordId,
                              @RequestParam Integer questionId,
                              @RequestParam String studentAnswer) {
+        if (!isCurrentStudentRecord(recordId)) {
+            return forbidden();
+        }
         examRecordService.saveAnswer(recordId, questionId, studentAnswer);
         return Result.success();
     }
@@ -47,6 +59,9 @@ public class ExamRecordController {
      */
     @PostMapping("/saveAnswers")
     public Result saveAnswers(@RequestParam Integer recordId, @RequestBody List<ExamAnswer> answers) {
+        if (!isCurrentStudentRecord(recordId)) {
+            return forbidden();
+        }
         examRecordService.batchSaveAnswers(recordId, answers);
         return Result.success();
     }
@@ -56,6 +71,9 @@ public class ExamRecordController {
      */
     @PostMapping("/submit")
     public Result submit(@RequestParam Integer recordId) {
+        if (!isCurrentStudentRecord(recordId)) {
+            return forbidden();
+        }
         ExamRecord record = examRecordService.submitExam(recordId);
         return Result.success(record);
     }
@@ -65,6 +83,9 @@ public class ExamRecordController {
      */
     @GetMapping("/detail/{id}")
     public Result detail(@PathVariable Integer id) {
+        if (!canAccessRecord(id)) {
+            return forbidden();
+        }
         ExamRecord record = examRecordService.getDetail(id);
         return Result.success(record);
     }
@@ -74,6 +95,9 @@ public class ExamRecordController {
      */
     @GetMapping("/selectAll")
     public Result selectAll(ExamRecord record) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         List<ExamRecord> list = examRecordService.selectAll(record);
         return Result.success(list);
     }
@@ -85,6 +109,9 @@ public class ExamRecordController {
     public Result selectPage(ExamRecord record,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         PageInfo<ExamRecord> pageInfo = examRecordService.selectPage(record, pageNum, pageSize);
         return Result.success(pageInfo);
     }
@@ -94,6 +121,9 @@ public class ExamRecordController {
      */
     @GetMapping("/getByStudentId/{studentId}")
     public Result getByStudentId(@PathVariable Integer studentId) {
+        if (!canAccessStudent(studentId)) {
+            return forbidden();
+        }
         List<ExamRecord> list = examRecordService.getByStudentId(studentId);
         return Result.success(list);
     }
@@ -103,6 +133,9 @@ public class ExamRecordController {
      */
     @GetMapping("/getByExamId/{examId}")
     public Result getByExamId(@PathVariable Integer examId) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         List<ExamRecord> list = examRecordService.getByExamId(examId);
         return Result.success(list);
     }
@@ -112,6 +145,9 @@ public class ExamRecordController {
      */
     @PutMapping("/update")
     public Result update(@RequestBody ExamRecord record) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         examRecordService.updateById(record);
         return Result.success();
     }
@@ -130,6 +166,9 @@ public class ExamRecordController {
      */
     @PostMapping("/reportSwitch")
     public Result reportSwitch(@RequestParam Integer recordId) {
+        if (!isCurrentStudentRecord(recordId)) {
+            return forbidden();
+        }
         ExamRecord record = examRecordService.getDetail(recordId);
         if (record == null) return Result.error("记录不存在");
         int current = record.getSwitchCount() != null ? record.getSwitchCount() : 0;
@@ -149,6 +188,9 @@ public class ExamRecordController {
      */
     @GetMapping("/compareScore")
     public Result compareScore(@RequestParam Integer examId, @RequestParam Integer studentId) {
+        if (!canAccessStudent(studentId)) {
+            return forbidden();
+        }
         List<ExamRecord> allRecords = examRecordService.getByExamId(examId).stream()
                 .filter(r -> "completed".equals(r.getStatus()))
                 .toList();
@@ -186,6 +228,9 @@ public class ExamRecordController {
 
     @GetMapping("/gradingStats")
     public Result gradingStats() {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         List<ExamRecord> all = examRecordService.selectAll(new ExamRecord());
         long totalCount = all.size();
         long gradedCount = all.stream().filter(r -> "completed".equals(r.getStatus()) && r.getTotalScore() != null).count();
@@ -206,6 +251,9 @@ public class ExamRecordController {
 
     @GetMapping("/studentStats/{studentId}")
     public Result studentStats(@PathVariable Integer studentId) {
+        if (!canAccessStudent(studentId)) {
+            return forbidden();
+        }
         List<ExamRecord> records = examRecordService.getByStudentId(studentId);
         long completed = records.stream().filter(r -> "completed".equals(r.getStatus())).count();
         long passed = records.stream().filter(r -> Boolean.TRUE.equals(r.getIsPass())).count();
@@ -225,5 +273,49 @@ public class ExamRecordController {
         stats.put("thisMonthExams", thisMonth);
         stats.put("avgScore", Math.round(avgScore * 10) / 10.0);
         return Result.success(stats);
+    }
+
+    private boolean canAccessRecord(Integer recordId) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return false;
+        }
+        if (REVIEW_ROLES.contains(current.getRole())) {
+            return true;
+        }
+        ExamRecord record = examRecordService.getDetail(recordId);
+        return RoleEnum.USER.name().equals(current.getRole()) && record != null && current.getId().equals(record.getStudentId());
+    }
+
+    private boolean isCurrentStudentRecord(Integer recordId) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !RoleEnum.USER.name().equals(current.getRole())) {
+            return false;
+        }
+        ExamRecord record = examRecordService.getDetail(recordId);
+        return record != null && current.getId().equals(record.getStudentId());
+    }
+
+    private boolean canAccessStudent(Integer studentId) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return false;
+        }
+        return REVIEW_ROLES.contains(current.getRole())
+                || (RoleEnum.USER.name().equals(current.getRole()) && current.getId().equals(studentId));
+    }
+
+    private boolean isCurrentStudent(Integer studentId) {
+        Account current = TokenUtils.getCurrentUser();
+        return current != null && RoleEnum.USER.name().equals(current.getRole()) && current.getId().equals(studentId);
+    }
+
+    private boolean hasReviewPermission() {
+        Account current = TokenUtils.getCurrentUser();
+        return current != null && REVIEW_ROLES.contains(current.getRole());
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }

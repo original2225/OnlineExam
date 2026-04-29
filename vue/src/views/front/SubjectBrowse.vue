@@ -502,7 +502,7 @@ const loadSubjects = () => {
 
 const loadExams = () => {
   data.loadingExams = true
-  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+  const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
   request.get('/exam/getAvailableExams/' + user.id).then(res => {
     if (res.code === '200') {
       data.exams = res.data || []

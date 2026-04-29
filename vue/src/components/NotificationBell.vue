@@ -32,7 +32,7 @@ import { useRouter } from 'vue-router'
 import request from '@/utils/request.js'
 
 const router = useRouter()
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const data = reactive({
   list: [],

@@ -1,10 +1,12 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.WrongQuestion;
 import com.example.mapper.WrongQuestionMapper;
 import com.example.entity.Question;
 import com.example.mapper.QuestionMapper;
+import com.example.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +30,12 @@ public class WrongQuestionController {
      */
     @PostMapping("/add")
     public Result add(@RequestBody WrongQuestion wrongQuestion) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        wrongQuestion.setUserId(current.getId());
+        wrongQuestion.setUserRole(current.getRole());
         // 检查是否已存在
         int exists = wrongQuestionMapper.existsByUserAndQuestion(
                 wrongQuestion.getUserId(), wrongQuestion.getUserRole(), wrongQuestion.getQuestionId());
@@ -43,6 +51,10 @@ public class WrongQuestionController {
      */
     @GetMapping("/selectByUser")
     public Result selectByUser(@RequestParam Integer userId, @RequestParam String userRole) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !current.getId().equals(userId) || !current.getRole().equals(userRole)) {
+            return forbidden();
+        }
         List<WrongQuestion> list = wrongQuestionMapper.selectByUser(userId, userRole);
         // 填充题目信息
         for (WrongQuestion wq : list) {
@@ -59,7 +71,15 @@ public class WrongQuestionController {
      */
     @DeleteMapping("/delete/{id}")
     public Result delete(@PathVariable Integer id) {
-        wrongQuestionMapper.deleteById(id);
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        wrongQuestionMapper.deleteByOwner(id, current.getId(), current.getRole());
         return Result.success();
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }

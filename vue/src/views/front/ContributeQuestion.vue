@@ -204,7 +204,7 @@ import { ElMessage } from 'element-plus'
 import { EditPen, Plus, Delete, Document, Star, Trophy, View, RefreshRight, CircleCheck, Clock, ChatLineSquare } from '@element-plus/icons-vue'
 import request from '@/utils/request.js'
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 const typeLabel = (t) => ({ single: '单选题', multiple: '多选题', judge: '判断题', fillin: '填空题', essay: '简答题' })[t] || t
 
 const data = reactive({

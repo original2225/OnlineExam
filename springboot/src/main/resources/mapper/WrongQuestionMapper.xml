@@ -44,4 +44,9 @@
         delete from `wrong_question` where id = #{id}
     </delete>
 
+    <delete id="deleteByOwner">
+        delete from `wrong_question`
+        where id = #{id} and user_id = #{userId} and user_role = #{userRole}
+    </delete>
+
 </mapper>

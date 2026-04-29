@@ -157,7 +157,7 @@ const data = reactive({
   pageSize: 10
 })
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const getExamStatus = (exam) => {
   if (exam.examType === 'permanent') return 'ongoing'

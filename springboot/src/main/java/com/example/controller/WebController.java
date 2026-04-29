@@ -2,7 +2,9 @@ package com.example.controller;
 
 import com.example.common.Result;
 import com.example.common.enums.RoleEnum;
+import com.example.common.enums.ResultCodeEnum;
 import com.example.entity.Account;
+import com.example.exception.CustomException;
 import com.example.service.AdminService;
 import com.example.service.ExaminerService;
 import com.example.service.StudentService;
@@ -36,13 +38,24 @@ public class WebController {
     public Result login(@RequestBody Account account) {
         Account loginAccount = null;
         if (RoleEnum.OWNER.name().equals(account.getRole()) || RoleEnum.ADMIN.name().equals(account.getRole())) {
-            loginAccount = adminService.login(account);
+            loginAccount = loginManager(account);
         } else if (RoleEnum.USER.name().equals(account.getRole())) {
             loginAccount = studentService.login(account);
         } else if (RoleEnum.HELPER.name().equals(account.getRole())) {
             loginAccount = examinerService.login(account);
         }
         return Result.success(loginAccount);
+    }
+
+    private Account loginManager(Account account) {
+        try {
+            return adminService.login(account);
+        } catch (CustomException e) {
+            if (!ResultCodeEnum.USER_NOT_EXIST_ERROR.code.equals(e.getCode())) {
+                throw e;
+            }
+            return examinerService.login(account);
+        }
     }
 
     /**

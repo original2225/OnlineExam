@@ -2,7 +2,7 @@
   <div class="grading-page">
 
     <!-- 页面标题 -->
-    <div class="page-hero">
+    <div class="page-hero" :style="getSceneStyle('admin')">
       <div class="hero-left">
         <div class="hero-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -90,6 +90,9 @@
             </div>
           </div>
           <div class="grade-right">
+            <el-button round @click="openChat(row)">
+              <el-icon><ChatDotRound /></el-icon> 追问室
+            </el-button>
             <el-button type="primary" round @click="handleGrade(row)">
               <el-icon><EditPen /></el-icon> 批阅
             </el-button>
@@ -104,6 +107,9 @@
         <div class="dialog-hero">
           <span class="dialog-title">批阅答卷</span>
           <el-tag type="info" size="small" effect="plain">{{ data.currentRecord?.studentName }}</el-tag>
+          <el-button v-if="data.currentRecord?.id" type="primary" plain size="small" round @click="openChat(data.currentRecord)">
+            <el-icon><ChatDotRound /></el-icon> 追问室
+          </el-button>
         </div>
       </template>
 
@@ -166,6 +172,22 @@
               <span class="answer-score-info">{{ answer.score || 0 }} / {{ answer.question?.score || 0 }} 分</span>
             </div>
             <div class="answer-content">{{ answer.question?.content }}</div>
+
+            <div v-if="answerVisuals(answer).length" class="grader-visuals">
+              <div
+                v-for="visual in answerVisuals(answer)"
+                :key="visual.key"
+                class="grader-visual"
+                :style="visualBackgroundStyle(visual)"
+              >
+                <div>
+                  <strong>{{ visual.title }}</strong>
+                  <span>{{ visual.desc }}</span>
+                  <a v-if="visual.source" :href="visual.source" target="_blank" rel="noopener noreferrer">{{ visual.sourceName }}</a>
+                </div>
+              </div>
+            </div>
+
             <div class="answer-row">
               <span class="answer-label">玩家答案：</span>
               <span class="answer-value">{{ answer.studentAnswer || '未作答' }}</span>
@@ -223,6 +245,11 @@
       </template>
     </el-dialog>
 
+    <ExamRecordChatDrawer
+      v-model="data.chatVisible"
+      :record-id="data.chatRecordId"
+      :record="data.chatRecord"
+    />
   </div>
 </template>
 
@@ -230,7 +257,9 @@
 import { reactive, computed } from "vue";
 import request from "@/utils/request.js";
 import { ElMessage } from "element-plus";
-import { Search, EditPen, Clock, Document, Check } from "@element-plus/icons-vue";
+import { Search, EditPen, Clock, Document, Check, ChatDotRound } from "@element-plus/icons-vue";
+import { getQuestionVisuals, getSceneStyle, visualBackgroundStyle } from "@/data/reviewVisuals.js";
+import ExamRecordChatDrawer from "@/components/ExamRecordChatDrawer.vue";
 
 const data = reactive({
   examId: null,
@@ -244,7 +273,10 @@ const data = reactive({
   advisoryVote: 'PASS',
   rejectionReasons: [],
   customReason: '',
-  gradeComment: ''
+  gradeComment: '',
+  chatVisible: false,
+  chatRecordId: null,
+  chatRecord: null
 });
 
 const submissionCounts = reactive({});
@@ -270,6 +302,7 @@ const totalScore = computed(() => {
 const isObjective = (type) => type === 'single' || type === 'multiple' || type === 'judge';
 const needManualGrade = (type) => type === 'essay' || type === 'fill' || type === 'fillin';
 const getGradingStatus = (row) => submissionCounts[row.id] || 0;
+const answerVisuals = (answer) => getQuestionVisuals(answer.question || {}, 1);
 
 const loadExams = () => { request.get('/exam/selectAll').then(res => { if (res.code === '200') data.exams = res.data || [] }) };
 
@@ -303,6 +336,13 @@ const handleGrade = (row) => {
   Promise.all([detailPromise, submissionsPromise]).then(() => { data.gradingDialogVisible = true });
 };
 
+const openChat = (record) => {
+  if (!record?.id) return;
+  data.chatRecordId = record.id;
+  data.chatRecord = record;
+  data.chatVisible = true;
+};
+
 const submitGrading = () => {
   const answers = data.currentAnswers.map(a => ({ id: a.id, score: a.score || 0, comment: a.comment }));
   request.post('/grading/batchGrade?recordId=' + data.currentRecord.id, {
@@ -325,8 +365,10 @@ loadExams();
 .grading-page { padding: 24px; max-width: 1400px; margin: 0 auto; }
 
 /* ===== 页面标题 ===== */
-.page-hero { background: linear-gradient(135deg, #92400e 0%, #d97706 50%, #fbbf24 100%); border-radius: 16px; padding: 28px 36px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 32px rgba(217, 119, 6, 0.25); }
+.page-hero { position: relative; overflow: hidden; background-size: 400% 200%; border-radius: 16px; padding: 28px 36px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 32px rgba(217, 119, 6, 0.25); }
+.page-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.36)); }
 .hero-left { display: flex; align-items: center; gap: 18px; }
+.hero-icon, .hero-text { position: relative; z-index: 1; }
 .hero-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
 .hero-text h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: #fff; }
 .hero-text p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.75); }
@@ -384,7 +426,7 @@ loadExams();
 .status-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 .status-pill.pending { background: #fee2e2; color: #dc2626; }
 .status-pill.done { background: #dcfce7; color: #16a34a; }
-.grade-right { flex-shrink: 0; }
+.grade-right { flex-shrink: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* 弹窗 */
 .dialog-hero { display: flex; align-items: center; gap: 10px; }
@@ -409,6 +451,29 @@ loadExams();
 .answer-index { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #d97706, #fbbf24); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
 .answer-score-info { margin-left: auto; font-size: 13px; color: #666; font-weight: 500; }
 .answer-content { font-size: 14px; color: #333; margin-bottom: 8px; line-height: 1.6; }
+.grader-visuals { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.grader-visual {
+  min-height: 118px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #e5e7eb;
+}
+.grader-visual > div {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(9,17,28,0.05), rgba(9,17,28,0.74));
+  color: #fff;
+}
+.grader-visual strong { font-size: 13px; }
+.grader-visual span,
+.grader-visual a { color: rgba(255,255,255,0.78); font-size: 12px; line-height: 1.5; }
+.grader-visual a { width: fit-content; text-decoration: underline; }
 .answer-row { font-size: 13px; color: #666; margin-top: 4px; }
 .answer-label { color: #999; }
 .answer-value { color: #333; }
@@ -420,5 +485,5 @@ loadExams();
 .grade-anim-enter-from { opacity: 0; transform: translateY(10px); }
 .grade-anim-leave-to { opacity: 0; }
 
-@media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grade-card-item { flex-wrap: wrap; } .grade-right { width: 100%; } .grade-right .el-button { width: 100%; } }
+@media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grade-card-item { flex-wrap: wrap; } .grade-right { width: 100%; } .grade-right .el-button { flex: 1; } }
 </style>

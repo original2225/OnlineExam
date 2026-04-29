@@ -6,7 +6,7 @@ const ALL_ROLES = ['OWNER', 'ADMIN', 'HELPER', 'USER']
 
 const getUser = () => {
   try {
-    return JSON.parse(localStorage.getItem('xm-user') || '{}')
+    return JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
   } catch {
     return {}
   }

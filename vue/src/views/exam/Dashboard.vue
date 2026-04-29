@@ -199,7 +199,7 @@ import { EditPen, Clock, Check, DataLine, Bell, Notebook, Grid, Document, DataAn
 
 const data = reactive({
   loading: false,
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   stats: { examCount: 0, pendingApproval: 0, gradedCount: 0, publishedCount: 0, pendingGrade: 0, myScoreCount: 0 },
   examList: [],
   announcements: [],

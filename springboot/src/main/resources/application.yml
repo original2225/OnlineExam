@@ -7,7 +7,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
-    url: ${DB_URL:jdbc:mysql://localhost:3306/onlineexam?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/Beiming-OnlineExam?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}
   # Jackson配置：支持 LocalDateTime 序列化
   jackson:
     serialization:
@@ -42,6 +42,7 @@ fileBaseUrl: ${FILE_BASE_URL:http://localhost:9090}
 # 应用配置
 app:
   base-url: ${APP_BASE_URL:http://localhost:9090}
+  upload-dir: ${APP_UPLOAD_DIR:${user.dir}/beiming-files}
   admin-email: ${ADMIN_EMAIL:admin@example.com}
   jwt:
     secret: ${JWT_SECRET:beiming-online-exam-dev-secret-change-me}

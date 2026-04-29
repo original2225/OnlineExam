@@ -62,7 +62,7 @@ const validatePass = (rule, value, callback) => {
   }
 }
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   rules: {
     password: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
     newPassword: [
@@ -80,7 +80,7 @@ const updatePassword = () => {
         if (res.code === '200') {
           ElMessage.success('密码修改成功，即将跳转到登录页')
           setTimeout(() => {
-            localStorage.removeItem('xm-user')
+            localStorage.removeItem('beiming-onlineexam-user')
             router.push('/login')
           }, 1500)
         } else {

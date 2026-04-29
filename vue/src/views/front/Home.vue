@@ -1,726 +1,690 @@
 <template>
-  <div class="main-content">
-    <!-- 欢迎横幅 -->
-    <div class="welcome-banner">
-      <div class="welcome-text-wrap">
-        <div class="welcome-title">
-          {{ getGreeting() }}，{{ data.user.name || '审核员' }} 👋
-        </div>
-        <div class="welcome-desc">{{ todayStr }}</div>
+  <div class="student-home app-page-shell">
+    <section class="student-hero">
+      <div>
+        <p>{{ todayStr }}</p>
+        <h1>{{ greeting }}，{{ data.user.name || "玩家" }}</h1>
+        <span>完成题库复习、模拟练习和正式进服审核。</span>
       </div>
-      <div class="welcome-right" v-if="data.user.id">
-        <div class="welcome-stats">
-          <div class="ws-item">
-            <span class="ws-val">{{ data.stats.completed }}</span>
-            <span class="ws-lbl">已完成</span>
-          </div>
-          <div class="ws-divider"></div>
-          <div class="ws-item">
-            <span class="ws-val">{{ data.stats.avgScore }}</span>
-            <span class="ws-lbl">平均分</span>
-          </div>
-          <div class="ws-divider"></div>
-          <div class="ws-item">
-            <span class="ws-val">{{ data.stats.passRate }}%</span>
-            <span class="ws-lbl">通过率</span>
-          </div>
-        </div>
-        <div class="progress-wrap" @click="router.push('/front/myScores')">
-          <svg class="spr-svg" viewBox="0 0 60 60">
-            <circle class="spr-bg" cx="30" cy="30" r="24" />
-            <circle class="spr-fill" cx="30" cy="30" r="24"
-              :stroke-dasharray="150.8"
-              :stroke-dashoffset="150.8 - (150.8 * data.learningProgress / 100)"
-            />
-          </svg>
-          <div class="spr-text">
-            <span class="spr-value">{{ data.learningProgress }}%</span>
-            <span class="spr-label">审核</span>
-          </div>
-        </div>
+      <div class="hero-progress" @click="router.push('/front/myScores')">
+        <svg viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="25" class="ring-bg" />
+          <circle cx="32" cy="32" r="25" class="ring-fill" :stroke-dasharray="157" :stroke-dashoffset="157 - (157 * data.learningProgress / 100)" />
+        </svg>
+        <strong>{{ data.learningProgress }}%</strong>
+        <small>准备度</small>
       </div>
-    </div>
+    </section>
 
-    <!-- 每日任务 -->
-    <div class="mission-trend-row" v-if="false">
-      <div class="daily-mission-card">
-        <div class="dm-header">
-          <span class="dm-title">今日任务</span>
-          <span class="dm-progress">{{ data.missions.filter(m => m.done).length }}/{{ data.missions.length }}</span>
-        </div>
-        <div class="mission-list">
-          <div
-            v-for="mission in data.missions"
-            :key="mission.id"
-            class="mission-item"
-            :class="{ done: mission.done }"
-            @click="doMission(mission)"
-          >
-            <div class="mi-check">
-              <span v-if="mission.done" class="mi-checked">✓</span>
-              <span v-else class="mi-circle"></span>
-            </div>
-            <div class="mi-info">
-              <span class="mi-name">{{ mission.name }}</span>
-              <span class="mi-desc">{{ mission.desc }}</span>
-            </div>
-            <span class="mi-badge" :style="{ background: mission.color }">{{ mission.reward }}</span>
+    <section class="metric-grid">
+      <button v-for="item in metrics" :key="item.label" type="button" class="metric-card" @click="router.push(item.path)">
+        <span class="metric-icon" :class="item.tone">
+          <el-icon><component :is="item.icon" /></el-icon>
+        </span>
+        <strong>{{ item.value }}</strong>
+        <small>{{ item.label }}</small>
+      </button>
+    </section>
+
+    <section class="quick-grid">
+      <button v-for="action in quickActions" :key="action.path" type="button" @click="router.push(action.path)">
+        <span :class="action.tone">
+          <el-icon><component :is="action.icon" /></el-icon>
+        </span>
+        <strong>{{ action.title }}</strong>
+        <small>{{ action.desc }}</small>
+        <el-icon class="quick-arrow"><ArrowRight /></el-icon>
+      </button>
+    </section>
+
+    <section class="student-grid">
+      <div class="panel-card wide-panel">
+        <div class="panel-header">
+          <div>
+            <span>审核题库</span>
+            <h2>按方向浏览复习材料</h2>
           </div>
+          <el-button link type="primary" @click="router.push('/front/subjects')">查看全部</el-button>
         </div>
+        <div v-if="data.subjects.length" class="subject-grid">
+          <button v-for="subject in data.subjects.slice(0, 6)" :key="subject.id" type="button" class="subject-card" @click="goSubject(subject)">
+            <span class="subject-icon">
+              <img v-if="getSubjectImg(subject.icon)" :src="getSubjectImg(subject.icon)" alt="" />
+              <el-icon v-else><Reading /></el-icon>
+            </span>
+            <strong>{{ subject.name }}</strong>
+            <small>{{ subject.description || "暂无描述" }}</small>
+            <em>{{ subject.children?.length || 0 }} 个板块</em>
+          </button>
+        </div>
+        <el-empty v-else description="暂无题库数据" :image-size="90" />
       </div>
 
-      <!-- 审核趋势 -->
-      <div class="trend-card">
-        <div class="trend-header">
-          <span class="trend-title">近7天练习趋势</span>
-          <span class="trend-more" @click="router.push('/front/myScores')">详情 →</span>
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <span>即将开始</span>
+            <h2>可参加的进服审核</h2>
+          </div>
+          <el-button link type="primary" @click="router.push('/front/examList')">全部审核</el-button>
         </div>
-        <div class="trend-bars">
-          <div v-for="(day, idx) in data.practiceTrend" :key="idx" class="trend-bar-item">
-            <div class="tb-bar-wrap">
-              <div class="tb-bar" :style="{ height: (day.count / data.maxTrendCount * 80) + 'px' }">
-                <span class="tb-tooltip" v-if="day.count > 0">{{ day.count }}题</span>
-              </div>
-            </div>
-            <span class="tb-label">{{ day.label }}</span>
+        <div v-if="data.upcomingExams.length" class="exam-list">
+          <button v-for="exam in data.upcomingExams" :key="exam.id" type="button" class="exam-row" @click="tryStartExam(exam)">
+            <span class="status-dot" :class="getExamStatus(exam)"></span>
+            <span>
+              <strong>{{ exam.name }}</strong>
+              <small>{{ exam.paperName || "未绑定试卷" }} · {{ exam.duration || 0 }} 分钟</small>
+            </span>
+            <el-tag :type="getExamStatus(exam) === 'ongoing' ? 'success' : 'warning'" size="small">
+              {{ getExamStatus(exam) === "ongoing" ? "进行中" : "未开始" }}
+            </el-tag>
+          </button>
+        </div>
+        <el-empty v-else description="暂无可参加审核" :image-size="90" />
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <span>最近结果</span>
+            <h2>你的审核成绩</h2>
+          </div>
+          <el-button link type="primary" @click="router.push('/front/myScores')">全部结果</el-button>
+        </div>
+        <div v-if="data.recentScores.length" class="score-list">
+          <article v-for="score in data.recentScores" :key="score.id" class="score-row">
+            <span class="score-circle" :class="getScoreClass(score.totalScore)">{{ score.totalScore || 0 }}</span>
+            <span>
+              <strong>{{ score.examName }}</strong>
+              <small>{{ score.isPass ? "已通过" : "未通过" }}</small>
+            </span>
+            <el-tag :type="score.isPass ? 'success' : 'danger'" size="small">{{ score.isPass ? "通过" : "未通过" }}</el-tag>
+          </article>
+        </div>
+        <el-empty v-else description="暂无审核结果" :image-size="90" />
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <span>系统公告</span>
+            <h2>最近通知</h2>
           </div>
         </div>
-        <div class="trend-summary" v-if="data.practiceTrend.length">
-          <span>本周共练习 <strong>{{ data.totalWeeklyPractice }}</strong> 题</span>
-          <span :class="data.weeklyChange >= 0 ? 'trend-up' : 'trend-down'">
-            {{ data.weeklyChange >= 0 ? '↑' : '↓' }}
-            {{ Math.abs(data.weeklyChange) }}% vs上周
-          </span>
+        <div v-if="data.noticeData.length" class="notice-list">
+          <article v-for="notice in data.noticeData.slice(0, 5)" :key="notice.id || notice.time" class="notice-item">
+            <strong>{{ notice.title || "公告" }}</strong>
+            <p>{{ notice.content }}</p>
+            <small>{{ formatDateTime(notice.time) }}</small>
+          </article>
         </div>
+        <el-empty v-else description="暂无公告" :image-size="90" />
       </div>
-    </div>
 
-    <!-- 统计卡片 -->
-    <div class="stats-grid">
-      <div class="stats-card blue hover-lift">
-        <div class="stats-icon blue"><el-icon :size="22"><EditPen /></el-icon></div>
-        <div class="stats-value">{{ data.stats.available }}</div>
-        <div class="stats-label">可参加审核</div>
-      </div>
-      <div class="stats-card green hover-lift">
-        <div class="stats-icon green"><el-icon :size="22"><CircleCheck /></el-icon></div>
-        <div class="stats-value">{{ data.stats.completed }}</div>
-        <div class="stats-label">已完成审核</div>
-      </div>
-      <div class="stats-card orange hover-lift">
-        <div class="stats-icon orange"><el-icon :size="22"><TrendCharts /></el-icon></div>
-        <div class="stats-value">{{ data.stats.avgScore }}</div>
-        <div class="stats-label">平均分</div>
-      </div>
-      <div class="stats-card purple hover-lift">
-        <div class="stats-icon purple"><el-icon :size="22"><Trophy /></el-icon></div>
-        <div class="stats-value">{{ data.stats.passRate }}%</div>
-        <div class="stats-label">通过率</div>
-      </div>
-    </div>
-
-    <!-- 审核打卡 -->
-    <div class="checkin-card" v-if="false">
-      <div class="checkin-info">
-        <div class="checkin-flame">🔥</div>
-        <div class="checkin-text">
-          <div class="checkin-title">{{ data.checkin.checked ? '今日已打卡' : '今日还未打卡' }}</div>
-          <div class="checkin-streak">已连续 {{ data.checkin.streakDays }} 天 · 坚持就是胜利</div>
-        </div>
-      </div>
-      <el-button v-if="!data.checkin.checked" type="primary" round @click="doCheckin" :loading="data.checkin.loading">
-        立即打卡
-      </el-button>
-      <div v-else class="checkin-done">
-        <span class="checkin-done-icon">✓</span>
-        <span>已打卡</span>
-      </div>
-    </div>
-
-    <!-- 快捷功能 -->
-    <div class="quick-actions">
-      <div class="qa-item" @click="router.push('/front/subjects')">
-        <div class="qa-icon" style="background: linear-gradient(135deg, #00b42a, #00a81e);">📚</div>
-        <div class="qa-text">
-          <div class="qa-title">审核题库</div>
-          <div class="qa-desc">建筑、后期、红石、见习四项</div>
-        </div>
-        <el-icon class="qa-arrow"><ArrowRight /></el-icon>
-      </div>
-      <div class="qa-item" @click="router.push('/front/examList')">
-        <div class="qa-icon" style="background: linear-gradient(135deg, #409eff, #53a8ff);">📋</div>
-        <div class="qa-text">
-          <div class="qa-title">进服审核</div>
-          <div class="qa-desc">{{ data.stats.available }} 场可参加</div>
-        </div>
-        <el-icon class="qa-arrow"><ArrowRight /></el-icon>
-      </div>
-      <div class="qa-item" @click="router.push('/front/myScores')">
-        <div class="qa-icon" style="background: linear-gradient(135deg, #ff7d00, #ff9500);">🏆</div>
-        <div class="qa-text">
-          <div class="qa-title">审核结果</div>
-          <div class="qa-desc">查看结果与通过状态</div>
-        </div>
-        <el-icon class="qa-arrow"><ArrowRight /></el-icon>
-      </div>
-    </div>
-
-    <!-- 学科入口 -->
-    <div class="card" style="margin-bottom: 24px">
-      <div class="section-header">
-        <div class="section-title">审核题库</div>
-        <span class="section-more" @click="router.push('/front/subjects')">查看全部 →</span>
-      </div>
-      <div class="subject-grid">
-        <div
-          v-for="subject in data.subjects"
-          :key="subject.id"
-          class="subject-card"
-          @click="goSubject(subject)"
-        >
-          <div class="subject-icon" :class="!subject.icon || subject.icon.startsWith('http') || subject.icon.includes('/files/') ? '' : (subject.icon || 'default')">
-            <img v-if="subject.icon && (subject.icon.startsWith('http') || subject.icon.includes('/files/'))" :src="subject.icon" class="subject-img-icon" />
-            <img v-else-if="getSubjectImg(subject.icon)" :src="getSubjectImg(subject.icon)" class="subject-img-icon" />
-            <span v-else>{{ getSubjectEmoji(subject.icon) }}</span>
-          </div>
-          <div class="subject-name">{{ subject.name }}</div>
-          <div class="subject-desc">{{ subject.description || '暂无描述' }}</div>
-          <div class="subject-meta">
-            <span>{{ subject.children?.length || 0 }} 个板块</span>
-          </div>
-          <div class="subject-tags" v-if="subject.children?.length">
-            <span
-              v-for="child in subject.children.slice(0, 4)"
-              :key="child.id"
-              class="subject-tag"
-            >{{ child.name }}</span>
-          </div>
-          <div class="subject-enter">进入审核库 <el-icon><ArrowRight /></el-icon></div>
-        </div>
-        <div v-if="!data.subjects.length" class="empty-state" style="grid-column: 1 / -1;">
-          <div class="empty-icon">📚</div>
-          <div class="empty-text">暂无题库数据</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 即将开始审核 -->
-    <div class="card" style="margin-bottom: 24px" v-if="data.upcomingExams.length">
-      <div class="section-header">
-        <div class="section-title">即将开始的进服审核</div>
-        <span class="section-more" @click="router.push('/front/examList')">全部审核 →</span>
-      </div>
-      <div class="upcoming-exams">
-        <div
-          v-for="exam in data.upcomingExams"
-          :key="exam.id"
-          class="upcoming-exam-card"
-          @click="tryStartExam(exam)"
-        >
-          <div class="exam-status-dot" :class="getExamStatus(exam)"></div>
-          <div class="uec-info">
-            <div class="uec-name">{{ exam.name }}</div>
-            <div class="uec-meta">{{ exam.paperName }} · {{ exam.duration }}分钟</div>
-          </div>
-          <el-tag
-            v-if="getExamStatus(exam) === 'ongoing'"
-            type="success"
-            size="small"
-          >进行中</el-tag>
-          <el-tag
-            v-else-if="getExamStatus(exam) === 'notStarted'"
-            type="warning"
-            size="small"
-          >未开始</el-tag>
-        </div>
-      </div>
-    </div>
-
-    <!-- 最近结果 + 公告 -->
-    <div class="two-col-grid">
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">最近结果</div>
-          <span class="section-more" @click="router.push('/front/myScores')">全部结果 →</span>
-        </div>
-        <div v-if="data.recentScores.length === 0" class="empty-state">
-          <div class="empty-icon">📝</div>
-          <div class="empty-text">暂无审核结果</div>
-        </div>
-        <div v-else class="score-card-list">
-          <div v-for="score in data.recentScores" :key="score.id" class="score-card">
-            <div class="score-circle" :class="getScoreClass(score.totalScore)">{{ score.totalScore || 0 }}</div>
-            <div class="score-info">
-              <div class="score-name">{{ score.examName }}</div>
-              <el-tag :type="score.isPass ? 'success' : 'danger'" size="small" style="margin-top: 4px;">
-                {{ score.isPass ? '通过' : '未通过' }}
-              </el-tag>
-            </div>
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <span>通过公示</span>
+            <h2>近期审核通过记录</h2>
           </div>
         </div>
+        <div v-if="data.publicResults.length" class="public-list">
+          <article v-for="record in data.publicResults.slice(0, 6)" :key="record.id" class="public-row">
+            <span class="public-badge" :class="{ pass: record.isPass }">{{ record.isPass ? "过" : "未" }}</span>
+            <span>
+              <strong>{{ record.studentName }}</strong>
+              <small>{{ record.examName }}</small>
+            </span>
+            <small>{{ formatDateTime(record.submitTime) }}</small>
+          </article>
+        </div>
+        <el-empty v-else description="暂无公示记录" :image-size="90" />
       </div>
-
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">系统公告</div>
-        </div>
-        <div v-if="data.noticeData.length === 0" class="empty-state">
-          <div class="empty-icon">📢</div>
-          <div class="empty-text">暂无公告</div>
-        </div>
-        <div v-else class="notice-timeline">
-          <div v-for="notice in data.noticeData.slice(0, 5)" :key="notice.id" class="notice-item">
-            <div class="notice-dot"></div>
-            <div class="notice-content">
-              <div class="notice-text">{{ notice.content }}</div>
-              <div class="notice-time">{{ notice.time }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 彩蛋 + 进服审核通过公示 -->
-    <div class="two-col-grid" style="margin-top: 24px;" v-if="data.user.id">
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">彩蛋探索者</div>
-          <el-tag size="small" type="info">{{ data.easterLeaderboard.length }} 次发现</el-tag>
-        </div>
-        <div v-if="data.easterLeaderboard.length === 0" class="empty-state">
-          <div class="empty-icon">🔮</div>
-          <div class="empty-text">还没有人发现彩蛋，快去各处探索吧！</div>
-        </div>
-        <div v-else class="leaderboard-list">
-          <div v-for="(record, index) in data.easterLeaderboard.slice(0, 10)" :key="record.id" class="leaderboard-item">
-            <div class="leaderboard-rank">
-              <span v-if="index < 3" class="rank-medal">{{ ['🥇','🥈','🥉'][index] }}</span>
-              <span v-else class="rank-number">{{ index + 1 }}</span>
-            </div>
-            <div class="leaderboard-info">
-              <div class="leaderboard-name">{{ record.userName || '匿名探索者' }}</div>
-              <div class="leaderboard-time">{{ formatDateTime(record.discoverTime) }}</div>
-            </div>
-            <el-tag size="small" :type="getEggTagType(record.eggName)">{{ getEggLabel(record.eggName) }}</el-tag>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">进服审核通过公示</div>
-        </div>
-        <div v-if="data.publicResults.length === 0" class="empty-state">
-          <div class="empty-icon">📋</div>
-          <div class="empty-text">暂无审核通过记录</div>
-        </div>
-        <div v-else class="public-result-list">
-          <div v-for="record in data.publicResults.slice(0, 10)" :key="record.id" class="public-result-item">
-            <div class="result-indicator" :class="record.isPass ? 'pass' : 'fail'">
-              <span>{{ record.isPass ? '✓' : '✗' }}</span>
-            </div>
-            <div class="result-info">
-              <div class="result-name">{{ record.studentName }}</div>
-              <div class="result-exam">{{ record.examName }}</div>
-            </div>
-            <div class="result-status">
-              <el-tag :type="record.isPass ? 'success' : 'danger'" size="small">
-                {{ record.isPass ? '通过' : '未通过' }}
-              </el-tag>
-              <div class="result-time">{{ formatDateTime(record.submitTime) }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 审核小贴士悬浮球 -->
-    <div class="study-tip-float" @click="data.tipExpanded = !data.tipExpanded">
-      <span class="tip-icon">{{ data.currentTip?.icon || '💡' }}</span>
-      <div class="tip-bubble" v-if="data.tipExpanded">
-        <div class="tip-content">{{ data.currentTip?.text }}</div>
-        <div class="tip-footer">
-          <span class="tip-next" @click.stop="nextTip">下一条 →</span>
-          <span class="tip-close" @click.stop="data.tipExpanded = false">×</span>
-        </div>
-      </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted } from "vue";
-import { ElMessage } from "element-plus";
-import request from "@/utils/request.js";
-import router from "@/router/index.js";
+import { computed, onMounted, reactive } from "vue"
+import { ElMessage } from "element-plus"
+import {
+  ArrowRight,
+  CircleCheck,
+  Collection,
+  DataAnalysis,
+  Edit,
+  EditPen,
+  Reading,
+  Trophy,
+  WarnTriangleFilled,
+} from "@element-plus/icons-vue"
+import request from "@/utils/request.js"
+import router from "@/router/index.js"
+import creeperImg from "@/assets/imgs/creeper.png"
+import redstoneImg from "@/assets/imgs/redstone.png"
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}"),
   stats: { available: 0, completed: 0, avgScore: 0, passRate: 0, wrongCount: 0 },
   subjects: [],
   upcomingExams: [],
   recentScores: [],
   noticeData: [],
-  easterLeaderboard: [],
   publicResults: [],
-  checkin: { checked: false, streakDays: 0, loading: false },
   learningProgress: 0,
-  missions: [
-    { id: 1, name: '完成一次练习', desc: '进入练习模式完成至少1题', reward: '+5分', done: false, action: () => router.push('/front/practiceMode'), color: '#00b42a' },
-    { id: 2, name: '查看审核题库', desc: '熟悉四项审核要求', reward: '+3分', done: false, action: () => router.push('/front/subjects'), color: '#409eff' },
-    { id: 3, name: '复习错题', desc: '回顾错题，加深理解', reward: '+2分', done: false, action: () => router.push('/front/wrongQuestions'), color: '#ff7d00' },
-  ],
-  practiceTrend: [],
-  maxTrendCount: 1,
-  totalWeeklyPractice: 0,
-  weeklyChange: 0,
-  tipExpanded: false,
-  currentTip: null,
-  tips: [
-    { icon: '🧠', text: '审核时多思考为什么，而不是死记硬背。' },
-    { icon: '📖', text: '先熟悉审核方向，再进入正式考核。' },
-    { icon: '💡', text: '错题代表薄弱规则，复盘后再模拟一次。' },
-    { icon: '⏰', text: '正式审核前检查网络、浏览器和可用时间。' },
-    { icon: '🎯', text: '选择与你申请方向一致的题库，避免盲刷。' },
-    { icon: '🔄', text: '建筑、后期、红石和见习要求不同，按方向复习。' },
-    { icon: '📝', text: '简答题写清思路、依据和服务器规则理解。' },
-    { icon: '🏃', text: '状态不好先休息，正式审核一次认真完成。' },
-  ],
 })
 
-const todayStr = new Date().toLocaleDateString('zh-CN', {
-  year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+const todayStr = new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "long" })
+const greeting = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 12) return "上午好"
+  if (hour < 18) return "下午好"
+  return "晚上好"
 })
 
-const getGreeting = () => {
-  const greetings = [
-    '欢迎回来', '元气满满', '继续加油', '审核愉快', '突破自我',
-  ]
-  return greetings[Math.floor(Math.random() * greetings.length)]
-}
+const metrics = computed(() => [
+  { label: "可参加审核", value: data.stats.available, path: "/front/examList", icon: "EditPen", tone: "blue" },
+  { label: "已完成审核", value: data.stats.completed, path: "/front/myScores", icon: "CircleCheck", tone: "green" },
+  { label: "平均分", value: data.stats.avgScore, path: "/front/myScores", icon: "DataAnalysis", tone: "orange" },
+  { label: "通过率", value: `${data.stats.passRate}%`, path: "/front/myScores", icon: "Trophy", tone: "purple" },
+  { label: "错题数", value: data.stats.wrongCount, path: "/front/wrongQuestions", icon: "WarnTriangleFilled", tone: "red" },
+])
+
+const quickActions = computed(() => [
+  { title: "审核题库", desc: "按方向复习规则", path: "/front/subjects", icon: "Collection", tone: "blue" },
+  { title: "正式审核", desc: `${data.stats.available} 场可参加`, path: "/front/examList", icon: "EditPen", tone: "green" },
+  { title: "审核模拟", desc: "进入练习模式", path: "/front/practiceMode", icon: "Edit", tone: "orange" },
+  { title: "错题复盘", desc: `${data.stats.wrongCount} 道待回看`, path: "/front/wrongQuestions", icon: "WarnTriangleFilled", tone: "red" },
+])
 
 const computeLearningProgress = () => {
-  const missionDone = data.missions.filter(m => m.done).length
-  const checkinDone = data.checkin.checked ? 1 : 0
-  const examDone = data.stats.completed > 0 ? 1 : 0
-  const practiceDone = data.totalWeeklyPractice > 0 ? 1 : 0
-  const total = data.missions.length + 3
-  const done = missionDone + checkinDone + examDone + practiceDone
-  data.learningProgress = Math.round((done / total) * 100)
+  const done = [
+    data.stats.completed > 0,
+    data.stats.available > 0,
+    data.stats.avgScore >= 60,
+    data.stats.wrongCount === 0 && data.stats.completed > 0,
+  ].filter(Boolean).length
+  data.learningProgress = Math.round((done / 4) * 100)
 }
-
-const doMission = (mission) => {
-  if (mission.done) { ElMessage.info('该任务已完成！'); return }
-  mission.action()
-}
-
-const nextTip = () => {
-  const idx = data.tips.indexOf(data.currentTip)
-  data.currentTip = data.tips[(idx + 1) % data.tips.length]
-}
-
-const loadPracticeTrend = () => {
-  request.get('/practice/trend', {
-    params: { userId: data.user.id, userRole: data.user.role }
-  }).then(res => {
-    if (res.code === '200' && res.data) {
-      const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-      const now = new Date()
-      data.practiceTrend = []
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now)
-        d.setDate(d.getDate() - i)
-        const dateStr = `${d.getMonth() + 1}/${d.getDate()}`
-        const count = res.data[dateStr] || 0
-        data.practiceTrend.push({ label: days[d.getDay()], count })
-      }
-      data.maxTrendCount = Math.max(...data.practiceTrend.map(t => t.count), 1)
-      data.totalWeeklyPractice = data.practiceTrend.reduce((s, t) => s + t.count, 0)
-    }
-  }).catch(() => {
-    data.practiceTrend = []
-    data.maxTrendCount = 1
-    data.totalWeeklyPractice = 0
-    data.weeklyChange = 0
-  })
-}
-
-const initTip = () => {
-  data.currentTip = data.tips[Math.floor(Math.random() * data.tips.length)]
-}
-
-const getSubjectEmoji = (icon) => {
-  const map = { math: '📐', writing: '📝', computer: '💻', programming: '⌨️' }
-  return map[icon] || '📚'
-}
-
-import creeperImg from '@/assets/imgs/creeper.png'
-import redstoneImg from '@/assets/imgs/redstone.png'
 
 const getSubjectImg = (icon) => {
   const map = { minecraft: creeperImg, redstone: redstoneImg }
-  return map[icon] || ''
+  if (icon && (icon.startsWith?.("http") || icon.includes?.("/files/"))) return icon
+  return map[icon] || ""
 }
 
 const getExamStatus = (exam) => {
-  if (exam.examType === 'permanent') return 'ongoing'
+  if (exam.examType === "permanent") return "ongoing"
   const now = new Date()
   const start = exam.startTime ? new Date(exam.startTime) : null
   const end = exam.endTime ? new Date(exam.endTime) : null
-  if (start && now < start) return 'notStarted'
-  if (end && now > end) return 'ended'
-  return 'ongoing'
+  if (start && now < start) return "notStarted"
+  if (end && now > end) return "ended"
+  return "ongoing"
 }
 
 const getScoreClass = (score) => {
-  if (score >= 90) return 'excellent'
-  if (score >= 80) return 'good'
-  if (score >= 60) return 'average'
-  return 'poor'
+  if (score >= 90) return "excellent"
+  if (score >= 80) return "good"
+  if (score >= 60) return "average"
+  return "poor"
 }
 
 const goSubject = (subject) => {
-  router.push({ path: '/front/subjects', query: { subjectId: subject.id } })
+  router.push({ path: "/front/subjects", query: { subjectId: subject.id } })
 }
 
 const tryStartExam = (exam) => {
-  if (getExamStatus(exam) === 'ongoing') {
-    router.push({ path: '/front/examTaking', query: { examId: exam.id } })
+  if (getExamStatus(exam) === "ongoing") {
+    router.push({ path: "/front/examTaking", query: { examId: exam.id } })
+  } else {
+    ElMessage.info("该审核尚未开始")
   }
 }
 
+const formatDateTime = (dt) => {
+  if (!dt) return "未设置时间"
+  const d = new Date(dt)
+  if (Number.isNaN(d.getTime())) return String(dt)
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+}
+
 const loadSubjects = () => {
-  request.get('/questionCategory/selectTree').then(res => {
-    if (res.code === '200') {
-      data.subjects = res.data || []
-    }
-  })
+  request.get("/questionCategory/selectTree").then(res => {
+    if (res.code === "200") data.subjects = res.data || []
+  }).catch(() => {})
 }
 
 const loadExams = () => {
-  request.get('/exam/getAvailableExams/' + data.user.id).then(res => {
-    if (res.code === '200') {
+  if (!data.user.id) return
+  request.get("/exam/getAvailableExams/" + data.user.id).then(res => {
+    if (res.code === "200") {
       const exams = res.data || []
-      data.stats.available = exams.filter(e => getExamStatus(e) !== 'ended').length
+      data.stats.available = exams.filter(item => getExamStatus(item) !== "ended").length
       data.upcomingExams = exams
-        .filter(e => getExamStatus(e) !== 'ended')
+        .filter(item => getExamStatus(item) !== "ended")
         .sort((a, b) => {
-          const statusOrder = { ongoing: 0, notStarted: 1 }
-          return (statusOrder[getExamStatus(a)] || 2) - (statusOrder[getExamStatus(b)] || 2)
+          const order = { ongoing: 0, notStarted: 1, ended: 2 }
+          return order[getExamStatus(a)] - order[getExamStatus(b)]
         })
-        .slice(0, 4)
+        .slice(0, 5)
+      computeLearningProgress()
     }
-  })
+  }).catch(() => {})
 }
 
 const loadScores = () => {
-  request.get('/score/getByStudentId/' + data.user.id).then(res => {
-    if (res.code === '200') {
+  if (!data.user.id) return
+  request.get("/score/getByStudentId/" + data.user.id).then(res => {
+    if (res.code === "200") {
       const scores = res.data || []
       data.stats.completed = scores.length
       data.recentScores = scores.slice(0, 4)
       if (scores.length) {
-        const total = scores.reduce((s, r) => s + (r.totalScore || 0), 0)
+        const total = scores.reduce((sum, item) => sum + (item.totalScore || 0), 0)
         data.stats.avgScore = Math.round(total / scores.length)
-        const passed = scores.filter(r => r.isPass).length
-        data.stats.passRate = Math.round((passed / scores.length) * 100)
+        data.stats.passRate = Math.round((scores.filter(item => item.isPass).length / scores.length) * 100)
       }
+      computeLearningProgress()
     }
-  })
+  }).catch(() => {})
 }
 
 const loadWrongCount = () => {
-  request.get('/wrongQuestion/selectByUser', {
-    params: { userId: data.user.id, userRole: data.user.role }
-  }).then(res => {
-    if (res.code === '200') data.stats.wrongCount = (res.data || []).length
-  })
+  request.get("/wrongQuestion/selectByUser").then(res => {
+    if (res.code === "200") {
+      data.stats.wrongCount = (res.data || []).length
+      computeLearningProgress()
+    }
+  }).catch(() => {})
 }
 
 const loadNotice = () => {
-  request.get('/notice/selectAll').then(res => {
-    data.noticeData = res.data || []
-  })
-}
-
-const loadEasterLeaderboard = () => {
-  request.get('/easterEgg/leaderboard').then(res => {
-    if (res.code === '200') {
-      data.easterLeaderboard = res.data || []
-    }
-  })
+  request.get("/notice/selectAll").then(res => {
+    if (res.code === "200") data.noticeData = res.data || []
+  }).catch(() => {})
 }
 
 const loadPublicResults = () => {
-  request.get('/examRecord/publicResults').then(res => {
-    if (res.code === '200') {
-      data.publicResults = res.data || []
-    }
-  })
-}
-
-const eggLabels = {
-  logo_click_10: 'Logo十连击',
-  login_konami: 'Konami密码',
-  register_triple_click: '三击摩斯码',
-  workflow_dance: '工作流舞者',
-  dashboard_combo: '顺序大师',
-  logo_click: 'Logo点击',
-}
-const getEggLabel = (name) => eggLabels[name] || name || '未知彩蛋'
-const getEggTagType = (name) => {
-  const map = { logo_click_10: '', login_konami: 'danger', register_triple_click: 'warning', workflow_dance: 'success', dashboard_combo: 'info' }
-  return map[name] || ''
-}
-
-const formatDateTime = (dt) => {
-  if (!dt) return ''
-  const d = new Date(dt)
-  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
-}
-
-const loadCheckinStatus = () => {
-  if (!data.user.id) return
-  request.get('/studyCheckin/status', {
-    params: { userId: data.user.id, userRole: data.user.role }
-  }).then(res => {
-    if (res.code === '200') {
-      data.checkin.checked = res.data.todayChecked || false
-      data.checkin.streakDays = res.data.streakDays || 0
-    }
-  })
-}
-
-const doCheckin = () => {
-  data.checkin.loading = true
-  request.post('/studyCheckin/checkin', {
-    userId: data.user.id,
-    userRole: data.user.role
-  }).then(res => {
-    if (res.code === '200') {
-      data.checkin.checked = true
-      data.checkin.streakDays = res.data.streakDays || data.checkin.streakDays + 1
-      ElMessage.success({ message: `打卡成功！已连续 ${data.checkin.streakDays} 天 🎉`, duration: 3000 })
-    } else {
-      ElMessage.error(res.msg || '打卡失败')
-    }
-  }).finally(() => { data.checkin.loading = false })
+  request.get("/examRecord/publicResults").then(res => {
+    if (res.code === "200") data.publicResults = res.data || []
+  }).catch(() => {})
 }
 
 onMounted(() => {
   loadSubjects()
   loadExams()
   loadScores()
-  loadNotice()
-  loadEasterLeaderboard()
-  loadPublicResults()
   loadWrongCount()
-  loadCheckinStatus()
-  loadPracticeTrend()
-  initTip()
-  setTimeout(() => {
-    if (data.stats.completed > 0) data.missions[0].done = true
-    computeLearningProgress()
-  }, 1500)
+  loadNotice()
+  loadPublicResults()
 })
 </script>
 
 <style scoped>
-@import "@/assets/css/front.css";
-
-/* 欢迎横幅扩展 */
-.welcome-banner .welcome-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.welcome-stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: rgba(255,255,255,0.08);
-  padding: 10px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.ws-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.ws-val {
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-}
-
-.ws-lbl {
-  font-size: 10px;
-  color: rgba(255,255,255,0.6);
-  margin-top: 1px;
-}
-
-.ws-divider {
-  width: 1px;
-  height: 28px;
-  background: rgba(255,255,255,0.15);
-}
-
-.progress-wrap {
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.progress-wrap:hover { transform: scale(1.08); }
-
-.checkin-done {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.checkin-done-icon {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-/* 欢迎横幅内的进度环 */
-.spr-svg { width: 68px; height: 68px; transform: rotate(-90deg); }
-.spr-bg { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 5; }
-.spr-fill {
-  fill: none; stroke: var(--primary-color); stroke-width: 5;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s ease;
-}
-.spr-text {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.spr-value { font-size: 13px; font-weight: 700; color: #fff; line-height: 1; }
-.spr-label { font-size: 9px; color: rgba(255,255,255,0.6); margin-top: 1px; }
-
-/* 两列布局 */
-.two-col-grid {
+.student-home {
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-@media (max-width: 900px) {
-  .two-col-grid { grid-template-columns: 1fr; }
-  .welcome-banner .welcome-right { flex-direction: column; gap: 12px; }
+.student-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 34px;
+  border-radius: 8px;
+  background:
+    linear-gradient(110deg, rgba(9, 18, 30, 0.9), rgba(9, 18, 30, 0.58)),
+    url("@/assets/imgs/bj2.png") center / cover;
+  color: #fff;
+}
+
+.student-hero p,
+.student-hero span,
+.hero-progress small {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.student-hero h1 {
+  margin: 8px 0;
+  color: #fff;
+  font-size: 30px;
+}
+
+.hero-progress {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.hero-progress svg {
+  width: 88px;
+  height: 88px;
+  transform: rotate(-90deg);
+}
+
+.ring-bg,
+.ring-fill {
+  fill: none;
+  stroke-width: 7;
+}
+
+.ring-bg {
+  stroke: rgba(255, 255, 255, 0.18);
+}
+
+.ring-fill {
+  stroke: #4ade80;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s;
+}
+
+.hero-progress strong,
+.hero-progress small {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.hero-progress strong {
+  top: 27px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.hero-progress small {
+  top: 50px;
+  font-size: 11px;
+}
+
+.metric-card {
+  text-align: left;
+  cursor: pointer;
+}
+
+.metric-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  font-size: 22px;
+}
+
+.metric-icon.blue,
+.quick-grid .blue { color: #2563eb; background: #dbeafe; }
+.metric-icon.green,
+.quick-grid .green { color: #16a34a; background: #dcfce7; }
+.metric-icon.orange,
+.quick-grid .orange { color: #d97706; background: #fef3c7; }
+.metric-icon.purple { color: #7c3aed; background: #ede9fe; }
+.metric-icon.red,
+.quick-grid .red { color: #dc2626; background: #fee2e2; }
+
+.metric-card strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 28px;
+}
+
+.metric-card small {
+  color: var(--text-secondary);
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.quick-grid button {
+  position: relative;
+  min-height: 122px;
+  padding: 18px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.quick-grid button:hover {
+  border-color: rgba(var(--primary-rgb), 0.35);
+}
+
+.quick-grid button > span {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+
+.quick-grid strong,
+.subject-card strong,
+.exam-row strong,
+.score-row strong,
+.public-row strong,
+.notice-item strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.quick-grid small,
+.subject-card small,
+.exam-row small,
+.score-row small,
+.public-row small,
+.notice-item small {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.quick-arrow {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  color: var(--text-secondary);
+}
+
+.student-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 20px;
+}
+
+.panel-card {
+  padding: 22px;
+  border: 1px solid var(--border-lighter);
+  border-radius: 8px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.wide-panel {
+  grid-row: span 2;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-header span {
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.panel-header h2 {
+  margin: 4px 0 0;
+  color: var(--text-primary);
+  font-size: 17px;
+}
+
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.subject-card,
+.exam-row {
+  border: 1px solid var(--border-lighter);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.subject-card {
+  min-height: 166px;
+  padding: 16px;
+}
+
+.subject-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 22px;
+}
+
+.subject-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.subject-card em {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.exam-list,
+.score-list,
+.notice-list,
+.public-list {
+  display: grid;
+  gap: 10px;
+}
+
+.exam-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.status-dot.ongoing { background: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12); }
+.status-dot.notStarted { background: #d97706; box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12); }
+.status-dot.ended { background: #94a3b8; }
+
+.score-row,
+.public-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-lighter);
+}
+
+.score-row:last-child,
+.public-row:last-child {
+  border-bottom: 0;
+}
+
+.score-circle,
+.public-badge {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.score-circle.excellent { color: #16a34a; background: #dcfce7; }
+.score-circle.good { color: #2563eb; background: #dbeafe; }
+.score-circle.average { color: #d97706; background: #fef3c7; }
+.score-circle.poor { color: #dc2626; background: #fee2e2; }
+.public-badge { color: #dc2626; background: #fee2e2; }
+.public-badge.pass { color: #16a34a; background: #dcfce7; }
+
+.notice-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-lighter);
+}
+
+.notice-item:last-child {
+  border-bottom: 0;
+}
+
+.notice-item p {
+  display: -webkit-box;
+  margin: 6px 0;
+  overflow: hidden;
+  color: var(--text-regular);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 1080px) {
+  .student-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .student-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .subject-grid,
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

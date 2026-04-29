@@ -1,7 +1,7 @@
 <template>
   <el-popover placement="bottom" :width="380" trigger="click">
     <template #reference>
-      <div class="theme-trigger" :title="'切换主题 — ' + themeName">
+      <div class="theme-trigger" :title="'切换主题 - ' + themeName">
         <el-icon :size="18"><Brush /></el-icon>
       </div>
     </template>
@@ -36,6 +36,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 
+const THEME_KEY = 'beiming-onlineexam-theme'
+
 const themes = [
   { id: 'default',      name: '力扣绿',     headerBg: 'linear-gradient(135deg, #1d2129, #2b2f38)', accent: '#00b42a' },
   { id: 'ocean',        name: '海洋蓝',     headerBg: 'linear-gradient(135deg, #0c2d48, #145da0)', accent: '#2196f3' },
@@ -51,7 +53,7 @@ const themes = [
   { id: 'gold',         name: '黑金',       headerBg: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)', accent: '#fbbf24' },
 ]
 
-const currentTheme = ref(localStorage.getItem('theme') || 'default')
+const currentTheme = ref(localStorage.getItem(THEME_KEY) || 'default')
 
 const themeName = computed(() => {
   const t = themes.find(t => t.id === currentTheme.value)
@@ -62,7 +64,7 @@ const emit = defineEmits(['change'])
 
 const switchTheme = (id) => {
   currentTheme.value = id
-  localStorage.setItem('theme', id)
+  localStorage.setItem(THEME_KEY, id)
   document.documentElement.setAttribute('data-theme', id)
   emit('change', id)
 }

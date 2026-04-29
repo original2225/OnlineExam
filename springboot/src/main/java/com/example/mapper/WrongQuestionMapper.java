@@ -14,6 +14,8 @@ public interface WrongQuestionMapper {
 
     void deleteById(Integer id);
 
+    void deleteByOwner(@Param("id") Integer id, @Param("userId") Integer userId, @Param("userRole") String userRole);
+
     @Select("select count(*) from `wrong_question` where user_id = #{userId} and user_role = #{userRole} and question_id = #{questionId}")
     int existsByUserAndQuestion(@Param("userId") Integer userId, @Param("userRole") String userRole, @Param("questionId") Integer questionId);
 

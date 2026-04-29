@@ -5,7 +5,7 @@
  Source Server Type    : MySQL
  Source Server Version : 80013
  Source Host           : localhost:3306
- Source Schema         : system
+ Source Schema         : Beiming-OnlineExam
 
  Target Server Type    : MySQL
  Target Server Version : 80013
@@ -15,6 +15,8 @@
 */
 
 SET NAMES utf8mb4;
+CREATE DATABASE IF NOT EXISTS `Beiming-OnlineExam` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `Beiming-OnlineExam`;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------

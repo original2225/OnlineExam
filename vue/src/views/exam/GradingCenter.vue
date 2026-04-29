@@ -1,5 +1,11 @@
 <template>
   <div class="gc" v-loading="data.loading">
+    <div class="gc-scene" :style="getSceneStyle('admin')">
+      <div>
+        <strong>阅卷工作台</strong>
+        <span>结合题目场景、参考答案和新人作答，给出可执行的反馈。</span>
+      </div>
+    </div>
 
     <!-- 顶部工具栏 -->
     <div class="gc-toolbar">
@@ -94,6 +100,15 @@
           </div>
           <div class="grc-action">
             <el-button
+              round
+              size="small"
+              @click="openChat(row)"
+              :disabled="row.status !== 'completed'"
+            >
+              <el-icon><ChatDotRound /></el-icon>
+              追问室
+            </el-button>
+            <el-button
               type="primary"
               round
               size="small"
@@ -135,6 +150,9 @@
               <span class="gsb-label">自动评分</span>
               <span class="gsb-val">{{ data.currentRecord.autoScore || 0 }}</span>
             </div>
+            <el-button type="primary" plain round size="small" @click="openChat(data.currentRecord)">
+              <el-icon><ChatDotRound /></el-icon> 追问室
+            </el-button>
           </div>
 
           <!-- 题目列表 -->
@@ -145,6 +163,21 @@
               <span class="gqc-score">{{ q.score }}分</span>
             </div>
             <div class="gqc-content">{{ q.content }}</div>
+
+            <div v-if="questionVisuals(q).length" class="gqc-visuals">
+              <div
+                v-for="visual in questionVisuals(q)"
+                :key="visual.key"
+                class="gqc-visual"
+                :style="visualBackgroundStyle(visual)"
+              >
+                <div>
+                  <strong>{{ visual.title }}</strong>
+                  <span>{{ visual.desc }}</span>
+                  <a v-if="visual.source" :href="visual.source" target="_blank" rel="noopener noreferrer">{{ visual.sourceName }}</a>
+                </div>
+              </div>
+            </div>
 
             <!-- 选择题选项 -->
             <div v-if="q.type === 'single' || q.type === 'multiple'" class="gqc-options">
@@ -225,15 +258,22 @@
       </div>
     </el-dialog>
 
+    <ExamRecordChatDrawer
+      v-model="data.chatVisible"
+      :record-id="data.chatRecordId"
+      :record="data.chatRecord"
+    />
   </div>
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, onUnmounted } from 'vue'
+import { reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import request from '@/utils/request.js'
 import { ElMessage } from 'element-plus'
 import { useRoute } from 'vue-router'
-import { Search, Document, Clock, Timer, EditPen, Check, CircleCheck, Key } from '@element-plus/icons-vue'
+import { Search, Document, Clock, Timer, EditPen, Check, CircleCheck, Key, ChatDotRound } from '@element-plus/icons-vue'
+import { getQuestionVisuals, getSceneStyle, visualBackgroundStyle } from '@/data/reviewVisuals.js'
+import ExamRecordChatDrawer from '@/components/ExamRecordChatDrawer.vue'
 
 const route = useRoute()
 const gradients = [
@@ -264,6 +304,9 @@ const data = reactive({
   rejectionReasons: [],
   customReason: '',
   gradeCommentMap: {},
+  chatVisible: false,
+  chatRecordId: null,
+  chatRecord: null,
 })
 
 const typeLabel = (t) => ({ single: '单选', multiple: '多选', judge: '判断', fill: '填空', essay: '简答' }[t] || t)
@@ -298,6 +341,7 @@ const isWrongOpt = (q, key) => {
   if (!a) return false
   return (Array.isArray(a) ? a : [a]).includes(key) && !q.answer?.includes(key)
 }
+const questionVisuals = (question) => getQuestionVisuals(question || {}, 1)
 
 const gradingPercent = computed(() => {
   if (!data.progress?.total) return 0
@@ -316,6 +360,7 @@ const loadExams = () => {
         data.selectedExamId = parseInt(route.query.examId)
         loadRecords()
       }
+      openInitialChat()
     }
   })
 }
@@ -326,12 +371,32 @@ const loadRecords = () => {
   request.get('/examRecord/selectAll', {
     params: { examId: data.selectedExamId, status: data.filterStatus || 'completed' }
   }).then(res => {
-    if (res.code === '200') data.records = res.data || []
+    if (res.code === '200') {
+      data.records = res.data || []
+      if (data.chatRecordId) {
+        data.chatRecord = data.records.find(item => item.id === data.chatRecordId) || data.chatRecord
+      }
+    }
   }).finally(() => { data.loading = false })
 
   request.get('/examApproval/getGradingProgress/' + data.selectedExamId).then(res => {
     if (res.code === '200') data.progress = res.data
   }).catch(() => {})
+}
+
+const openChat = (record) => {
+  if (!record?.id) return
+  data.chatRecordId = record.id
+  data.chatRecord = record
+  data.chatVisible = true
+}
+
+const openInitialChat = () => {
+  const queryRecordId = route.query.chatRecordId
+  if (!queryRecordId || data.chatVisible) return
+  data.chatRecordId = Number(queryRecordId)
+  data.chatRecord = data.records.find(item => item.id === data.chatRecordId) || null
+  data.chatVisible = true
 }
 
 const openGrade = (record) => {
@@ -394,10 +459,47 @@ const onKeyDown = (e) => {
 
 onMounted(() => { loadExams(); window.addEventListener('keydown', onKeyDown) })
 onUnmounted(() => { window.removeEventListener('keydown', onKeyDown) })
+
+watch(() => route.query.chatRecordId, () => {
+  if (route.query.examId) {
+    data.selectedExamId = Number(route.query.examId)
+    loadRecords()
+  }
+  openInitialChat()
+})
 </script>
 
 <style scoped>
 .gc { max-width: 1100px; margin: 0 auto; }
+
+.gc-scene {
+  min-height: 190px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 14px;
+  background-size: 400% 200%;
+  color: #fff;
+}
+
+.gc-scene > div {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 24px;
+  background: linear-gradient(100deg, rgba(9,17,28,0.86), rgba(9,17,28,0.18));
+}
+
+.gc-scene strong {
+  font-size: 24px;
+}
+
+.gc-scene span {
+  max-width: 520px;
+  color: rgba(255,255,255,0.78);
+  line-height: 1.7;
+}
 
 /* ===== 工具栏 ===== */
 .gc-toolbar {
@@ -457,7 +559,7 @@ onUnmounted(() => { window.removeEventListener('keydown', onKeyDown) })
 .grcsv { font-weight: 700; }
 .grcsv.auto { color: inherit; }
 .grcs-op { color: var(--border-light); font-size: 12px; font-weight: 300; }
-.grc-action { flex-shrink: 0; }
+.grc-action { flex-shrink: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* ===== 批阅弹窗 ===== */
 .grade-dialog-body { display: flex; gap: 20px; max-height: 72vh; }
@@ -491,6 +593,29 @@ onUnmounted(() => { window.removeEventListener('keydown', onKeyDown) })
 }
 .gqc-score { margin-left: auto; font-size: 13px; color: var(--text-secondary); font-weight: 600; }
 .gqc-content { font-size: 14px; color: var(--text-primary); line-height: 1.6; margin-bottom: 10px; }
+.gqc-visuals { margin-bottom: 10px; }
+.gqc-visual {
+  min-height: 124px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid var(--border-lighter);
+}
+.gqc-visual > div {
+  min-height: 124px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(9,17,28,0.06), rgba(9,17,28,0.76));
+  color: #fff;
+}
+.gqc-visual strong { font-size: 13px; }
+.gqc-visual span,
+.gqc-visual a { color: rgba(255,255,255,0.78); font-size: 12px; line-height: 1.5; }
+.gqc-visual a { width: fit-content; text-decoration: underline; }
 .gqc-options { margin-bottom: 10px; }
 .gqc-opt { padding: 6px 12px; border-radius: 6px; margin-bottom: 4px; font-size: 13px; background: var(--bg-card); border: 1px solid var(--border-lighter); }
 .gqc-opt.correct { background: rgba(22,163,74,0.1); color: var(--success-color, #16a34a); border-color: rgba(22,163,74,0.2); }

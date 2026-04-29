@@ -144,7 +144,7 @@ import { getUploadHeaders } from '@/utils/upload.js'
 
 const baseUrl = import.meta.env.VITE_BASE_URL
 const uploadHeaders = getUploadHeaders()
-const currentUser = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const currentUser = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 const currentUserLevel = currentUser.level || 1
 
 const data = reactive({

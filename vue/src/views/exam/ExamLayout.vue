@@ -67,6 +67,7 @@
         </div>
         <div class="ext-right">
           <ThemeSwitcher />
+          <ExamRecordChatLauncher />
           <NotificationBell />
         </div>
       </header>
@@ -89,11 +90,12 @@ import router from '@/router/index.js'
 import { ElMessage } from 'element-plus'
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 import NotificationBell from '@/components/NotificationBell.vue'
+import ExamRecordChatLauncher from '@/components/ExamRecordChatLauncher.vue'
 
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   fold: false,
 })
 

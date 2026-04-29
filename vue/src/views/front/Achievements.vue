@@ -107,7 +107,7 @@ const data = reactive({
   detailData: null,
 })
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const filteredAchievements = computed(() => {
   if (data.activeCategory === 'all') return data.achievements

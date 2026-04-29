@@ -95,29 +95,57 @@ public class JWTInterceptor implements HandlerInterceptor {
                 require(role, ADMIN_ROLES);
             }
         }
-        if (path.startsWith("/question") || path.startsWith("/examPaper") || path.startsWith("/notice")
-                || path.startsWith("/examAnnouncement")) {
+        if (matches(path, "/questionContribution")) {
+            if (path.contains("/review") || path.contains("/selectPage") || path.contains("/pendingCount")) {
+                require(role, ADMIN_ROLES);
+            } else if (!"GET".equalsIgnoreCase(method) && !path.contains("/submit")) {
+                require(role, ADMIN_ROLES);
+            }
+            return;
+        }
+        if (matches(path, "/question") || matches(path, "/examPaper") || matches(path, "/notice")
+                || matches(path, "/examAnnouncement")) {
             if (!"GET".equalsIgnoreCase(method)) {
                 require(role, ADMIN_ROLES);
             }
         }
-        if (path.startsWith("/exam")) {
-            if (path.startsWith("/examRecord") || path.startsWith("/examRecording")) {
-                return;
+        if (matches(path, "/examRecord")) {
+            if (path.contains("/selectAll") || path.contains("/selectPage") || path.contains("/getByExamId")
+                    || path.contains("/gradingStats") || path.contains("/update")) {
+                require(role, REVIEW_ROLES);
             }
+            return;
+        }
+        if (matches(path, "/examRecording")) {
+            if (path.contains("/selectByExam/") || path.contains("/selectAll")) {
+                require(role, REVIEW_ROLES);
+            }
+            return;
+        }
+        if (matches(path, "/notification")) {
+            if (path.contains("/send")) {
+                require(role, ADMIN_ROLES);
+            }
+            return;
+        }
+        if (matches(path, "/exam")) {
             if (!"GET".equalsIgnoreCase(method) || path.contains("setPermissions") || path.contains("makeup")) {
                 require(role, ADMIN_ROLES);
             }
         }
-        if (path.startsWith("/grading") || path.startsWith("/examApproval")) {
+        if (matches(path, "/grading") || matches(path, "/examApproval")) {
             require(role, REVIEW_ROLES);
         }
-        if (path.startsWith("/score") && (path.contains("selectPage") || path.contains("getStatistics"))) {
+        if (matches(path, "/score") && (path.contains("selectPage") || path.contains("getStatistics"))) {
             require(role, REVIEW_ROLES);
         }
         if (path.equals("/files/upload")) {
             require(role, ALL_ROLES);
         }
+    }
+
+    private boolean matches(String path, String prefix) {
+        return path.equals(prefix) || path.startsWith(prefix + "/");
     }
 
     private void require(String role, Set<String> allowedRoles) {

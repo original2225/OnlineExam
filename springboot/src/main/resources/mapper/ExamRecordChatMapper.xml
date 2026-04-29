@@ -1,0 +1,89 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExamRecordChatMapper">
+    <insert id="insertMessage" parameterType="com.example.entity.ExamRecordChatMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into exam_record_chat_message
+            (record_id, sender_id, sender_role, sender_name, content, message_type, is_deleted)
+        values
+            (#{recordId}, #{senderId}, #{senderRole}, #{senderName}, #{content}, #{messageType}, 0)
+    </insert>
+
+    <select id="selectMessages" resultType="com.example.entity.ExamRecordChatMessage">
+        select *
+        from exam_record_chat_message
+        where record_id = #{recordId}
+          and is_deleted = 0
+        <if test="afterId != null and afterId > 0">
+          and id > #{afterId}
+        </if>
+        order by id asc
+        limit 200
+    </select>
+
+    <insert id="upsertRead">
+        insert into exam_record_chat_read (record_id, user_id, user_role, last_read_message_id, last_read_at)
+        values (#{recordId}, #{userId}, #{userRole}, #{messageId}, now())
+        on duplicate key update
+            last_read_message_id = greatest(ifnull(last_read_message_id, 0), values(last_read_message_id)),
+            last_read_at = now()
+    </insert>
+
+    <select id="unreadCount" resultType="int">
+        select count(*)
+        from exam_record_chat_message m
+        left join exam_record_chat_read r
+          on r.record_id = m.record_id
+         and r.user_id = #{userId}
+         and r.user_role = #{userRole}
+        where m.record_id = #{recordId}
+          and m.is_deleted = 0
+          and not (m.sender_id = #{userId} and m.sender_role = #{userRole})
+          and m.id > ifnull(r.last_read_message_id, 0)
+    </select>
+
+    <select id="selectRooms" resultType="com.example.entity.ExamRecordChatRoom">
+        select
+            er.id as recordId,
+            er.exam_id as examId,
+            e.name as examName,
+            er.student_id as studentId,
+            s.name as studentName,
+            s.student_no as studentNo,
+            er.status as recordStatus,
+            er.exam_status as examStatus,
+            lm.content as lastMessageContent,
+            lm.sender_name as lastSenderName,
+            lm.created_at as lastMessageAt,
+            (
+                select count(*)
+                from exam_record_chat_message um
+                left join exam_record_chat_read rr
+                  on rr.record_id = um.record_id
+                 and rr.user_id = #{userId}
+                 and rr.user_role = #{userRole}
+                where um.record_id = er.id
+                  and um.is_deleted = 0
+                  and not (um.sender_id = #{userId} and um.sender_role = #{userRole})
+                  and um.id > ifnull(rr.last_read_message_id, 0)
+            ) as unreadCount,
+            case when er.exam_status in ('PASSED', 'FAILED') then 1 else 0 end as locked
+        from exam_record er
+        left join exam e on er.exam_id = e.id
+        left join student s on er.student_id = s.id
+        join (
+            select m1.*
+            from exam_record_chat_message m1
+            join (
+                select record_id, max(id) as max_id
+                from exam_record_chat_message
+                where is_deleted = 0
+                group by record_id
+            ) m2 on m1.record_id = m2.record_id and m1.id = m2.max_id
+        ) lm on lm.record_id = er.id
+        where er.status = 'completed'
+        <if test="isReviewer == false">
+          and er.student_id = #{userId}
+        </if>
+        order by lm.created_at desc
+        limit 50
+    </select>
+</mapper>

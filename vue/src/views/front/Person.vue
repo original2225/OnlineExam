@@ -147,7 +147,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL
 const uploadHeaders = getUploadHeaders()
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
+  user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   stats: { completed: 0, avg: 0, passRate: 0, highest: 0 },
   saving: false,
   newPassword: '',
@@ -216,7 +216,7 @@ const getRoleLabel = (role) => {
 const handleFileUpload = (res) => {
   data.user.avatar = res.data
   ElMessage.success('头像上传成功')
-  localStorage.setItem('xm-user', JSON.stringify(data.user))
+  localStorage.setItem('beiming-onlineexam-user', JSON.stringify(data.user))
 }
 
 const handleFileError = () => {
@@ -244,7 +244,7 @@ const update = () => {
     request.put(api, payload).then(res => {
       if (res.code === '200') {
         ElMessage.success('保存成功')
-        localStorage.setItem('xm-user', JSON.stringify(data.user))
+        localStorage.setItem('beiming-onlineexam-user', JSON.stringify(data.user))
         emit('updateUser')
         data.newPassword = ''
         data.confirmPassword = ''
@@ -258,7 +258,7 @@ const update = () => {
 }
 
 const resetForm = () => {
-  data.user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+  data.user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
   data.newPassword = ''
   data.confirmPassword = ''
   formRef.resetFields()

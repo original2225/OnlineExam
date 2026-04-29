@@ -92,6 +92,9 @@
       <el-button size="large" round @click="router.push('/front/myScores')">
         <el-icon><DataLine /></el-icon> 查看结果单
       </el-button>
+      <el-button size="large" round @click="openChat">
+        <el-icon><ChatDotRound /></el-icon> 打开追问室
+      </el-button>
     </div>
 
     <div class="card answer-section">
@@ -183,6 +186,12 @@
     <div class="result-footer">
       <el-button type="primary" size="large" round @click="goBack">返回审核列表</el-button>
     </div>
+
+    <ExamRecordChatDrawer
+      v-model="data.chatVisible"
+      :record-id="data.recordId"
+      :record="data.record"
+    />
   </div>
 </template>
 
@@ -190,8 +199,9 @@
 import { reactive, ref, computed, onMounted, onUnmounted, nextTick } from "vue";
 import request from "@/utils/request.js";
 import { ElMessage } from "element-plus";
-import { CircleCheck, CircleClose } from "@element-plus/icons-vue";
+import { ChatDotRound, CircleCheck, CircleClose } from "@element-plus/icons-vue";
 import router from "@/router/index.js";
+import ExamRecordChatDrawer from "@/components/ExamRecordChatDrawer.vue";
 
 const celebrateCanvas = ref(null)
 let celebrationRAF = null
@@ -215,9 +225,10 @@ const data = reactive({
   annoContent: {},
   annoSubmitting: false,
   wrongAdded: {},
+  chatVisible: false,
 })
 
-const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+const user = JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}')
 
 const getScoreEmoji = () => {
   const s = data.record?.totalScore
@@ -323,6 +334,14 @@ const reactMood = (mood) => {
   data.userMood = mood
   data.moodCounts[mood] = (data.moodCounts[mood] || 0) + 1
   ElMessage.success({ message: mood === 'laugh' ? '😄 太棒了！' : mood === 'clap' ? '👏 继续加油！' : '🤔 思考使人进步！', duration: 2000 })
+}
+
+const openChat = () => {
+  if (!data.recordId) {
+    ElMessage.warning('未找到答卷记录')
+    return
+  }
+  data.chatVisible = true
 }
 
 

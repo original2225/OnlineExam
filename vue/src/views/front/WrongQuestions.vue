@@ -124,7 +124,7 @@ const data = reactive({
   reviewCount: 0,
 })
 
-const user = computed(() => JSON.parse(localStorage.getItem('xm-user') || '{}'))
+const user = computed(() => JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'))
 
 const filteredQuestions = computed(() => {
   let list = data.wrongList
