@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.common.Result;
 import com.example.entity.*;
 import com.example.mapper.*;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -49,8 +50,11 @@ public class PracticeController {
     @PostMapping("/generate")
     @Transactional
     public Result generate(@RequestBody Map<String, Object> params) {
-        Integer userId = ((Number) params.get("userId")).intValue();
-        String userRole = (String) params.get("userRole");
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        Integer userId = current.getId();
         Integer categoryId = params.get("categoryId") != null ? ((Number) params.get("categoryId")).intValue() : null;
         String difficulty = (String) params.get("difficulty");
         Integer questionCount = params.get("questionCount") != null ? ((Number) params.get("questionCount")).intValue() : 10;
@@ -139,14 +143,21 @@ public class PracticeController {
     @PostMapping("/submit")
     @Transactional
     public Result submit(@RequestBody Map<String, Object> params) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
         Integer recordId = ((Number) params.get("recordId")).intValue();
-        Integer userId = ((Number) params.get("userId")).intValue();
-        String userRole = (String) params.get("userRole");
+        Integer userId = current.getId();
+        String userRole = current.getRole();
         Boolean saveWrong = params.get("saveWrong") != null ? (Boolean) params.get("saveWrong") : true;
 
         ExamRecord record = examRecordMapper.selectById(recordId);
         if (record == null || !"ongoing".equals(record.getStatus())) {
             return Result.error("记录不存在或已提交");
+        }
+        if (!userId.equals(record.getStudentId())) {
+            return forbidden();
         }
 
         // 设置提交时间
@@ -228,6 +239,10 @@ public class PracticeController {
      */
     @GetMapping("/trend")
     public Result trend(@RequestParam Integer userId, @RequestParam String userRole) {
+        Account current = TokenUtils.getCurrentUser();
+        if (!matchesCurrent(current, userId, userRole)) {
+            return forbidden();
+        }
         List<ExamRecord> allRecords = examRecordMapper.selectAll(new ExamRecord());
         List<ExamRecord> practiceRecords = allRecords.stream()
                 .filter(r -> r.getExamName() != null && r.getExamName().startsWith("[练习]") && "completed".equals(r.getStatus()))
@@ -246,6 +261,10 @@ public class PracticeController {
 
     @GetMapping("/stats")
     public Result stats(@RequestParam Integer userId, @RequestParam(defaultValue = "USER") String userRole) {
+        Account current = TokenUtils.getCurrentUser();
+        if (!matchesCurrent(current, userId, userRole)) {
+            return forbidden();
+        }
         List<ExamRecord> allRecords = examRecordMapper.selectAll(new ExamRecord());
         List<ExamRecord> myPractice = allRecords.stream()
                 .filter(r -> r.getExamName() != null && (r.getExamName().startsWith("[练习]") || r.getExamName().startsWith("[挑战]")) && "completed".equals(r.getStatus()))
@@ -300,6 +319,10 @@ public class PracticeController {
 
     @GetMapping("/categoryStats")
     public Result categoryStats(@RequestParam Integer userId) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !current.getId().equals(userId)) {
+            return forbidden();
+        }
         List<ExamRecord> allRecords = examRecordMapper.selectAll(new ExamRecord());
         List<ExamRecord> myRecords = allRecords.stream()
                 .filter(r -> r.getStudentId() != null && r.getStudentId().equals(userId) && "completed".equals(r.getStatus()))
@@ -346,6 +369,10 @@ public class PracticeController {
 
     @GetMapping("/calendar")
     public Result calendar(@RequestParam Integer userId, @RequestParam(defaultValue = "30") Integer days) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !current.getId().equals(userId)) {
+            return forbidden();
+        }
         List<ExamRecord> allRecords = examRecordMapper.selectAll(new ExamRecord());
         java.time.LocalDate today = java.time.LocalDate.now();
         java.time.LocalDate start = today.minusDays(days - 1);
@@ -414,8 +441,11 @@ public class PracticeController {
     @PostMapping("/challenge")
     @Transactional
     public Result challenge(@RequestBody Map<String, Object> params) {
-        Integer userId = ((Number) params.get("userId")).intValue();
-        String userRole = (String) params.get("userRole");
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        Integer userId = current.getId();
         Integer categoryId = params.get("categoryId") != null ? ((Number) params.get("categoryId")).intValue() : null;
 
         Question query = new Question();
@@ -488,5 +518,13 @@ public class PracticeController {
         result.put("questionCount", selected.size());
         result.put("challengeMode", true);
         return Result.success(result);
+    }
+
+    private boolean matchesCurrent(Account current, Integer userId, String userRole) {
+        return current != null && current.getId().equals(userId) && current.getRole().equals(userRole);
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }

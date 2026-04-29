@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.StudyCheckin;
 import com.example.mapper.StudyCheckinMapper;
+import com.example.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +22,12 @@ public class StudyCheckinController {
 
     @PostMapping("/checkin")
     public Result checkin(@RequestBody Map<String, Object> params) {
-        Integer userId = ((Number) params.get("userId")).intValue();
-        String userRole = (String) params.get("userRole");
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        Integer userId = current.getId();
+        String userRole = current.getRole();
         LocalDate today = LocalDate.now();
 
         StudyCheckin existing = studyCheckinMapper.selectByUserAndDate(userId, userRole, today);
@@ -50,6 +56,12 @@ public class StudyCheckinController {
 
     @GetMapping("/status")
     public Result status(@RequestParam Integer userId, @RequestParam String userRole) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !current.getId().equals(userId) || !current.getRole().equals(userRole)) {
+            return forbidden();
+        }
+        userId = current.getId();
+        userRole = current.getRole();
         LocalDate today = LocalDate.now();
         StudyCheckin todayCheckin = studyCheckinMapper.selectByUserAndDate(userId, userRole, today);
         StudyCheckin latest = studyCheckinMapper.selectLatestByUser(userId, userRole);
@@ -61,6 +73,10 @@ public class StudyCheckinController {
         result.put("totalDays", totalDays);
         result.put("latestDate", latest != null ? latest.getCheckinDate().toString() : null);
         return Result.success(result);
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 
     @GetMapping("/leaderboard")

@@ -1,8 +1,11 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.common.enums.RoleEnum;
+import com.example.entity.Account;
 import com.example.entity.ExamRecord;
 import com.example.service.ExamRecordService;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 成绩前端请求接口
@@ -18,6 +22,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/score")
 public class ScoreController {
+
+    private static final Set<String> REVIEW_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name(), RoleEnum.HELPER.name());
 
     @Resource
     private ExamRecordService examRecordService;
@@ -30,6 +36,9 @@ public class ScoreController {
                               @RequestParam(required = false) Integer studentId,
                               @RequestParam(defaultValue = "1") Integer pageNum,
                               @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         ExamRecord record = new ExamRecord();
         record.setExamId(examId);
         record.setStudentId(studentId);
@@ -42,6 +51,9 @@ public class ScoreController {
      */
     @GetMapping("/getStatistics/{examId}")
     public Result getStatistics(@PathVariable Integer examId) {
+        if (!hasReviewPermission()) {
+            return forbidden();
+        }
         List<ExamRecord> records = examRecordService.getByExamId(examId);
 
         int totalCount = records.size();
@@ -98,7 +110,28 @@ public class ScoreController {
      */
     @GetMapping("/getByStudentId/{studentId}")
     public Result getByStudentId(@PathVariable Integer studentId) {
+        if (!canAccessStudent(studentId)) {
+            return forbidden();
+        }
         List<ExamRecord> list = examRecordService.getByStudentId(studentId);
         return Result.success(list);
+    }
+
+    private boolean canAccessStudent(Integer studentId) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return false;
+        }
+        return REVIEW_ROLES.contains(current.getRole())
+                || (RoleEnum.USER.name().equals(current.getRole()) && current.getId().equals(studentId));
+    }
+
+    private boolean hasReviewPermission() {
+        Account current = TokenUtils.getCurrentUser();
+        return current != null && REVIEW_ROLES.contains(current.getRole());
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }

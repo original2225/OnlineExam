@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.EasterEggRecord;
 import com.example.mapper.EasterEggRecordMapper;
+import com.example.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,18 +28,14 @@ public class EasterEggController {
      */
     @PostMapping("/discover")
     public Result discover(@RequestBody Map<String, Object> params) {
-        Object userIdValue = params.get("userId");
-        if (!(userIdValue instanceof Number)) {
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
             return Result.error("请先登录");
         }
-        Integer userId = ((Number) userIdValue).intValue();
-        String userName = (String) params.get("userName");
-        String userRole = (String) params.get("userRole");
+        Integer userId = current.getId();
+        String userName = current.getUsername();
+        String userRole = current.getRole();
         String eggName = (String) params.getOrDefault("eggName", "logo_click");
-
-        if (userId == null || userRole == null || userRole.isBlank()) {
-            return Result.error("请先登录");
-        }
 
         // 检查是否已记录
         EasterEggRecord existing = easterEggRecordMapper.selectByUserAndRoleAndEgg(userId, userRole, eggName);
@@ -92,7 +90,11 @@ public class EasterEggController {
      */
     @GetMapping("/myEggs")
     public Result myEggs(@RequestParam Integer userId, @RequestParam String userRole) {
-        List<EasterEggRecord> list = easterEggRecordMapper.selectAllEggsByUser(userId, userRole);
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !current.getId().equals(userId) || !current.getRole().equals(userRole)) {
+            return Result.error("403", "无权限访问");
+        }
+        List<EasterEggRecord> list = easterEggRecordMapper.selectAllEggsByUser(current.getId(), current.getRole());
         return Result.success(list);
     }
 }

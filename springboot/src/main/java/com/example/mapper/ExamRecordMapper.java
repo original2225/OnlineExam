@@ -19,7 +19,8 @@ public interface ExamRecordMapper {
     ExamRecord selectById(Integer id);
 
     @Select("select * from `exam_record` where exam_id = #{examId} and student_id = #{studentId} and status = 'ongoing'")
-    ExamRecord selectOngoingRecord(Integer examId, Integer studentId);
+    ExamRecord selectOngoingRecord(@Param("examId") Integer examId,
+                                   @Param("studentId") Integer studentId);
 
     List<ExamRecord> selectAll(ExamRecord record);
 

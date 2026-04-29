@@ -9,6 +9,7 @@ import java.util.List;
 public interface QuestionFavoriteMapper {
     int insert(QuestionFavorite fav);
     void deleteById(Integer id);
+    void deleteByOwner(@Param("id") Integer id, @Param("userId") Integer userId, @Param("userRole") String userRole);
     List<QuestionFavorite> selectByUser(@Param("userId") Integer userId, @Param("userRole") String userRole);
     @Select("select count(*) from `question_favorite` where user_id=#{userId} and user_role=#{userRole} and question_id=#{questionId}")
     int existsByUserAndQuestion(@Param("userId") Integer userId, @Param("userRole") String userRole, @Param("questionId") Integer questionId);

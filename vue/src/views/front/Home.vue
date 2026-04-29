@@ -256,7 +256,7 @@ const loadExams = () => {
 }
 
 const loadScores = () => {
-  if (!data.user.id) return
+  if (!data.user.id || data.user.role !== "USER") return
   request.get("/score/getByStudentId/" + data.user.id).then(res => {
     if (res.code === "200") {
       const scores = res.data || []

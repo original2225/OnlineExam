@@ -264,7 +264,7 @@ const resetForm = () => {
 }
 
 const loadStats = () => {
-  if (data.user.role === 'USER' || data.user.role === 'OWNER' || data.user.role === 'ADMIN') {
+  if (data.user.role === 'USER') {
     request.get('/score/getByStudentId/' + data.user.id).then(res => {
       if (res.code === '200') {
         const scores = res.data || []

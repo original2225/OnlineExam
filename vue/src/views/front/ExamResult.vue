@@ -299,7 +299,6 @@ const submitAnnotation = (answer) => {
   data.annoSubmitting = true
   request.post('/questionAnnotation/add', {
     questionId: answer.questionId,
-    userId: user.id, userName: user.name, userRole: user.role,
     content: content.trim()
   }).then(res => {
     if (res.code === '200') {

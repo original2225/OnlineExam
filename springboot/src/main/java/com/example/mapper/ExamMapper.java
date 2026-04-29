@@ -1,6 +1,7 @@
 package com.example.mapper;
 
 import com.example.entity.Exam;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public interface ExamMapper {
 
     List<Exam> selectAll(Exam exam);
 
-    void updateStatus(Integer id, String status);
+    void updateStatus(@Param("id") Integer id, @Param("status") String status);
 }

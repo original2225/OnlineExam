@@ -755,9 +755,7 @@ const addToWrong = (q) => {
 }
 
 const addToFavorites = (q) => {
-  request.post('/favorite/add', {
-    userId: user.value.id,
-    userRole: user.value.role,
+  request.post('/questionFavorite/add', {
     questionId: q.questionId
   }).then(res => {
     if (res.code === '200') {

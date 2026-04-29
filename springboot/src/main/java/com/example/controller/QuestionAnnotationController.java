@@ -1,17 +1,26 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.common.enums.RoleEnum;
+import com.example.entity.Account;
+import com.example.entity.Admin;
 import com.example.entity.ExamAnswer;
+import com.example.entity.ExamRecord;
+import com.example.entity.Examiner;
 import com.example.entity.QuestionAnnotation;
+import com.example.entity.Student;
 import com.example.mapper.ExamAnswerMapper;
+import com.example.mapper.ExamRecordMapper;
 import com.example.mapper.QuestionAnnotationMapper;
 import com.example.mapper.QuestionMapper;
 import com.example.entity.Question;
+import com.example.utils.TokenUtils;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 题目批注接口
@@ -21,11 +30,16 @@ import java.util.List;
 @RequestMapping("/questionAnnotation")
 public class QuestionAnnotationController {
 
+    private static final Set<String> REVIEW_ROLES = Set.of(RoleEnum.OWNER.name(), RoleEnum.ADMIN.name(), RoleEnum.HELPER.name());
+
     @Resource
     private QuestionAnnotationMapper questionAnnotationMapper;
 
     @Resource
     private ExamAnswerMapper examAnswerMapper;
+
+    @Resource
+    private ExamRecordMapper examRecordMapper;
 
     @Resource
     private QuestionMapper questionMapper;
@@ -36,41 +50,33 @@ public class QuestionAnnotationController {
      */
     @PostMapping("/add")
     public Result add(@RequestBody QuestionAnnotation annotation) {
-        // 查找该用户在该题目上的最高得分
-        List<ExamAnswer> allAnswers = examAnswerMapper.selectByQuestionId(annotation.getQuestionId());
-        BigDecimal maxScore = BigDecimal.ZERO;
-        BigDecimal fullScore = BigDecimal.ZERO;
-
-        for (ExamAnswer answer : allAnswers) {
-            if (answer.getStudentAnswer() != null && answer.getScore() != null) {
-                // 需要通过recordId查找studentId来匹配
-                // 简化处理：检查是否有满分记录
-                Question q = questionMapper.selectById(annotation.getQuestionId());
-                if (q != null) {
-                    fullScore = q.getScore();
-                    if (answer.getScore().compareTo(q.getScore()) >= 0
-                            && answer.getIsCorrect() != null && answer.getIsCorrect()) {
-                        maxScore = answer.getScore();
-                    }
-                }
-            }
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null || !RoleEnum.USER.name().equals(current.getRole())) {
+            return forbidden();
+        }
+        if (annotation.getQuestionId() == null) {
+            return Result.error("题目不能为空");
+        }
+        String content = annotation.getContent() == null ? "" : annotation.getContent().trim();
+        if (content.isEmpty()) {
+            return Result.error("批注内容不能为空");
+        }
+        if (content.length() > 1000) {
+            return Result.error("批注内容不能超过1000字");
         }
 
-        // 检查用户是否有满分答案记录
-        boolean hasFullScore = false;
         Question question = questionMapper.selectById(annotation.getQuestionId());
-        if (question != null) {
-            List<ExamAnswer> questionAnswers = examAnswerMapper.selectByQuestionId(annotation.getQuestionId());
-            for (ExamAnswer a : questionAnswers) {
-                // 通过recordId找到对应的student
-                if (a.getScore() != null && a.getScore().compareTo(question.getScore()) >= 0
-                        && a.getIsCorrect() != null && a.getIsCorrect()) {
-                    hasFullScore = true;
-                    break;
-                }
-            }
+        if (question == null || question.getScore() == null) {
+            return Result.error("题目不存在");
+        }
+        if (!hasFullScoreAnswer(current.getId(), annotation.getQuestionId(), question.getScore())) {
+            return forbidden();
         }
 
+        annotation.setUserId(current.getId());
+        annotation.setUserName(displayName(current));
+        annotation.setUserRole(current.getRole());
+        annotation.setContent(content);
         annotation.setLikeCount(0);
         questionAnnotationMapper.insert(annotation);
         return Result.success();
@@ -90,6 +96,9 @@ public class QuestionAnnotationController {
      */
     @PutMapping("/like/{id}")
     public Result like(@PathVariable Integer id) {
+        if (TokenUtils.getCurrentUser() == null) {
+            return forbidden();
+        }
         questionAnnotationMapper.incrementLike(id);
         return Result.success();
     }
@@ -99,7 +108,50 @@ public class QuestionAnnotationController {
      */
     @DeleteMapping("/delete/{id}")
     public Result delete(@PathVariable Integer id) {
+        Account current = TokenUtils.getCurrentUser();
+        QuestionAnnotation annotation = questionAnnotationMapper.selectById(id);
+        if (current == null || annotation == null) {
+            return forbidden();
+        }
+        boolean isOwner = current.getId().equals(annotation.getUserId()) && current.getRole().equals(annotation.getUserRole());
+        if (!isOwner && !REVIEW_ROLES.contains(current.getRole())) {
+            return forbidden();
+        }
         questionAnnotationMapper.deleteById(id);
         return Result.success();
+    }
+
+    private boolean hasFullScoreAnswer(Integer studentId, Integer questionId, BigDecimal fullScore) {
+        List<ExamAnswer> questionAnswers = examAnswerMapper.selectByQuestionId(questionId);
+        for (ExamAnswer answer : questionAnswers) {
+            if (answer.getRecordId() == null || answer.getScore() == null || !Boolean.TRUE.equals(answer.getIsCorrect())) {
+                continue;
+            }
+            if (answer.getScore().compareTo(fullScore) < 0) {
+                continue;
+            }
+            ExamRecord record = examRecordMapper.selectById(answer.getRecordId());
+            if (record != null && studentId.equals(record.getStudentId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String displayName(Account account) {
+        if (account instanceof Admin admin && admin.getName() != null && !admin.getName().isBlank()) {
+            return admin.getName();
+        }
+        if (account instanceof Examiner examiner && examiner.getName() != null && !examiner.getName().isBlank()) {
+            return examiner.getName();
+        }
+        if (account instanceof Student student && student.getName() != null && !student.getName().isBlank()) {
+            return student.getName();
+        }
+        return account.getUsername();
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }

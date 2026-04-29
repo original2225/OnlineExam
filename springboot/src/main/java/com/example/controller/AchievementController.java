@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.AchievementRecord;
 import com.example.service.AchievementService;
+import com.example.utils.TokenUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +25,13 @@ public class AchievementController {
      */
     @PostMapping("/unlock")
     public Result unlock(@RequestBody Map<String, Object> params) {
-        Integer userId = ((Number) params.get("userId")).intValue();
-        String userName = (String) params.get("userName");
-        String userRole = (String) params.get("userRole");
+        Account current = TokenUtils.getCurrentUser();
+        if (current == null) {
+            return forbidden();
+        }
+        Integer userId = current.getId();
+        String userName = current.getUsername();
+        String userRole = current.getRole();
         String achievementKey = (String) params.get("achievementKey");
 
         AchievementRecord unlocked = achievementService.tryUnlock(userId, userName, userRole, achievementKey);
@@ -40,7 +46,11 @@ public class AchievementController {
      */
     @GetMapping("/my")
     public Result myAchievements(@RequestParam Integer userId, @RequestParam String userRole) {
-        return Result.success(achievementService.getUserAchievements(userId, userRole));
+        Account current = TokenUtils.getCurrentUser();
+        if (!matchesCurrent(current, userId, userRole)) {
+            return forbidden();
+        }
+        return Result.success(achievementService.getUserAchievements(current.getId(), current.getRole()));
     }
 
     /**
@@ -48,7 +58,14 @@ public class AchievementController {
      */
     @GetMapping("/all")
     public Result allAchievements(@RequestParam(required = false) Integer userId, @RequestParam(required = false) String userRole) {
-        return Result.success(achievementService.getAllAchievements(userId, userRole));
+        Account current = TokenUtils.getCurrentUser();
+        if (userId != null || userRole != null) {
+            if (!matchesCurrent(current, userId, userRole)) {
+                return forbidden();
+            }
+            return Result.success(achievementService.getAllAchievements(current.getId(), current.getRole()));
+        }
+        return Result.success(achievementService.getAllAchievements(null, null));
     }
 
     /**
@@ -56,6 +73,21 @@ public class AchievementController {
      */
     @GetMapping("/stats")
     public Result stats(@RequestParam(required = false) Integer userId, @RequestParam(required = false) String userRole) {
-        return Result.success(achievementService.getStats(userId, userRole));
+        Account current = TokenUtils.getCurrentUser();
+        if (userId != null || userRole != null) {
+            if (!matchesCurrent(current, userId, userRole)) {
+                return forbidden();
+            }
+            return Result.success(achievementService.getStats(current.getId(), current.getRole()));
+        }
+        return Result.success(achievementService.getStats(null, null));
+    }
+
+    private boolean matchesCurrent(Account current, Integer userId, String userRole) {
+        return current != null && current.getId().equals(userId) && current.getRole().equals(userRole);
+    }
+
+    private Result forbidden() {
+        return Result.error("403", "无权限访问");
     }
 }
