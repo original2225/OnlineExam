@@ -12,7 +12,7 @@
         </div>
         <div>
           <h1>审批中心</h1>
-          <p>查看阅卷表决结果，由主考官作出入服最终判定</p>
+        <p>查看批阅表决结果，由主考官作出入服最终判定</p>
         </div>
       </div>
     </div>
@@ -95,15 +95,13 @@
         <div class="chief-form" v-if="isAdmin">
           <el-input-number v-model="data.chiefExaminerId" :min="1" placeholder="主考官ID" />
           <el-select v-model="data.chiefExaminerRole" style="width: 130px">
-            <el-option label="阅卷人" value="HELPER" />
             <el-option label="管理员" value="ADMIN" />
-            <el-option label="所有者" value="OWNER" />
           </el-select>
           <el-button type="primary" plain @click="assignChief">任命/更换主考官</el-button>
         </div>
 
         <el-table :data="data.submissions" size="small" stripe>
-          <el-table-column prop="graderName" label="阅卷人" width="110" />
+          <el-table-column prop="graderName" label="批阅人" width="110" />
           <el-table-column prop="performanceScore" label="表现分" width="90" />
           <el-table-column label="参考表决" width="100">
             <template #default="scope">{{ voteLabel(scope.row.advisoryVote) }}</template>
@@ -150,7 +148,7 @@ const data = reactive({
   currentRecord: null,
   submissions: [],
   chiefExaminerId: null,
-  chiefExaminerRole: 'HELPER',
+  chiefExaminerRole: 'ADMIN',
   finalReason: ''
 })
 
@@ -185,7 +183,7 @@ const openDecision = (row) => {
   data.currentRecord = row
   data.finalReason = ''
   data.chiefExaminerId = row.chiefExaminerId || null
-  data.chiefExaminerRole = 'HELPER'
+  data.chiefExaminerRole = 'ADMIN'
   request.get('/examApproval/detail/' + row.id).then(res => {
     if (res.code === '200') {
       data.currentRecord = res.data?.record || row

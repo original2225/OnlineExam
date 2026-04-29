@@ -11,7 +11,7 @@
         <h1>进服审核、题库练习、结果管理统一入口</h1>
         <div class="auth-points">
           <span>四项审核方向</span>
-          <span>在线答题与阅卷</span>
+          <span>在线答题与批阅</span>
           <span>后台数据闭环</span>
         </div>
       </div>
@@ -58,7 +58,7 @@
           </el-form-item>
 
           <el-form-item label="角色" prop="role">
-            <el-segmented v-model="data.form.role" :options="roleOptions" block />
+            <el-segmented v-model="data.form.role" :options="roleOptions" class="role-segmented" />
           </el-form-item>
 
           <el-button
@@ -225,7 +225,7 @@ onMounted(() => {
   padding: 32px;
   background-image:
     linear-gradient(115deg, rgba(13, 24, 34, 0.82), rgba(13, 24, 34, 0.42)),
-    url("@/assets/imgs/review/review-scenes.png");
+    url("@/assets/imgs/review/review-scenes.jpg");
   background-size: auto, 400% 200%;
   background-position: center, 66.666% 0%;
 }
@@ -330,6 +330,20 @@ onMounted(() => {
 .auth-submit {
   width: 100%;
   margin-top: 8px;
+}
+
+.role-segmented {
+  min-width: 176px;
+}
+
+.role-segmented :deep(.el-segmented__item) {
+  min-width: 82px;
+}
+
+.role-segmented :deep(.el-segmented__item-label) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .auth-footer {

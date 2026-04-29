@@ -103,8 +103,7 @@ public class JWTInterceptor implements HandlerInterceptor {
             }
             return;
         }
-        if (matches(path, "/question") || matches(path, "/examPaper") || matches(path, "/notice")
-                || matches(path, "/examAnnouncement")) {
+        if (matches(path, "/question") || matches(path, "/examPaper")) {
             if (!"GET".equalsIgnoreCase(method)) {
                 require(role, ADMIN_ROLES);
             }

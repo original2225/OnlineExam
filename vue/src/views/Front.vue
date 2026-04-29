@@ -61,12 +61,6 @@
       </div>
     </header>
 
-    <section v-if="data.noticeData.length" class="front-notice-strip">
-      <el-icon><Bell /></el-icon>
-      <strong>公告</strong>
-      <span>{{ data.topNotice }}</span>
-    </section>
-
     <main class="front-main">
       <router-view v-slot="{ Component, route: currentRoute }">
         <transition name="fade" mode="out-in">
@@ -92,7 +86,7 @@
 
 <script setup>
 import router from "@/router/index.js"
-import { computed, onMounted, onUnmounted, reactive } from "vue"
+import { computed, onUnmounted, reactive } from "vue"
 import { ElMessage } from "element-plus"
 import request from "@/utils/request.js"
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue"
@@ -100,7 +94,6 @@ import NotificationBell from "@/components/NotificationBell.vue"
 import ExamRecordChatLauncher from "@/components/ExamRecordChatLauncher.vue"
 import {
   ArrowDown,
-  Bell,
   Collection,
   DataAnalysis,
   Edit,
@@ -117,16 +110,12 @@ const defaultAvatar = "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}"),
-  noticeData: [],
-  topNotice: "",
-  noticeIndex: 0,
-  noticeTimer: null,
   brandClickCount: 0,
   brandClickTimer: null,
 })
 
 const canManage = computed(() => ["OWNER", "ADMIN", "HELPER"].includes(data.user.role))
-const roleLabel = computed(() => ({ OWNER: "所有者", ADMIN: "管理员", HELPER: "阅卷人", USER: "玩家" }[data.user.role] || "访客"))
+const roleLabel = computed(() => (data.user.role === "USER" ? "玩家" : data.user.id ? "管理员" : "访客"))
 
 const navItems = computed(() => [
   { path: "/front/home", label: "首页", icon: "HomeFilled" },
@@ -186,24 +175,7 @@ const updateUser = () => {
   data.user = JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}")
 }
 
-const loadNotice = () => {
-  request.get("/notice/selectAll").then(res => {
-    if (res.code === "200" && res.data?.length) {
-      data.noticeData = res.data
-      data.topNotice = res.data[0]?.content || ""
-      if (res.data.length > 1) {
-        data.noticeTimer = setInterval(() => {
-          data.noticeIndex = (data.noticeIndex + 1) % data.noticeData.length
-          data.topNotice = data.noticeData[data.noticeIndex]?.content || ""
-        }, 4500)
-      }
-    }
-  }).catch(() => {})
-}
-
-onMounted(loadNotice)
 onUnmounted(() => {
-  if (data.noticeTimer) clearInterval(data.noticeTimer)
   if (data.brandClickTimer) clearTimeout(data.brandClickTimer)
 })
 </script>
@@ -345,28 +317,6 @@ onUnmounted(() => {
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.front-notice-strip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding: 0 28px;
-  background: var(--primary-light);
-  border-bottom: 1px solid rgba(var(--primary-rgb), 0.16);
-  color: var(--text-regular);
-  font-size: 13px;
-}
-
-.front-notice-strip strong {
-  color: var(--primary-color);
-}
-
-.front-notice-strip span {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

@@ -209,8 +209,7 @@ const rules = {
 }
 
 const getRoleLabel = (role) => {
-  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }
-  return map[role] || '玩家'
+  return role === 'USER' ? '玩家' : '管理员'
 }
 
 const handleFileUpload = (res) => {

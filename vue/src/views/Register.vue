@@ -188,7 +188,7 @@ const submitRequest = () => {
   padding: 32px;
   background-image:
     linear-gradient(115deg, rgba(7, 16, 28, 0.86), rgba(7, 16, 28, 0.36)),
-    url("@/assets/imgs/review/review-scenes.png");
+    url("@/assets/imgs/review/review-scenes.jpg");
   background-size: auto, 400% 200%;
   background-position: center, 33.333% 0%;
 }

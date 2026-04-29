@@ -3,7 +3,7 @@
     <div class="page-hero">
       <div class="page-hero-icon">✏️</div>
       <div class="page-hero-title">提交审核题目</div>
-      <div class="page-hero-subtitle">由阅卷人或管理员补充入服审核题，经管理员通过后进入题库并可用于组卷</div>
+    <div class="page-hero-subtitle">由管理员补充入服审核题，经管理员通过后进入题库并可用于组卷</div>
       <div class="page-hero-stats">
         <div class="page-hero-stat">
           <div class="page-hero-stat-val">{{ data.myList.length }}</div>

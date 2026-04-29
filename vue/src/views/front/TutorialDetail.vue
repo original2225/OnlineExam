@@ -115,8 +115,7 @@ const data = reactive({
 })
 
 const getRoleName = (role) => {
-  const map = { OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人' }
-  return map[role] || role || '未知'
+  return role === 'USER' ? '玩家' : role ? '管理员' : '未知'
 }
 
 const loadTutorial = () => {

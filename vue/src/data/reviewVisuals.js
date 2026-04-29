@@ -1,4 +1,4 @@
-import reviewScenes from "@/assets/imgs/review/review-scenes.png"
+import reviewScenes from "@/assets/imgs/review/review-scenes.jpg"
 
 const scenePositions = {
   landing: "0% 0%",

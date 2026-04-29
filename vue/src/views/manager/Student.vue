@@ -33,25 +33,11 @@
           <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><User /></el-icon></div>
         </div>
       </div>
-      <div class="stat-card stat-owner">
-        <div class="stat-inner">
-          <div class="stat-num">{{ countByRole('OWNER') }}</div>
-          <div class="stat-label">站长</div>
-          <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><Star /></el-icon></div>
-        </div>
-      </div>
       <div class="stat-card stat-admin">
         <div class="stat-inner">
           <div class="stat-num">{{ countByRole('ADMIN') }}</div>
           <div class="stat-label">管理员</div>
           <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><Tools /></el-icon></div>
-        </div>
-      </div>
-      <div class="stat-card stat-helper">
-        <div class="stat-inner">
-          <div class="stat-num">{{ countByRole('HELPER') }}</div>
-          <div class="stat-label">阅卷人</div>
-          <div class="stat-icon"><el-icon color="rgba(255,255,255,0.4)"><Reading /></el-icon></div>
         </div>
       </div>
       <div class="stat-card stat-user">
@@ -80,9 +66,7 @@
         <el-select v-model="data.roleFilter" placeholder="筛选身份" clearable @change="load" class="filter-sel">
           <template #prefix><el-icon><Filter /></el-icon></template>
           <el-option label="全部身份" value="" />
-          <el-option label="站长" value="OWNER" />
           <el-option label="管理员" value="ADMIN" />
-          <el-option label="阅卷人" value="HELPER" />
           <el-option label="玩家" value="USER" />
         </el-select>
         <el-button plain @click="reset" class="reset-btn">重置</el-button>
@@ -128,9 +112,7 @@
           <template #default="scope">
             <div class="role-badge" :class="'role-' + scope.row.source.toLowerCase()">
               <el-icon>
-                <Star v-if="scope.row.source === 'OWNER'" />
-                <Tools v-else-if="scope.row.source === 'ADMIN'" />
-                <Reading v-else-if="scope.row.source === 'HELPER'" />
+                <Tools v-if="scope.row.source !== 'USER'" />
                 <User v-else />
               </el-icon>
               {{ roleLabel(scope.row.source) }}
@@ -243,10 +225,8 @@
             <div class="form-item">
               <label>身份</label>
               <el-select v-model="data.form.source" placeholder="选择身份" style="width:100%">
-                <el-option v-if="currentUserLevel >= 4" label="站长 (Owner)" value="OWNER" />
-                <el-option v-if="currentUserLevel >= 4" label="管理员 (Admin)" value="ADMIN" />
-                <el-option v-if="currentUserLevel >= 3" label="阅卷人 (Helper)" value="HELPER" />
-                <el-option label="玩家 (User)" value="USER" />
+                <el-option v-if="currentUserLevel >= 4" label="管理员" value="ADMIN" />
+                <el-option label="玩家" value="USER" />
               </el-select>
             </div>
           </div>
@@ -300,7 +280,7 @@
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Edit, Search, Filter, Plus, Star, Tools, Reading, Avatar, User } from '@element-plus/icons-vue'
+import { Delete, Edit, Search, Filter, Plus, Tools, Avatar, User } from '@element-plus/icons-vue'
 import request from '@/utils/request.js'
 import { getUploadHeaders } from '@/utils/upload.js'
 
@@ -330,7 +310,8 @@ const filteredData = computed(() => {
       (u.username && u.username.toLowerCase().includes(kw))
     )
   }
-  if (data.roleFilter) list = list.filter(u => data.roleFilter === u.source)
+  if (data.roleFilter === 'ADMIN') list = list.filter(u => ['OWNER', 'ADMIN', 'HELPER'].includes(u.source))
+  else if (data.roleFilter) list = list.filter(u => data.roleFilter === u.source)
   return list
 })
 
@@ -339,12 +320,13 @@ const pagedData = computed(() => {
   return filteredData.value.slice(start, start + data.pageSize)
 })
 
-const countByRole = (role) => data.allUsers.filter(u => u.source === role).length
+const countByRole = (role) => {
+  if (role === 'ADMIN') return data.allUsers.filter(u => ['OWNER', 'ADMIN', 'HELPER'].includes(u.source)).length
+  return data.allUsers.filter(u => u.source === role).length
+}
 
 const roleLabel = (src) => {
-  if (src === 'OWNER') return '站长'
-  if (src === 'ADMIN') return '管理员'
-  if (src === 'HELPER') return '阅卷人'
+  if (['OWNER', 'ADMIN', 'HELPER'].includes(src)) return '管理员'
   return '玩家'
 }
 

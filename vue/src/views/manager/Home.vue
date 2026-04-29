@@ -85,24 +85,6 @@
       <div class="panel-card">
         <div class="panel-header">
           <div>
-            <span>系统公告</span>
-            <h2>最近发布内容</h2>
-          </div>
-          <el-tag v-if="data.noticeData.length" type="info">{{ data.noticeData.length }}</el-tag>
-        </div>
-        <div v-if="data.noticeData.length" class="notice-list">
-          <article v-for="notice in data.noticeData.slice(0, 5)" :key="notice.id || notice.title" class="notice-item">
-            <strong>{{ notice.title || "公告" }}</strong>
-            <p>{{ notice.content }}</p>
-            <small>{{ formatTime(notice.time) }}</small>
-          </article>
-        </div>
-        <el-empty v-else description="暂无公告" :image-size="90" />
-      </div>
-
-      <div class="panel-card">
-        <div class="panel-header">
-          <div>
             <span>系统状态</span>
             <h2>当前运行概览</h2>
           </div>
@@ -140,30 +122,27 @@ import request from "@/utils/request.js"
 import {
   ArrowRight,
   Avatar,
-  Bell,
   Calendar,
   DataLine,
   Document,
   EditPen,
   Finished,
   List,
-  Reading,
   Tools,
   User,
 } from "@element-plus/icons-vue"
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem("beiming-onlineexam-user") || "{}"),
-  noticeData: [],
   recentExams: [],
-  stats: { users: 0, admins: 0, examiners: 0, exams: 0, questions: 0, notices: 0 },
+  stats: { users: 0, admins: 0, exams: 0, questions: 0 },
 })
 
 const pendingApprovalCount = ref(0)
 const startTime = Date.now()
-const totalUsers = computed(() => data.stats.users + data.stats.admins + data.stats.examiners)
+const totalUsers = computed(() => data.stats.users + data.stats.admins)
 
-const roleLabel = computed(() => ({ OWNER: "所有者", ADMIN: "管理员", HELPER: "阅卷人", USER: "玩家" }[data.user.role] || "管理员"))
+const roleLabel = computed(() => (data.user.role === "USER" ? "玩家" : "管理员"))
 const today = new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "long" })
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -194,7 +173,6 @@ const uptimeStr = computed(() => {
 const metrics = computed(() => [
   { label: "总成员", value: totalUsers.value, path: "/manager/student", icon: "Avatar", tone: "blue" },
   { label: "管理员", value: data.stats.admins, path: "/manager/admin", icon: "Tools", tone: "purple" },
-  { label: "阅卷人", value: data.stats.examiners, path: "/manager/examiner", icon: "Reading", tone: "orange" },
   { label: "玩家", value: data.stats.users, path: "/manager/student", icon: "User", tone: "green" },
   { label: "审核", value: data.stats.exams, path: "/manager/exam", icon: "Calendar", tone: "cyan" },
   { label: "题目", value: data.stats.questions, path: "/manager/question", icon: "EditPen", tone: "red" },
@@ -203,10 +181,9 @@ const metrics = computed(() => [
 const shortcuts = [
   { label: "审核管理", path: "/manager/exam", icon: "Document" },
   { label: "结果管理", path: "/manager/score", icon: "DataLine" },
-  { label: "阅卷中心", path: "/exam/gradingCenter", icon: "Finished" },
+  { label: "批阅中心", path: "/exam/gradingCenter", icon: "Finished" },
   { label: "题目管理", path: "/manager/question", icon: "EditPen" },
   { label: "玩家管理", path: "/manager/student", icon: "User" },
-  { label: "公告管理", path: "/manager/notice", icon: "Bell" },
 ]
 
 const todoItems = reactive([
@@ -248,24 +225,9 @@ const formatShortTime = (dt) => {
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
 }
 
-const formatTime = (dt) => {
-  if (!dt) return "未设置时间"
-  return String(dt).replace("T", " ").substring(0, 19)
-}
-
-const loadNotice = () => {
-  request.get("/notice/selectAll", silent).then(res => {
-    if (res.code === "200") {
-      data.noticeData = res.data || []
-      data.stats.notices = data.noticeData.length
-    }
-  }).catch(() => {})
-}
-
 const loadStats = () => {
   request.get("/student/selectPage", { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === "200") data.stats.users = res.data?.total || 0 }).catch(() => {})
   request.get("/admin/selectPage", { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === "200") data.stats.admins = res.data?.total || 0 }).catch(() => {})
-  request.get("/examiner/selectPage", { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === "200") data.stats.examiners = res.data?.total || 0 }).catch(() => {})
   request.get("/exam/selectPage", { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === "200") data.stats.exams = res.data?.total || 0 }).catch(() => {})
   request.get("/question/selectPage", { ...silent, params: { pageNum: 1, pageSize: 1 } }).then(res => { if (res.code === "200") data.stats.questions = res.data?.total || 0 }).catch(() => {})
 }
@@ -308,7 +270,6 @@ const loadTodoItems = () => {
 onMounted(() => {
   updateClock()
   clockTimer = setInterval(updateClock, 1000)
-  loadNotice()
   loadStats()
   loadRecentExams()
   loadTodoItems()
@@ -436,7 +397,6 @@ onUnmounted(() => {
 
 .todo-list,
 .exam-list,
-.notice-list,
 .status-list {
   display: grid;
   gap: 10px;
@@ -479,16 +439,14 @@ onUnmounted(() => {
 }
 
 .todo-item strong,
-.exam-main strong,
-.notice-item strong {
+.exam-main strong {
   display: block;
   color: var(--text-primary);
   font-size: 14px;
 }
 
 .todo-item small,
-.exam-main small,
-.notice-item small {
+.exam-main small {
   color: var(--text-secondary);
   font-size: 12px;
 }
@@ -533,26 +491,6 @@ onUnmounted(() => {
 .status-dot.online { background: #16a34a; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12); }
 .status-dot.warn { background: #d97706; box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12); }
 .status-dot.ended { background: #94a3b8; }
-
-.notice-item {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-lighter);
-}
-
-.notice-item:last-child {
-  border-bottom: 0;
-}
-
-.notice-item p {
-  display: -webkit-box;
-  margin: 6px 0;
-  overflow: hidden;
-  color: var(--text-regular);
-  font-size: 13px;
-  line-height: 1.6;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
 
 .status-item {
   display: grid;

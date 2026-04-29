@@ -2,7 +2,7 @@
   <div class="gc" v-loading="data.loading">
     <div class="gc-scene" :style="getSceneStyle('admin')">
       <div>
-        <strong>阅卷工作台</strong>
+        <strong>批阅工作台</strong>
         <span>结合题目场景、参考答案和新人作答，给出可执行的反馈。</span>
       </div>
     </div>

@@ -8,7 +8,7 @@
         <transition name="fade">
           <div v-if="!data.fold" class="exs-logo-text">
             <b>北冥</b>
-            <span>阅卷中心</span>
+            <span>批阅中心</span>
           </div>
         </transition>
       </div>
@@ -99,9 +99,9 @@ const data = reactive({
   fold: false,
 })
 
-const roleColors = { OWNER: '#f87171', ADMIN: '#fbbf24', HELPER: '#60a5fa', USER: '#4ade80' }
+const roleColors = { OWNER: '#fbbf24', ADMIN: '#fbbf24', HELPER: '#fbbf24', USER: '#4ade80' }
 const roleColor = computed(() => roleColors[data.user.user?.role || data.user.role] || '#4ade80')
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '玩家')
+const getRoleLabel = (role) => (role === 'USER' ? '玩家' : '管理员')
 
 const isAdmin = computed(() => ['OWNER', 'ADMIN'].includes(data.user.role))
 
@@ -121,16 +121,15 @@ const allGroups = [
     ]
   },
   {
-    title: '阅卷',
+    title: '批阅',
     items: [
-      { path: '/exam/gradingCenter', label: '阅卷中心', icon: 'Checked', color: 'green', roles: ['OWNER', 'ADMIN', 'HELPER'] },
+      { path: '/exam/gradingCenter', label: '批阅中心', icon: 'Checked', color: 'green', roles: ['OWNER', 'ADMIN', 'HELPER'] },
     ]
   },
   {
     title: '公示',
     items: [
       { path: '/exam/resultsCenter', label: '结果公示', icon: 'DataAnalysis', color: 'cyan', roles: ['OWNER', 'ADMIN', 'HELPER', 'USER'] },
-      { path: '/exam/announcements', label: '公告中心', icon: 'Bell', color: 'teal', roles: ['OWNER', 'ADMIN', 'HELPER', 'USER'] },
     ]
   },
 ]
@@ -150,9 +149,8 @@ const pageNameMap = {
   '/exam/examAdmin': '审核管理',
   '/exam/approvalCenter': '审批中心',
   '/exam/scoreManage': '结果管理',
-  '/exam/gradingCenter': '阅卷中心',
+  '/exam/gradingCenter': '批阅中心',
   '/exam/resultsCenter': '结果公示',
-  '/exam/announcements': '公告中心',
 }
 const currentPageName = computed(() => pageNameMap[router.currentRoute.value.path] || '')
 

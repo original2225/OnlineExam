@@ -12,7 +12,7 @@
         </div>
         <div class="hero-text">
           <h1>邀请码管理</h1>
-          <p>统一管理玩家及阅卷人注册邀请码，支持批量生成与自动清理</p>
+          <p>统一管理玩家注册邀请码，支持批量生成与自动清理</p>
         </div>
       </div>
       <div class="hero-actions">
@@ -35,13 +35,6 @@
         <div class="stat-inner">
           <div class="stat-num" v-count-up="{ val: data.statistics.studentUnused }">{{ data.statistics.studentUnused || 0 }}</div>
           <div class="stat-label">玩家邀请码</div>
-          <div class="stat-desc">未使用</div>
-        </div>
-      </div>
-      <div class="stat-item stat-examiner">
-        <div class="stat-inner">
-          <div class="stat-num" v-count-up="{ val: data.statistics.examinerUnused }">{{ data.statistics.examinerUnused || 0 }}</div>
-          <div class="stat-label">阅卷人邀请码</div>
           <div class="stat-desc">未使用</div>
         </div>
       </div>
@@ -78,7 +71,6 @@
           <template #prefix><el-icon><User /></el-icon></template>
           <el-option label="全部类型" value=""></el-option>
           <el-option label="玩家" value="USER" />
-          <el-option label="阅卷人" value="HELPER" />
         </el-select>
         <el-button plain @click="reset" class="reset-btn">重置</el-button>
       </div>
@@ -111,8 +103,8 @@
         </el-table-column>
         <el-table-column prop="targetRole" label="类型" width="110">
           <template #default="scope">
-            <span class="type-badge" :class="scope.row.targetRole === 'HELPER' ? 'type-examiner' : 'type-user'">
-              {{ scope.row.targetRole === 'HELPER' ? '阅卷人' : '玩家' }}
+            <span class="type-badge type-user">
+              玩家
             </span>
           </template>
         </el-table-column>
@@ -209,22 +201,6 @@
                 <el-icon><Check /></el-icon>
               </div>
             </div>
-            <div
-              class="type-option"
-              :class="{ active: data.generateForm.targetRole === 'HELPER' }"
-              @click="data.generateForm.targetRole = 'HELPER'"
-            >
-              <div class="type-icon type-icon-examiner">
-                <el-icon><Reading /></el-icon>
-              </div>
-              <div class="type-info">
-                <div class="type-name">阅卷人邀请码</div>
-                <div class="type-desc">注册为阅卷工作人员</div>
-              </div>
-              <div class="type-check">
-                <el-icon><Check /></el-icon>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -281,7 +257,7 @@
           </div>
           <div class="result-info">
             <div class="result-count">{{ generatedCount }} 个邀请码</div>
-            <div class="result-type">{{ data.generateForm.targetRole === 'USER' ? '玩家邀请码' : '阅卷人邀请码' }}</div>
+            <div class="result-type">玩家邀请码</div>
           </div>
         </div>
         <el-alert
@@ -315,7 +291,7 @@
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Filter, User, Delete, CopyDocument, Check, Reading, InfoFilled } from '@element-plus/icons-vue'
+import { Search, Filter, User, Delete, CopyDocument, Check, InfoFilled } from '@element-plus/icons-vue'
 import request from '@/utils/request.js'
 
 const showGenerateDrawer = ref(false)
@@ -340,7 +316,6 @@ const data = reactive({
   statistics: {
     total: 0,
     studentUnused: 0,
-    examinerUnused: 0,
     unused: 0,
     used: 0
   },
@@ -453,7 +428,7 @@ const handleDelete = (id) => {
 
 // 清理所有未使用
 const deleteAllUnused = () => {
-  const totalUnused = (data.statistics.studentUnused || 0) + (data.statistics.examinerUnused || 0)
+  const totalUnused = data.statistics.studentUnused || 0
   if (totalUnused === 0) {
     ElMessage.warning('当前没有未使用的邀请码')
     return
@@ -596,7 +571,7 @@ onMounted(() => {
 /* ===== 统计卡片 ===== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -619,10 +594,6 @@ onMounted(() => {
 }
 .stat-user .stat-inner {
   background: linear-gradient(135deg, #059669, #10b981);
-  color: #fff;
-}
-.stat-examiner .stat-inner {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
   color: #fff;
 }
 .stat-used .stat-inner {
@@ -765,11 +736,6 @@ onMounted(() => {
   background: #dcfce7;
   color: #16a34a;
 }
-.type-examiner {
-  background: #fef3c7;
-  color: #d97706;
-}
-
 /* 状态 */
 .status-dot {
   display: inline-flex;
@@ -872,10 +838,6 @@ onMounted(() => {
 }
 .type-icon-user {
   background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-}
-.type-icon-examiner {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #fff;
 }
 .type-info {

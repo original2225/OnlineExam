@@ -38,12 +38,12 @@
       <!-- 主体内容 -->
       <div class="gd-body">
 
-        <!-- 阅卷进度 -->
+        <!-- 批阅进度 -->
         <div class="gd-card">
           <div class="gdc-header">
             <div class="gdc-title">
               <div class="gdc-icon" style="background:rgba(0,180,42,0.1); color:#00b42a"><el-icon><EditPen /></el-icon></div>
-              阅卷进度
+              批阅进度
             </div>
             <el-button text type="primary" size="small" @click="router.push('/exam/gradingCenter')">查看全部 →</el-button>
           </div>
@@ -59,25 +59,6 @@
               <span class="gdp-pct">{{ calcProgress(exam) }}%</span>
             </div>
             <div v-if="!data.examList.length" class="gd-empty">暂无审核数据</div>
-          </div>
-        </div>
-
-        <!-- 最新公告 -->
-        <div class="gd-card">
-          <div class="gdc-header">
-            <div class="gdc-title">
-              <div class="gdc-icon" style="background:rgba(99,102,241,0.1); color:#6366f1"><el-icon><Bell /></el-icon></div>
-              最新公告
-            </div>
-            <el-button text type="primary" size="small" @click="router.push('/exam/announcements')">查看全部 →</el-button>
-          </div>
-          <div class="gdc-body">
-            <div v-for="a in data.announcements.slice(0,6)" :key="a.id" class="gd-ann-item">
-              <span class="gdann-tag" :class="a.type">{{ typeLabel(a.type) }}</span>
-              <span class="gdann-title">{{ a.title }}</span>
-              <span class="gdann-time">{{ a.createdAt?.substring(5,16) }}</span>
-            </div>
-            <div v-if="!data.announcements.length" class="gd-empty">暂无公告</div>
           </div>
         </div>
 
@@ -104,7 +85,7 @@
       </div>
     </template>
 
-    <!-- 阅卷人视图 -->
+    <!-- 批阅视图 -->
     <template v-else-if="data.user.role === 'HELPER'">
       <div class="gd-stats">
         <div class="gd-stat-card">
@@ -131,7 +112,7 @@
         <div class="gdc-header">
           <div class="gdc-title">
             <div class="gdc-icon" style="background:rgba(0,180,42,0.1); color:#00b42a"><el-icon><EditPen /></el-icon></div>
-            我的阅卷任务
+            我的批阅任务
           </div>
         </div>
         <div class="gdc-body">
@@ -140,7 +121,7 @@
               <span class="gdt-name">{{ exam.name }}</span>
               <el-tag type="warning" size="small" effect="plain">{{ exam.ungradedCount || 0 }} 份待阅</el-tag>
             </div>
-            <el-button type="primary" size="small" round @click="router.push({ path: '/exam/gradingCenter', query: { examId: exam.id } })">开始阅卷</el-button>
+            <el-button type="primary" size="small" round @click="router.push({ path: '/exam/gradingCenter', query: { examId: exam.id } })">开始批阅</el-button>
           </div>
           <div v-if="!data.examList.length" class="gd-empty">暂无待阅任务</div>
         </div>
@@ -173,17 +154,18 @@
       <div class="gd-card">
         <div class="gdc-header">
           <div class="gdc-title">
-            <div class="gdc-icon" style="background:rgba(99,102,241,0.1); color:#6366f1"><el-icon><Bell /></el-icon></div>
-            最新公告
+            <div class="gdc-icon" style="background:rgba(0,180,42,0.1); color:#00b42a"><el-icon><Notebook /></el-icon></div>
+            可参加审核
           </div>
         </div>
         <div class="gdc-body">
-          <div v-for="a in data.announcements.slice(0,6)" :key="a.id" class="gd-ann-item">
-            <span class="gdann-tag" :class="a.type">{{ typeLabel(a.type) }}</span>
-            <span class="gdann-title">{{ a.title }}</span>
-            <span class="gdann-time">{{ a.createdAt?.substring(5,16) }}</span>
+          <div v-for="exam in data.examList.slice(0,6)" :key="exam.id" class="gd-task-item">
+            <div class="gdt-info">
+              <span class="gdt-name">{{ exam.name }}</span>
+            </div>
+            <el-button type="primary" size="small" round @click="router.push('/front/examList')">查看</el-button>
           </div>
-          <div v-if="!data.announcements.length" class="gd-empty">暂无公告</div>
+          <div v-if="!data.examList.length" class="gd-empty">暂无可参加审核</div>
         </div>
       </div>
     </template>
@@ -195,14 +177,13 @@
 import { reactive, computed, onMounted } from 'vue'
 import router from '@/router/index.js'
 import request from '@/utils/request.js'
-import { EditPen, Clock, Check, DataLine, Bell, Notebook, Grid, Document, DataAnalysis, Stamp, Finished } from '@element-plus/icons-vue'
+import { EditPen, Clock, Check, DataLine, Notebook, Grid, DataAnalysis, Stamp } from '@element-plus/icons-vue'
 
 const data = reactive({
   loading: false,
   user: JSON.parse(localStorage.getItem('beiming-onlineexam-user') || '{}'),
   stats: { examCount: 0, pendingApproval: 0, gradedCount: 0, publishedCount: 0, pendingGrade: 0, myScoreCount: 0 },
   examList: [],
-  announcements: [],
 })
 
 const isAdmin = computed(() => ['OWNER', 'ADMIN'].includes(data.user.role))
@@ -217,12 +198,12 @@ const greeting = computed(() => {
 })
 
 const heroTitle = computed(() => {
-  if (isAdmin.value) return '阅卷工作台'
-  if (data.user.role === 'HELPER') return '阅卷任务'
+  if (isAdmin.value) return '批阅工作台'
+  if (data.user.role === 'HELPER') return '批阅任务'
   return '审核中心'
 })
 const heroSub = computed(() => {
-  if (isAdmin.value) return '实时掌握审核进度与阅卷状态'
+  if (isAdmin.value) return '实时掌握审核进度与批阅状态'
   if (data.user.role === 'HELPER') return '高效批阅每一份审核答卷'
   return '查看可参加的审核与结果公示'
 })
@@ -251,13 +232,10 @@ const adminStats = computed(() => [
 ])
 
 const quickActions = [
-  { label: '阅卷中心', path: '/exam/gradingCenter', icon: 'EditPen', gradient: 'rgba(0,180,42,0.1)', color: '#00b42a' },
+  { label: '批阅中心', path: '/exam/gradingCenter', icon: 'EditPen', gradient: 'rgba(0,180,42,0.1)', color: '#00b42a' },
   { label: '审批中心', path: '/exam/approvalCenter', icon: 'Stamp', gradient: 'rgba(217,119,6,0.1)', color: '#d97706' },
   { label: '结果公示', path: '/exam/resultsCenter', icon: 'DataAnalysis', gradient: 'rgba(124,58,237,0.1)', color: '#7c3aed' },
-  { label: '公告中心', path: '/exam/announcements', icon: 'Bell', gradient: 'rgba(14,116,144,0.1)', color: '#0891b2' },
 ]
-
-const typeLabel = (type) => ({ general: '公告', exam: '审核', result: '结果', notice: '通知' }[type] || '公告')
 
 const calcProgress = (exam) => {
   if (!exam._gradingProgress) return 0
@@ -280,10 +258,6 @@ const loadData = () => {
       })
     }
   }).catch(() => {}).finally(() => { data.loading = false })
-
-  request.get('/examAnnouncement/selectPublished').then(res => {
-    if (res.code === '200') data.announcements = res.data || []
-  }).catch(() => {})
 
   if (isAdmin.value) {
     request.get('/examApproval/getPending', { params: { pageNum: 1, pageSize: 1 } }).then(res => {
@@ -369,17 +343,6 @@ onMounted(loadData)
 .gdp-bar { flex: 1; height: 6px; background: var(--border-lighter); border-radius: 3px; overflow: hidden; }
 .gdp-fill { height: 100%; background: var(--gradient-primary); border-radius: 3px; transition: width 0.6s ease; min-width: 2px; }
 .gdp-pct { font-size: 12px; font-weight: 600; color: var(--primary-color); width: 36px; text-align: right; flex-shrink: 0; }
-
-/* 公告 */
-.gd-ann-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--border-lighter); }
-.gd-ann-item:last-child { border-bottom: none; }
-.gdann-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff; flex-shrink: 0; }
-.gdann-tag.general { background: var(--text-secondary); }
-.gdann-tag.exam { background: var(--info-color, #409eff); }
-.gdann-tag.result { background: var(--success-color, #00b42a); }
-.gdann-tag.notice { background: var(--warning-color, #ff7d00); }
-.gdann-title { flex: 1; font-size: 13px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gdann-time { font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
 
 /* 快捷 */
 .gd-quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }

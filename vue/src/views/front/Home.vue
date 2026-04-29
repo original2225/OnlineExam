@@ -107,23 +107,6 @@
       <div class="panel-card">
         <div class="panel-header">
           <div>
-            <span>系统公告</span>
-            <h2>最近通知</h2>
-          </div>
-        </div>
-        <div v-if="data.noticeData.length" class="notice-list">
-          <article v-for="notice in data.noticeData.slice(0, 5)" :key="notice.id || notice.time" class="notice-item">
-            <strong>{{ notice.title || "公告" }}</strong>
-            <p>{{ notice.content }}</p>
-            <small>{{ formatDateTime(notice.time) }}</small>
-          </article>
-        </div>
-        <el-empty v-else description="暂无公告" :image-size="90" />
-      </div>
-
-      <div class="panel-card">
-        <div class="panel-header">
-          <div>
             <span>通过公示</span>
             <h2>近期审核通过记录</h2>
           </div>
@@ -169,7 +152,6 @@ const data = reactive({
   subjects: [],
   upcomingExams: [],
   recentScores: [],
-  noticeData: [],
   publicResults: [],
   learningProgress: 0,
 })
@@ -299,12 +281,6 @@ const loadWrongCount = () => {
   }).catch(() => {})
 }
 
-const loadNotice = () => {
-  request.get("/notice/selectAll").then(res => {
-    if (res.code === "200") data.noticeData = res.data || []
-  }).catch(() => {})
-}
-
 const loadPublicResults = () => {
   request.get("/examRecord/publicResults").then(res => {
     if (res.code === "200") data.publicResults = res.data || []
@@ -316,7 +292,6 @@ onMounted(() => {
   loadExams()
   loadScores()
   loadWrongCount()
-  loadNotice()
   loadPublicResults()
 })
 </script>
@@ -475,8 +450,7 @@ onMounted(() => {
 .subject-card strong,
 .exam-row strong,
 .score-row strong,
-.public-row strong,
-.notice-item strong {
+.public-row strong {
   display: block;
   color: var(--text-primary);
   font-size: 14px;
@@ -486,8 +460,7 @@ onMounted(() => {
 .subject-card small,
 .exam-row small,
 .score-row small,
-.public-row small,
-.notice-item small {
+.public-row small {
   color: var(--text-secondary);
   font-size: 12px;
 }
@@ -589,7 +562,6 @@ onMounted(() => {
 
 .exam-list,
 .score-list,
-.notice-list,
 .public-list {
   display: grid;
   gap: 10px;
@@ -645,26 +617,6 @@ onMounted(() => {
 .score-circle.poor { color: #dc2626; background: #fee2e2; }
 .public-badge { color: #dc2626; background: #fee2e2; }
 .public-badge.pass { color: #16a34a; background: #dcfce7; }
-
-.notice-item {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-lighter);
-}
-
-.notice-item:last-child {
-  border-bottom: 0;
-}
-
-.notice-item p {
-  display: -webkit-box;
-  margin: 6px 0;
-  overflow: hidden;
-  color: var(--text-regular);
-  font-size: 13px;
-  line-height: 1.6;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
 
 @media (max-width: 1080px) {
   .student-grid {

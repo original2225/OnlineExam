@@ -30,7 +30,7 @@ public class InvitationCodeController {
         Integer count = (Integer) params.get("count");
         Integer daysValid = (Integer) params.get("daysValid");
         String remark = (String) params.get("remark");
-        String targetRole = (String) params.get("targetRole");
+        String targetRole = "USER";
         Account currentUser = TokenUtils.getCurrentUser();
         Integer createdBy = currentUser != null ? currentUser.getId() : null;
 

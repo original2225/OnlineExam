@@ -11,7 +11,7 @@
           </svg>
         </div>
         <div class="hero-text">
-          <h1>阅卷管理</h1>
+        <h1>批阅管理</h1>
           <p>在线批阅主观题答卷，支持简答题与填空题人工评分</p>
         </div>
       </div>
@@ -141,13 +141,13 @@
           </div>
         </div>
 
-        <!-- 已有阅卷记录 -->
+      <!-- 已有批阅记录 -->
         <div v-if="data.submissions.length" class="sub-history">
           <div class="sub-label">
-            <el-icon><Clock /></el-icon> 已有阅卷记录（{{ data.submissions.length }}人）
+          <el-icon><Clock /></el-icon> 已有批阅记录（{{ data.submissions.length }}人）
           </div>
           <el-table :data="data.submissions" size="small" stripe style="margin-bottom: 12px;">
-            <el-table-column prop="graderName" label="阅卷人" width="100" />
+        <el-table-column prop="graderName" label="批阅人" width="100" />
             <el-table-column prop="graderRole" label="角色" width="80" />
             <el-table-column prop="manualScore" label="主观题评分" width="100" />
             <el-table-column prop="totalScore" label="总分" width="100" />

@@ -52,7 +52,7 @@ public class InvitationCodeService {
             invitationCode.setCreatedBy(createdBy);
             invitationCode.setExpireTime(expireTime);
             invitationCode.setRemark(remark);
-            invitationCode.setTargetRole(targetRole);
+            invitationCode.setTargetRole("USER");
 
             codes.add(invitationCode);
             codeStrings.add(codeStr);
@@ -155,15 +155,13 @@ public class InvitationCodeService {
         long total = allCodes.size();
         long unused = allCodes.stream().filter(c -> "UNUSED".equals(c.getStatus())).count();
         long used = allCodes.stream().filter(c -> "USED".equals(c.getStatus())).count();
-        long studentUnused = allCodes.stream().filter(c -> "UNUSED".equals(c.getStatus()) && !"HELPER".equals(c.getTargetRole())).count();
-        long examinerUnused = allCodes.stream().filter(c -> "UNUSED".equals(c.getStatus()) && "HELPER".equals(c.getTargetRole())).count();
+        long studentUnused = allCodes.stream().filter(c -> "UNUSED".equals(c.getStatus())).count();
 
         java.util.Map<String, Object> stats = new java.util.HashMap<>();
         stats.put("total", total);
         stats.put("unused", unused);
         stats.put("used", used);
         stats.put("studentUnused", studentUnused);
-        stats.put("examinerUnused", examinerUnused);
 
         return stats;
     }

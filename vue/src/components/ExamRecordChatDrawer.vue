@@ -116,7 +116,7 @@ watch(recordId, () => {
   if (visible.value) handleOpen()
 })
 
-const roleText = (role) => ({ OWNER: "所有者", ADMIN: "管理员", HELPER: "阅卷人", USER: "考生" }[role] || role || "成员")
+const roleText = (role) => (role === "USER" ? "考生" : "管理员")
 const isMine = (message) => message.senderId === user.id && message.senderRole === user.role
 const isFinal = (status) => status === "PASSED" || status === "FAILED"
 

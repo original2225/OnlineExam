@@ -26,8 +26,7 @@
     <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card stat-total"><div class="stat-inner"><div class="stat-num">{{ data.total }}</div><div class="stat-label">管理员总数</div></div></div>
-      <div class="stat-card stat-owner"><div class="stat-inner"><div class="stat-num">{{ ownerCount }}</div><div class="stat-label">Owner</div></div></div>
-      <div class="stat-card stat-admin"><div class="stat-inner"><div class="stat-num">{{ adminCount }}</div><div class="stat-label">Admin</div></div></div>
+      <div class="stat-card stat-admin"><div class="stat-inner"><div class="stat-num">{{ data.tableData.length }}</div><div class="stat-label">当前页账号</div></div></div>
     </div>
 
     <!-- 搜索工具栏 -->
@@ -121,8 +120,8 @@
         </el-form-item>
         <el-form-item label="权限身份">
           <el-select v-model="data.form.level" placeholder="请选择权限身份" style="width: 100%">
-            <el-option v-if="currentUserLevel >= 4" label="Admin (Lv.3)" :value="3" />
-            <el-option label="Helper (Lv.2)" :value="2" />
+            <el-option v-if="currentUserLevel >= 4" label="高级管理员（Lv.4）" :value="4" />
+            <el-option label="管理员（Lv.3）" :value="3" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -136,7 +135,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from "vue";
+import { reactive, onMounted } from "vue";
 import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Delete, Edit, Plus, Search, Upload } from "@element-plus/icons-vue";
@@ -157,13 +156,9 @@ const data = reactive({
   ids: []
 })
 
-const ownerCount = computed(() => data.tableData.filter(r => r.level >= 4).length)
-const adminCount = computed(() => data.tableData.filter(r => r.level === 3).length)
-
 const levelLabel = (level) => {
-  if (level >= 4) return 'Owner (Lv.4)'
-  if (level === 3) return 'Admin (Lv.3)'
-  return 'Helper (Lv.2)'
+  if (level >= 4) return '高级管理员'
+  return '管理员'
 }
 
 const load = () => {
@@ -173,7 +168,7 @@ const load = () => {
     .catch(() => { data.loading = false })
 }
 
-const handleAdd = () => { data.form = { level: 2 }; data.formVisible = true }
+const handleAdd = () => { data.form = { level: 3 }; data.formVisible = true }
 const handleEdit = (row) => { data.form = JSON.parse(JSON.stringify(row)); data.formVisible = true }
 const save = () => { data.form.id ? update() : add() }
 
@@ -240,12 +235,11 @@ onMounted(() => { load() })
 .hero-right :deep(.el-button:hover) { background: rgba(255,255,255,0.35) !important; }
 
 /* ===== 统计卡片 ===== */
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; max-width: 500px; }
+.stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; max-width: 420px; }
 .stat-card { border-radius: 14px; overflow: hidden; transition: transform 0.3s; }
 .stat-card:hover { transform: translateY(-3px); }
 .stat-inner { padding: 18px 22px; color: #fff; }
 .stat-total .stat-inner { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
-.stat-owner .stat-inner { background: linear-gradient(135deg, #dc2626, #ef4444); }
 .stat-admin .stat-inner { background: linear-gradient(135deg, #d97706, #f59e0b); }
 .stat-num { font-size: 30px; font-weight: 800; }
 .stat-label { font-size: 12px; opacity: 0.85; margin-top: 4px; }

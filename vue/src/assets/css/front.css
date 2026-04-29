@@ -2,25 +2,6 @@
    前台样式 - 力扣风格
    ============================================ */
 
-/* ========== 公告横幅 ========== */
-.front-notice {
-    padding: 8px 24px;
-    color: var(--text-secondary);
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-lighter);
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.front-notice .notice-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* ========== 导航栏 ========== */
 .front-header {
     display: flex;
@@ -849,24 +830,6 @@
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-lighter);
 }
-
-/* ========== 公告时间线 ========== */
-.notice-timeline { padding: 0; }
-.notice-item {
-    display: flex;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-lighter);
-}
-.notice-item:last-child { border-bottom: none; }
-.notice-item .notice-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--primary-color);
-    margin-top: 6px; flex-shrink: 0;
-}
-.notice-item .notice-content { flex: 1; }
-.notice-item .notice-content .notice-text { font-size: 13px; color: var(--text-primary); line-height: 1.6; margin-bottom: 3px; }
-.notice-item .notice-content .notice-time { font-size: 11px; color: var(--text-secondary); }
 
 /* ========== 空状态 ========== */
 .empty-state {

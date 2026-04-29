@@ -19,7 +19,7 @@
 
       <button class="review-entry" type="button" @click="router.push('/exam/dashboard')">
         <el-icon><Checked /></el-icon>
-        <span>阅卷工作台</span>
+        <span>批阅工作台</span>
       </button>
 
       <nav class="admin-nav" aria-label="管理后台导航">
@@ -114,18 +114,17 @@ const data = reactive({
   collapsed: false,
 })
 
-const roleColors = { OWNER: '#ef4444', ADMIN: '#b45309', HELPER: '#2563eb', USER: '#0f9f6e' }
+const roleColors = { OWNER: '#b45309', ADMIN: '#b45309', HELPER: '#b45309', USER: '#0f9f6e' }
 const roleColor = computed(() => roleColors[data.user.role] || '#0f9f6e')
 const isAdmin = computed(() => ['OWNER', 'ADMIN'].includes(data.user.role))
 
-const getRoleLabel = (role) => ({ OWNER: '所有者', ADMIN: '管理员', HELPER: '阅卷人', USER: '玩家' }[role] || '成员')
+const getRoleLabel = (role) => (role === 'USER' ? '玩家' : '管理员')
 
 const navGroups = computed(() => [
   {
     title: '总览',
     items: [
       { path: '/manager/home', label: '控制台', icon: 'DataBoard', tone: 'green' },
-      { path: '/manager/notice', label: '系统公告', icon: 'Bell', tone: 'blue' },
     ],
   },
   {
@@ -133,7 +132,6 @@ const navGroups = computed(() => [
     adminOnly: true,
     items: [
       { path: '/manager/admin', label: '管理员', icon: 'UserFilled', tone: 'red' },
-      { path: '/manager/examiner', label: '阅卷人', icon: 'Checked', tone: 'cyan' },
       { path: '/manager/student', label: '玩家', icon: 'User', tone: 'green' },
       { path: '/manager/registrationApproval', label: '注册审批', icon: 'Stamp', tone: 'orange' },
       { path: '/manager/invitationCode', label: '邀请码', icon: 'Ticket', tone: 'purple' },
@@ -152,7 +150,7 @@ const navGroups = computed(() => [
     items: [
       { path: '/manager/examPaper', label: '试卷管理', icon: 'Document', tone: 'purple' },
       { path: '/manager/exam', label: '审核管理', icon: 'EditPen', tone: 'green' },
-      { path: '/manager/grading', label: '阅卷管理', icon: 'Finished', tone: 'cyan' },
+      { path: '/manager/grading', label: '批阅管理', icon: 'Finished', tone: 'cyan' },
       { path: '/manager/score', label: '结果管理', icon: 'DataAnalysis', tone: 'orange' },
     ],
   },
@@ -189,8 +187,6 @@ const updateUser = () => {
 const preloadManagerPages = () => {
   const pages = [
     () => import('@/views/manager/Admin.vue'),
-    () => import('@/views/manager/Notice.vue'),
-    () => import('@/views/manager/Examiner.vue'),
     () => import('@/views/manager/Student.vue'),
     () => import('@/views/manager/Question.vue'),
     () => import('@/views/manager/Exam.vue'),

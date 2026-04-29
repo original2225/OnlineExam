@@ -44,26 +44,6 @@ CREATE TABLE `admin`  (
 INSERT INTO `admin` VALUES (1, 'admin', 'admin', '管理员', 'http://localhost:9090/files/download/1721114905635-柴犬.jpeg', 'ADMIN', '13800000001', 'admin@example.com', NOW(), NOW(), 'active');
 
 -- ----------------------------
--- Table structure for notice
--- ----------------------------
-DROP TABLE IF EXISTS `notice`;
-CREATE TABLE `notice`  (
-  `id` int(10) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '公告标题',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '公告内容',
-  `time` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '发布时间',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统公告表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of notice
--- ----------------------------
-INSERT INTO `notice` VALUES (1, '系统维护通知', '系统将在2026年3月10日凌晨2点进行维护，请各位玩家提前完成审核，避免影响正常入服流程。', '2025-03-09 18:00:00', NOW());
-INSERT INTO `notice` VALUES (2, '入服审核安排公告', '本次入服审核将于2026年3月15日开始，请各位玩家在规定时间内完成审核。审核内容包括：建筑审核、后期审核、红石审核、普通(见习)审核。', '2026-03-10 10:00:00', NOW());
-INSERT INTO `notice` VALUES (3, '作弊防范提示', '为了确保考试的公正性，本系统启用了实时监控功能，考试过程中请勿切换窗口或使用其他应用，违者将被警告并自动终止考试。', '2026-03-10 10:30:00', NOW());
-
--- ----------------------------
 -- Table structure for action_logs (审计日志)
 -- ----------------------------
 DROP TABLE IF EXISTS `action_logs`;

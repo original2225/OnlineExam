@@ -276,7 +276,7 @@
             </div>
             <div v-if="answer.comment" class="comment-box">
               <el-icon :size="14"><ChatDotRound /></el-icon>
-              <span><strong>阅卷评语：</strong>{{ answer.comment }}</span>
+                    <span><strong>批阅评语：</strong>{{ answer.comment }}</span>
             </div>
           </div>
         </div>
